@@ -3,27 +3,20 @@ import styled, { css } from "react-emotion";
 import Icon from "../common/icons";
 import { testable } from "../utils/helper";
 
-const active = css`
-  background-color: hsla(0, 0%, 100%, 0.1);
-  cursor: pointer;
-`;
-
 const GroupHeader = styled("div")`
   display: block;
-  color: #e8e8e8;
+  cursor: pointer;
   text-decoration: none;
   padding: 12px 18px;
   display: flex;
   align-items: center;
   padding-left: ${(p: P) => `${p.level * 20}px`};
-  :hover {
-    ${active};
-  }
 `;
 
 type Icon = {
   expanded: boolean;
 };
+
 const iconClass = (p: Icon) => css`
   margin-left: -10px;
   margin-right: 2px;

@@ -59,7 +59,6 @@ const InvisibleInput = styled("input")<{ hasValue: boolean }>`
   width: 100%;
   height: 2em;
   outline: none;
-  border-bottom: 1px solid transparent;
   &:focus {
     border-bottom: 1px solid var(--primary-color);
   }

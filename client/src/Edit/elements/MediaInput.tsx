@@ -32,8 +32,9 @@ const Chooser = styled("div")`
 
 const Buttons = styled("div")`
   margin-top: 10px;
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-gap: 16px;
 `;
 
 const Dialog = styled("div")`
@@ -87,6 +88,7 @@ type Props = FieldProps<any> & {
   maxWidth?: number;
   maxHeight?: number;
 };
+
 type State = {
   media?: MediaType | string;
   open?: boolean;
@@ -259,14 +261,14 @@ export default class MediaInput extends Component<Props, State> {
             <Chooser>
               Drag an image here
               <Buttons>
-                <UploadButton light>
+                <UploadButton secondary>
                   <UploadField onFiles={onFiles}>Browse computer</UploadField>
                 </UploadButton>
-                <Button light onClick={this.openGallery}>
+                <Button secondary onClick={this.openGallery}>
                   Open gallery
                 </Button>
                 {this.props.withExternal && (
-                  <Button light onClick={this.externalRefDialog}>
+                  <Button secondary onClick={this.externalRefDialog}>
                     External Reference
                   </Button>
                 )}

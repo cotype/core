@@ -30,9 +30,11 @@ const Icon = styled("div")`
   background-color: var(--accent-color);
   margin-right: 4px;
 `;
-const WrapFlexCenter = styled("div")`
-  display: flex;
-  align-items: center;
+
+const Buttons = styled("div")`
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-gap: 16px;
 `;
 
 type Props = FieldProps<any> & {
@@ -64,7 +66,7 @@ export default class UnionInput extends Component<Props, State> {
         onClose={() => cb(null)}
         style={{ minWidth: 250, maxWidth: 750 }}
       >
-        <WrapFlexCenter style={{ flexWrap: "wrap" }}>
+        <Buttons>
           {Object.keys(type.types).map(typeKey => (
             <Button
               light
@@ -72,15 +74,13 @@ export default class UnionInput extends Component<Props, State> {
               // icon={type.types[typeKey].icon}
               onClick={() => cb({ _type: typeKey })}
             >
-              <WrapFlexCenter>
-                {type.types[typeKey].icon && (
-                  <Icon name={type.types[typeKey].icon!} />
-                )}
-                {type.types[typeKey].label || typeKey}
-              </WrapFlexCenter>
+              {type.types[typeKey].icon && (
+                <Icon name={type.types[typeKey].icon!} />
+              )}
+              {type.types[typeKey].label || typeKey}
             </Button>
           ))}
-        </WrapFlexCenter>
+        </Buttons>
       </ModalDialog>
     );
   }

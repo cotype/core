@@ -13,11 +13,7 @@ export const inputClass = css`
   width: 300px;
   padding: 0.5em;
   font-size: 14px;
-  color: #fff;
-  border-bottom: 1px solid hsla(0, 0%, 100%, 0.1);
-  ::placeholder {
-    color: #fff;
-  }
+  border-bottom: 1px solid var(--dark-grey);
   :focus {
     background: hsla(0, 0%, 100%, 0.1);
   }

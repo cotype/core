@@ -8,7 +8,7 @@ const FieldBlock = styled("div")`
   /* padding-top: 24px;
   padding-bottom: 24px;
   padding-left: 24px; */
-  padding: 24px;
+  padding: 24px 0;
 `;
 
 const FieldListBlock = styled("div")`

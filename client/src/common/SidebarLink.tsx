@@ -2,18 +2,16 @@ import React from "react";
 import { NavLink, NavLinkProps } from "react-router-dom";
 import { css } from "react-emotion";
 
-const active = css`
-  background-color: hsla(0, 0%, 100%, 0.1);
-`;
-
 const link = css`
   display: block;
-  color: #e8e8e8;
+  color: inherit;
   text-decoration: none;
   padding: 12px 18px;
-  :hover {
-    ${active};
-  }
+`;
+
+const active = css`
+  background-color: var(--primary-color);
+  color: white !important;
 `;
 
 export default function SidebarLink(props: NavLinkProps) {

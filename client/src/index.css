@@ -1,3 +1,9 @@
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+}
+
 body,
 html,
 #root {
@@ -7,8 +13,8 @@ html,
 }
 
 html {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans",
+    "Helvetica Neue", Arial, sans-serif;
   font-size: 14.4px;
   font-weight: 400;
   line-height: 1.5;
@@ -18,12 +24,15 @@ html {
 
 html {
   --primary-color: rgb(28, 177, 226);
+  --primary-color--light: #3ddafd;
+  --primary-color--dark: #11486b;
   --accent-color: rgb(57, 199, 250);
   --slightly-transparent-accent-color: rgba(57, 199, 250, 0.7);
   --semi-transparent-accent-color: rgba(57, 199, 250, 0.1);
   --slightly-transparent-white: rgba(255, 255, 255, 0.8);
   --transparent-grey: rgba(0, 0, 0, 0.05);
-  --light-color: rgb(201, 234, 242);
+  --light-color: #f6f6f6;
+  --light-grey: #e8e8e8;
   --disabled-color: rgb(207, 207, 207);
   --dark-grey: #848484;
   --dark-color: rgb(39, 43, 51);

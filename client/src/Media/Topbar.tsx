@@ -77,19 +77,24 @@ const Add = styled("div")`
 type P = {
   active?: boolean;
 };
-const Button = styled(ButtonImport)`
+
+const TabButton = styled("button")`
   color: var(--dark-color);
   -webkit-appearance: none;
   background-color: transparent;
   padding: 17px 20px 13px;
   border-width: 0;
+  font-size: inherit;
   border-bottom: 4px solid transparent;
   border-radius: 0;
   border-bottom-color: ${(p: P) => p.active && "#70c8dc"};
   border-bottom-color: ${(p: P) => p.active && "var(--accent-color)"};
+  &:focus {
+    outline: none;
+  }
 `;
 
-const UploadButton = styled(Button)`
+const UploadButton = styled(TabButton)`
   color: #fff;
   background: var(--accent-color);
   padding: 0.7em 1em;
@@ -157,7 +162,7 @@ export default class Topbar extends Component<Props, State> {
         <Filters>
           {filters &&
             filters.map((f, idx) => (
-              <Button
+              <TabButton
                 active={f.label === filter}
                 key={idx}
                 onClick={() => {
@@ -166,7 +171,7 @@ export default class Topbar extends Component<Props, State> {
                 }}
               >
                 {f.label}
-              </Button>
+              </TabButton>
             ))}
         </Filters>
         <Order>

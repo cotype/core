@@ -10,10 +10,12 @@ import { testable } from "../utils/helper";
 
 const Bar = styled("div")`
   display: flex;
-  background-color: var(--primary-color);
-  color: #fff;
+  position: relative;
+  z-index: 5;
   height: 55px;
   justify-content: space-between;
+  background: white;
+  box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.05);
 `;
 
 const itemClass = css`
@@ -28,13 +30,11 @@ const itemClass = css`
 const linkClass = css`
   ${itemClass} color: inherit;
   text-decoration: none;
-  :hover {
-    background-color: hsla(0, 0%, 100%, 0.1);
-  }
 `;
 
 const activeClass = css`
-  background-color: hsla(0, 0%, 100%, 0.1);
+  background: var(--primary-color);
+  color: white;
 `;
 
 const Item = styled("div")(itemClass);

@@ -18,7 +18,7 @@ export const Page = styled("div")`
   min-height: 100%;
   padding: 36px;
   padding-top: 55px;
-  background-color: #f5f5f5;
+  background-color: white;
   display: flex;
   flex-direction: column;
   position: relative;
