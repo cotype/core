@@ -1,0 +1,20 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
+  "linterOptions": {
+    "exclude": ["**/node_modules/**"]
+  },
+  "rules": {
+    "ordered-imports": false,
+    "curly": false,
+    "object-literal-sort-keys": false,
+    "interface-name": false,
+    "member-access": false,
+    "interface-over-type-literal": false,
+    "no-use-before-declare": false,
+    "no-namespace": false,
+    "no-reference": false,
+    "no-console": [true, "log"],
+    "variable-name": [true, "allow-pascal-case", "allow-leading-underscore"]
+  }
+}

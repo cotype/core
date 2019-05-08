@@ -1,0 +1,8 @@
+.cache
+dev_db
+development_db
+test_db
+production_db
+dist/
+node_modules/
+uploads/

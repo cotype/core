@@ -1,0 +1,18 @@
+{
+  "name": "demo",
+  "version": "0.0.1",
+  "scripts": {
+    "clean": "rm -f dev_db",
+    "start": "ts-node --files server/server.ts",
+    "testserver": "npm run clean && NODE_ENV=test PORT=`get-port` npm start",
+    "dev": "echo $NODE_ENV && nodemon --watch ../typings --watch ./ --watch ../src --ext ts,json --exec npx ts-node --files server/server.ts"
+  },
+  "dependencies": {
+    "got": "^9.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.9",
+    "parcel-bundler": "^1.11.0",
+    "ts-node": "^7.0.1"
+  }
+}

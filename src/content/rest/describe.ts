@@ -1,0 +1,519 @@
+import { Model, Models, Field } from "../../../typings";
+import {
+  ref,
+  string,
+  integer,
+  float,
+  array,
+  object,
+  param,
+  addExternalModel,
+  toTypeName
+} from "../../api/oapi";
+import { OpenApiBuilder, ParameterObject, ReferenceObject } from "openapi3-ts";
+import { hasType } from "../../model/introspection";
+import { formats } from "../formatQuillDelta";
+import * as Cotype from "../../../typings";
+import visitModel from "../../model/visitModel";
+import { isComparable } from "../../persistence/adapter/knex/lookup";
+import pluralize from "pluralize";
+
+const describeModel = (
+  model: Cotype.Model | Cotype.ObjectType,
+  prefix = "",
+  uniqueFields = [
+    ...((model as Cotype.Model).uniqueFields || []),
+    "title" in model ? model.title : "",
+    "orderBy" in model ? model.orderBy : ""
+  ]
+) => {
+  let orderByEnums: string[] = [];
+  let values: ParameterObject[] = [];
+  Object.entries(model.fields).forEach(([field, type]) => {
+    if (type.type === "list" && type.item) {
+      if (type.item.type === "object" && type.item.fields) {
+        const sub = describeModel(
+          type.item,
+          prefix + field + ".",
+          uniqueFields
+        );
+        values = [...values, ...sub.values];
+        orderByEnums = [...orderByEnums, ...sub.orderByEnums];
+        return;
+      }
+
+      if (type.item.type === "content") {
+        values.push({
+          in: "query",
+          name: `data.${prefix + field}`,
+          style: "deepObject",
+          explode: true,
+          schema: criteria.content,
+          example: "{}",
+          description:
+            (type.item.allowAbsoluteRefs
+              ? 'Query example: <tt>{"eq": "id"}</tt>, <tt>{"eq": "http://xx.xx"}</tt>'
+              : 'Query example: <tt>{"eq": "id"}</tt>') +
+            ', <tt>{"eq": "null"}</tt> or <tt>{"eq":"string“, "path":"field1.field2"}</tt>'
+        });
+        return;
+      }
+
+      if (type.item.type === "references") {
+        values.push({
+          in: "query",
+          name: `data.${prefix + field}`,
+          style: "deepObject",
+          explode: true,
+          schema: criteria.content,
+          example: "{}",
+          description:
+            'Query example: <tt>{"eq": "id"}</tt>,  <tt>{"eq": "null"}</tt> or <tt>{"eq":"string“, "path":"field1.field2"}</tt>'
+        });
+      }
+
+      if (!("index" in type.item)) {
+        return;
+      }
+      if (type.item.type === "position") {
+        orderByEnums.push(field);
+        return;
+      }
+      if (type.item.type === "string" || type.item.type === "number") {
+        const isDate = "input" in type.item && type.item.input === "date";
+
+        orderByEnums.push(field);
+        values.push({
+          in: "query",
+          name: `data.${prefix + field}`,
+          style: "deepObject",
+          explode: true,
+          schema:
+            criteria[
+              isComparable(type.item) ? (isDate ? "date" : "number") : "string"
+            ],
+          example: "{}",
+          description:
+            (type.item.type === "number"
+              ? 'Query example: <tt>{"lte": 42}</tt>'
+              : 'Query example: <tt>{"eq": "some value"}</tt>') +
+            ' or <tt>{"eq": "null"}</tt>'
+        });
+        return;
+      }
+
+      if (type.item.type === "boolean") {
+        values.push({
+          in: "query",
+          name: `data.${prefix + field}[eq]`,
+          schema: {
+            type: "string",
+            enum: [true, false]
+          }
+        });
+        return;
+      }
+      return;
+    }
+
+    if (type.type === "object" && type.fields) {
+      const sub = describeModel(type, prefix + field + ".", uniqueFields);
+      values = [...values, ...sub.values];
+      orderByEnums = [...orderByEnums, ...sub.orderByEnums];
+      return;
+    }
+
+    if (type.type === "content") {
+      values.push({
+        in: "query",
+        name: `data.${prefix + field}`,
+        style: "deepObject",
+        explode: true,
+        schema: criteria.content,
+        example: "{}",
+        description:
+          (type.allowAbsoluteRefs
+            ? 'Query example: <tt>{"eq": "id"}</tt>, <tt>{"eq": "http://xx.xx"}</tt>'
+            : 'Query example: <tt>{"eq": "id"}</tt>') +
+          ', <tt>{"eq": "null"}</tt> or <tt>{"eq":"string“, "path":"field1.field2"}</tt>'
+      });
+    }
+
+    if (type.type === "references") {
+      values.push({
+        in: "query",
+        name: `data.${prefix + field}`,
+        style: "deepObject",
+        explode: true,
+        schema: criteria.content,
+        example: "{}",
+        description:
+          'Query example: <tt>{"eq": "id"}</tt>, <tt>{"eq": "null"}</tt> or <tt>{"eq":"string“, "path":"field1.field2"}</tt>'
+      });
+    }
+    if (!("index" in type) && !uniqueFields.includes(prefix + field)) {
+      return;
+    }
+    if (type.type === "position") {
+      orderByEnums.push(field);
+      return;
+    }
+    if (
+      type.type === "string" ||
+      type.type === "number" ||
+      (type.type === "immutable" &&
+        (type.child.type === "string" || type.child.type === "number"))
+    ) {
+      const t = type.type === "immutable" ? type.child : type;
+      const isDate = "input" in type && type.input === "date";
+
+      orderByEnums.push(field);
+      values.push({
+        in: "query",
+        name: `data.${prefix + field}`,
+        style: "deepObject",
+        explode: true,
+        schema:
+          criteria[isComparable(t) ? (isDate ? "date" : "number") : "string"],
+        example: "{}",
+        description:
+          type.type === "number"
+            ? 'Query example: <tt>{"lte": 42}</tt>'
+            : 'Query example: <tt>{"eq": "some value"}</tt>'
+      });
+      return;
+    }
+    if (
+      type.type === "boolean" ||
+      (type.type === "immutable" && type.child.type === "boolean")
+    ) {
+      values.push({
+        in: "query",
+        name: `data.${prefix + field}[eq]`,
+        schema: {
+          type: "string",
+          enum: [true, false]
+        }
+      });
+      return;
+    }
+    return;
+  });
+  return { values, orderByEnums };
+};
+
+const criteria = {
+  date: object({
+    eq: { oneOf: [float, string] },
+    ne: { oneOf: [float, string] },
+    gt: { oneOf: [float, string] },
+    gte: { oneOf: [float, string] },
+    lt: { oneOf: [float, string] },
+    lte: { oneOf: [float, string] }
+  }),
+  number: object({
+    eq: float,
+    ne: float,
+    gt: float,
+    gte: float,
+    lt: float,
+    lte: float
+  }),
+  string: object({
+    eq: string,
+    ne: string
+  }),
+  content: object({
+    eq: { oneOf: [float, string] },
+    ne: { oneOf: [float, string] },
+    gt: { oneOf: [float, string] },
+    gte: { oneOf: [float, string] },
+    lt: { oneOf: [float, string] },
+    lte: { oneOf: [float, string] },
+    path: string
+  })
+};
+
+const idParam: ParameterObject = param("id", { schema: string });
+
+function createQueryParams(model: Model) {
+  let params: ParameterObject[] = [];
+  if (model.collection !== "singleton") {
+    params = [
+      {
+        name: "order",
+        in: "query",
+        schema: {
+          type: "string",
+          enum: ["asc", "desc"]
+        }
+      },
+      { name: "offset", in: "query", schema: integer, default: 0 },
+      { name: "limit", in: "query", schema: integer, default: 50 }
+    ];
+    const {
+      values,
+      orderByEnums
+    }: {
+      values: ParameterObject[];
+      orderByEnums: string[];
+    } = describeModel(model);
+    params = [...params, ...values];
+
+    if (orderByEnums.length) {
+      params.unshift({
+        name: "orderBy",
+        in: "query",
+        schema: {
+          type: "string",
+          enum: orderByEnums
+        }
+      });
+    }
+  }
+
+  return params;
+}
+function createJoinParams(model: Model, { content: models }: Models) {
+  const params: ParameterObject[] = [];
+
+  let refs: string[] = [];
+
+  visitModel(model, (key: string, field: Field) => {
+    if (field.type === "content") {
+      if (field.models && field.models.length) {
+        field.models.forEach(n => {
+          refs.push(n);
+        });
+      } else if (field.model) {
+        refs.push(field.model);
+      }
+    }
+    if (field.type === "references") {
+      if (field.model) {
+        refs.push(field.model);
+      }
+    }
+  });
+
+  refs = [...new Set(refs)];
+
+  refs.forEach((modelName: string) => {
+    const m = models.find(c => c.name === modelName);
+    if (!m || !Object.keys(m.fields).length) return;
+
+    const schema: any = {
+      type: "string",
+      enum: Object.keys(m.fields)
+    };
+
+    params.push({
+      in: "query",
+      name: `join[${toTypeName(modelName)}]`,
+      style: "deepObject",
+      explode: true,
+      schema: array(schema)
+    });
+  });
+
+  return { params, refs };
+}
+
+export default (api: OpenApiBuilder, models: Models) => {
+  api.addPath(`/search/content`, {
+    /** List contents */
+    get: {
+      summary: `Search contents`,
+      operationId: `listContentBySearch`,
+      tags: ["Suche"],
+      parameters: [param("searchTerm", { schema: string })],
+      responses: {
+        "200": {
+          description: "Content List",
+          content: {
+            "application/json": {
+              schema: array({
+                type: "object",
+                required: ["id", "title"],
+                properties: {
+                  total: integer,
+                  items: array({
+                    type: "object",
+                    properties: {
+                      id: string,
+                      title: string,
+                      image: string
+                    }
+                  })
+                }
+              })
+            }
+          }
+        }
+      }
+    }
+  });
+
+  const mediaType = addExternalModel(api, models.media);
+
+  // Add models schemas
+  const refs: { [key: string]: ReferenceObject } = {};
+  models.content.forEach(model => {
+    refs[`${model.name}`] = addExternalModel(api, model);
+  });
+
+  // Add routes for models
+  models.content.forEach(model => {
+    const { name, singular, plural, collection } = model;
+
+    const singularName = toTypeName(name);
+    const pluralName = toTypeName(pluralize(name));
+    const singleton = collection === "singleton";
+    const tags = [plural];
+
+    const {
+      params: commonParams,
+      refs: joinRefs
+    }: { params: ParameterObject[]; refs: string[] } = createJoinParams(
+      model,
+      models
+    );
+    if (hasType(model, "richtext")) {
+      commonParams.push({
+        name: "X-Richtext-Format",
+        in: "header",
+        schema: {
+          type: "string",
+          enum: formats
+        }
+      });
+    }
+
+    const Type = refs[`${model.name}`];
+
+    const RefsSchema: any = {
+      type: "object",
+      properties: {
+        media: {
+          type: "object",
+          additionalProperties: mediaType
+        },
+        content: {
+          type: "object",
+          properties: {}
+        }
+      }
+    };
+    joinRefs.forEach(modelName => {
+      RefsSchema.properties.content.properties[modelName] = {
+        type: "object",
+        additionalProperties: refs[modelName]
+      };
+    });
+
+    api.addPath(`/${name}`, {
+      /** List contents */
+      get: {
+        summary: singleton ? `Load ${singularName}` : `List ${pluralName}`,
+        operationId: singleton ? `load_${singularName}` : `list_${pluralName}`,
+        tags,
+        parameters: createQueryParams(model).concat(commonParams),
+        responses: {
+          "200": {
+            description: singleton
+              ? `Load ${toTypeName(name)}`
+              : `List of ${plural}`,
+            content: {
+              "application/json": {
+                schema: singleton
+                  ? {
+                      allOf: [
+                        Type,
+                        {
+                          type: "object",
+                          properties: {
+                            _id: { type: "string" },
+                            _refs: RefsSchema
+                          }
+                        }
+                      ],
+                      required: ["_id", "_refs"]
+                    }
+                  : {
+                      type: "object",
+                      properties: {
+                        total: integer,
+                        items: array({
+                          allOf: [
+                            Type,
+                            {
+                              type: "object",
+                              properties: { _id: { type: "string" } },
+                              required: ["_id"]
+                            }
+                          ]
+                        }),
+                        _refs: RefsSchema
+                      },
+                      required: ["total", "items", "_refs"]
+                    }
+              }
+            }
+          }
+        }
+      }
+    });
+    if (!singleton) {
+      const get = {
+        summary: `Load ${singularName}`,
+        operationId: `load_${singularName}`,
+        tags,
+        parameters: [idParam].concat(commonParams),
+        responses: {
+          "200": {
+            description: `${singular} found`,
+            content: {
+              "application/json": {
+                schema: {
+                  allOf: [
+                    Type,
+                    {
+                      type: "object",
+                      properties: {
+                        _id: { type: "string" },
+                        _refs: RefsSchema
+                      }
+                    }
+                  ],
+                  required: ["_id", "_refs"]
+                }
+              }
+            }
+          },
+          "404": ref("responses/notFound")
+        }
+      };
+
+      api.addPath(`/${name}/{id}`, {
+        /** Find content by id */
+        get
+      });
+
+      // LoadContentByUniqueField
+      if (model.uniqueFields) {
+        model.uniqueFields.forEach(uniqueField => {
+          api.addPath(`/${name}/${uniqueField}/{uniqueValue}`, {
+            /** Find content by unique field value */
+            get: {
+              ...get,
+              parameters: [param("uniqueValue", { schema: string })].concat(
+                commonParams
+              ),
+              operationId: `load_${singularName}_by_${uniqueField}`
+            }
+          });
+        });
+      }
+    }
+  });
+};

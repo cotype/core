@@ -1,0 +1,10 @@
+.*
+Jenkinsfile
+tslint.json
+client/
+coverage/
+cypress/
+demo/
+etc/
+node_modules/
+src/

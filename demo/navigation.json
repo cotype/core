@@ -1,0 +1,32 @@
+{
+  "$schema": "../navigation.schema.json",
+  "navigation": [
+    {
+      "type": "group",
+      "name": "Pages",
+      "items": [
+        {
+          "type": "model",
+          "name": "Start Pages",
+          "model": "startPage"
+        },
+        {
+          "type": "model",
+          "name": "asd Pages",
+          "model": "extraObj"
+        },
+        {
+          "type": "group",
+          "name": "Other Pages",
+          "items": [
+            {
+              "type": "model",
+              "name": "Content Pages",
+              "model": "contentPages"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
