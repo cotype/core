@@ -11,11 +11,6 @@
           "model": "startPage"
         },
         {
-          "type": "model",
-          "name": "asd Pages",
-          "model": "extraObj"
-        },
-        {
           "type": "group",
           "name": "Other Pages",
           "items": [
