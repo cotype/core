@@ -1,0 +1,121 @@
+defaults: &defaults
+  docker:
+    - image: circleci/node:10
+  working_directory: ~/cotype
+
+version: 2
+jobs:
+  install:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Create package-lock.json checksum
+          command: >
+            sha256sum package-lock.json > .package-lock-sum
+            sha256sum client/package-lock.json >> .package-lock-sum
+            sha256sum demo/package-lock.json >> .package-lock-sum
+            sha256sum .package-lock-sum > .package-lock-sum
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum ".package-lock-sum" }}
+      - run:
+          name: Install
+          command: npm install
+      - save_cache:
+          paths:
+            - node_modules
+            - client/node_modules
+            - demo/node_modules
+            - models.schema.json
+            - navigation.schema.json
+          key: v1-dependencies-{{ checksum ".package-lock-sum" }}
+      - save_cache:
+          paths:
+            - ~/cotype
+          key: v1-repo-{{ .Revision }}
+  lint:
+    <<: *defaults
+    steps:
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Revision }}
+      - run:
+          name: Lint
+          command: npm run lint
+  test:
+    <<: *defaults
+    steps:
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Revision }}
+      - run:
+          name: Test
+          command: npm run test -- --coverage
+      - save_cache:
+          paths:
+            - coverage
+          key: v1-coverage-{{ .Revision }}
+  e2e:
+    <<: *defaults
+    steps:
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Revision }}
+      - run:
+          name: Build
+          command: npm run e2e
+  build:
+    <<: *defaults
+    steps:
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Revision }}
+      - run:
+          name: Build
+          command: npm run build
+      - save_cache:
+          paths:
+            - dist
+            - lib
+            - client/lib
+          key: v1-build-{{ .Revision }}
+  publish:
+    <<: *defaults
+    steps:
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - v1-build-{{ .Revision }}
+      - run:
+          name: Deploy
+          command: echo 'DEPLOYING, I SWEAR!'
+
+workflows:
+  version: 2
+  deploy:
+    jobs:
+      - install
+      - test:
+          requires:
+            - install
+      - lint:
+          requires:
+            - install
+      - e2e:
+          requires:
+            - install
+      - build:
+          requires:
+            - install
+      - publish:
+          requires:
+            - lint
+            - test
+            - e2e
+            - build
+          filters:
+            branches:
+              only: master
