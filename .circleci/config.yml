@@ -64,13 +64,20 @@ jobs:
       - restore_cache:
           keys:
             - v1-repo-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - v1-cypress
       - run:
-          name: Build
+          name: Run cypress
           command: npm run e2e -- --browser=chrome
       - store_artifacts:
           path: cypress/videos
       - store_artifacts:
           path: cypress/screenshots
+      - save_cache:
+          paths:
+            - /root/.cache/Cypress
+          key: v1-cypress
   build:
     <<: *defaults
     steps:
