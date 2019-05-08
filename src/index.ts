@@ -199,7 +199,7 @@ export async function init(opts: Opts) {
     opts.customSetup(app, p.content);
   }
 
-  app.get("/", (req, res) => res.redirect(adminPath));
+  app.get(basePath, (req, res) => res.redirect(adminPath));
 
   app.use((err: Error, req: Request, res: Response, _: () => void) => {
     if (err instanceof HttpError) {
