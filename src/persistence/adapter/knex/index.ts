@@ -1,6 +1,6 @@
 import path from "path";
 import { promisify } from "util";
-import knex, { Config } from "knex";
+import knex, { Config, SeedsConfig } from "knex";
 import glob from "glob-promise";
 import { mkdirp, copyFile, mkdir } from "fs-extra";
 import { PersistenceAdapter } from "..";
@@ -8,16 +8,23 @@ import KnexSettings from "./KnexSettings";
 import KnexContent from "./KnexContent";
 import KnexMedia from "./KnexMedia";
 
-type CustomSeedsConfig = {
+type KnexSeedsConfig = SeedsConfig & {
   directory: string;
   uploads?: string;
+};
+
+type KnexConfig = Config & {
+  migrate?: boolean;
+  seeds?: KnexSeedsConfig;
 };
 
 const migrationOptions = {
   directory: path.join(__dirname, "..", "..", "..", "..", "knex_migrations")
 };
 
-export default async function(userConfig: Config): Promise<PersistenceAdapter> {
+export default async function(
+  userConfig: KnexConfig
+): Promise<PersistenceAdapter> {
   // Suppress warnings
   const log = {
     warn() {
@@ -30,7 +37,7 @@ export default async function(userConfig: Config): Promise<PersistenceAdapter> {
     error: console.error
   };
 
-  async function seedMedia({ directory, uploads }: CustomSeedsConfig) {
+  async function seedMedia({ directory, uploads }: KnexSeedsConfig) {
     if (!uploads) {
       throw new Error("Need uploads directory for media seeding");
     }
@@ -54,7 +61,7 @@ export default async function(userConfig: Config): Promise<PersistenceAdapter> {
     );
   }
 
-  async function init(customConfig: Config = {}) {
+  async function init(customConfig: KnexConfig = {}) {
     const config = { log, ...userConfig, ...customConfig };
 
     if (config.client === "sqlite3") {
@@ -68,13 +75,12 @@ export default async function(userConfig: Config): Promise<PersistenceAdapter> {
 
     const k = knex(config);
 
-    await k.migrate.latest(migrationOptions);
+    if (config.migrate !== false) {
+      await k.migrate.latest(migrationOptions);
+    }
 
-    if (config.seeds) {
-      await Promise.all([
-        k.seed.run(),
-        seedMedia(config.seeds as CustomSeedsConfig)
-      ]);
+    if (config.migrate !== false && config.seeds) {
+      await Promise.all([k.seed.run(), seedMedia(config.seeds)]);
     }
 
     return k;
