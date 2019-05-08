@@ -63,6 +63,7 @@ exports.up = async function(knex) {
     table
       .integer("id")
       .unsigned()
+      .notNullable()
       .references("id")
       .inTable("contents")
       .onDelete("CASCADE");
