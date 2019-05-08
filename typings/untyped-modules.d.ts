@@ -1,6 +1,5 @@
 declare module "@slite/quill-delta-markdown";
 declare module "got";
-declare module "smartcrop-sharp";
 declare module "mudder" {
   export const base62: {
     stringToNumber(s: string): number;

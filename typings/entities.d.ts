@@ -348,12 +348,6 @@ export interface ThumbnailProvider {
   getThumbUrl(id: string, format: string): Promise<string | null>;
 }
 
-export type ThumbnailSize = {
-  width: number;
-  height: number;
-  crop: boolean;
-};
-
 export type BaseUrls = {
   cms?: string;
   media?: string;

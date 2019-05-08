@@ -6,17 +6,13 @@ import routes from "./routes";
 import describe from "./describe";
 import Storage from "./storage/Storage";
 import FsStorage from "./storage/FsStorage";
-import LocalThumbnailProvider from "./thumbnails/LocalThumbnailProvider";
 
 export default function media(
   persistence: Persistence,
   models: Models,
   storage: Storage,
-  customThumbnailProvider?: ThumbnailProvider
+  thumbnailProvider: ThumbnailProvider
 ) {
-  const thumbnailProvider = customThumbnailProvider
-    ? customThumbnailProvider
-    : new LocalThumbnailProvider(storage);
   return {
     describe(api: OpenApiBuilder) {
       describe(api, models.media);

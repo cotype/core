@@ -49,9 +49,6 @@ import Storage from "./media/storage/Storage";
 export { Persistence } from "./persistence";
 export { default as knexAdapter } from "./persistence/adapter/knex";
 export * from "../typings";
-export {
-  formats as thumbnailFormats
-} from "./media/thumbnails/ThumbnailProvider";
 export { default as FsStorage } from "./media/storage/FsStorage";
 
 export * from "./utils";
@@ -65,7 +62,7 @@ export type Opts = {
   persistenceAdapter: Promise<PersistenceAdapter>;
   externalDataSources?: ExternalDataSourceWithOptionalHelper[];
   sessionOpts?: CookieSessionInterfaces.CookieSessionOptions;
-  customThumbnailProvider?: ThumbnailProvider;
+  thumbnailProvider: ThumbnailProvider;
   clientMiddleware?: RequestHandler | RequestHandler[];
   anonymousPermissions?: AnonymousPermissions;
   customSetup?: (app: Express, contentPersistence: ContentPersistence) => void;
@@ -118,7 +115,7 @@ export async function init(opts: Opts) {
   const auth = Auth(p, opts.anonymousPermissions);
   const content = Content(p, models, externalDataSources, opts.baseUrls || {});
   const settings = Settings(p, models);
-  const media = Media(p, models, opts.storage, opts.customThumbnailProvider);
+  const media = Media(p, models, opts.storage, opts.thumbnailProvider);
 
   const basePath = opts.basePath || "";
   const adminPath = `${basePath}/admin`;

@@ -11,6 +11,7 @@ import models from "./models";
 import { login } from "./util";
 import { init, Persistence, knexAdapter } from "..";
 import FsStorage from "../media/storage/FsStorage";
+import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 
 let base = 0;
 function createId(): string {
@@ -77,9 +78,12 @@ describe("external data source support", () => {
   let server: SuperTest<Test>;
 
   beforeAll(async () => {
+    const storage = new FsStorage(uploadDir);
+
     ({ app, persistence } = await init({
       models,
-      storage: new FsStorage(uploadDir),
+      storage,
+      thumbnailProvider: new LocalThumbnailProvider(storage),
       persistenceAdapter: knexAdapter({
         client: "sqlite3",
         connection: {

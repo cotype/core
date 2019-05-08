@@ -8,6 +8,7 @@
     "dev": "echo $NODE_ENV && nodemon --watch ../typings --watch ./ --watch ../src --ext ts,json --exec npx ts-node --files server/server.ts"
   },
   "dependencies": {
+    "@cotype/local-thumbnail-provider": "0.0.2",
     "got": "^9.6.0"
   },
   "devDependencies": {

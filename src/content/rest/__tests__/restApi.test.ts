@@ -7,6 +7,7 @@ import { init, Persistence, knexAdapter } from "../../..";
 import models from "./models";
 import { login } from "../../../__tests__/util";
 import FsStorage from "../../../media/storage/FsStorage";
+import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 
 const uploadDir = path.join(__dirname, ".uploads");
 
@@ -19,9 +20,12 @@ describe("rest api", () => {
   const newsSlug = "foo-bar-baz";
 
   beforeAll(async () => {
+    const storage = new FsStorage(uploadDir);
+
     ({ app, persistence } = await init({
       models,
-      storage: new FsStorage(uploadDir),
+      thumbnailProvider: new LocalThumbnailProvider(storage),
+      storage,
       persistenceAdapter: knexAdapter({
         client: "sqlite3",
         connection: {

@@ -1,5 +1,5 @@
 import * as Cotype from "../../typings";
-import { init as initCotype, knexAdapter, Opts } from "../../src";
+import { init as initCotype, knexAdapter, Opts, FsStorage } from "../../src";
 import * as path from "path";
 import { models } from "../models";
 import { navigation } from "../navigation.json";
@@ -8,6 +8,7 @@ import reInitMiddleware from "./reInitMiddleware";
 import { Server } from "http";
 import { Express } from "express";
 import ContentPersistence from "../../src/persistence/ContentPersistence";
+import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 
 const uploadDir = path.resolve(__dirname, "..", "uploads");
 
@@ -62,10 +63,13 @@ async function init(initialConfig: Opts) {
   await startServer(initialConfig);
 }
 
+const storage = new FsStorage(uploadDir);
+
 init({
   models: models as Cotype.ModelOpts[],
-  uploadDir,
+  storage,
   navigation: navigation as Cotype.NavigationOpts[],
+  thumbnailProvider: new LocalThumbnailProvider(storage),
   persistenceAdapter: knexAdapter(getKnexConfig()),
   customSetup: (app: Express, persitence: ContentPersistence) => {
     app.use("/crazyCustomRoute", async (req, res) => {

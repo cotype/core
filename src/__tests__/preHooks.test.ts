@@ -6,6 +6,7 @@ import { init, Persistence, knexAdapter } from "..";
 import models from "./models";
 import { login } from "./util";
 import FsStorage from "../media/storage/FsStorage";
+import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 
 const uploadDir = path.join(__dirname, ".uploads");
 
@@ -16,9 +17,12 @@ describe("content hooks", () => {
   let server: SuperTest<Test>;
 
   beforeAll(async () => {
+    const storage = new FsStorage(uploadDir);
+
     ({ app, persistence } = await init({
       models,
-      storage: new FsStorage(uploadDir),
+      storage,
+      thumbnailProvider: new LocalThumbnailProvider(storage),
       persistenceAdapter: knexAdapter({
         client: "sqlite3",
         connection: {

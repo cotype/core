@@ -7,6 +7,8 @@ import models from "./models";
 import { login, withTempRole } from "./util";
 import { Permission } from "../auth/acl";
 import FsStorage from "../media/storage/FsStorage";
+import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
+
 const { view, edit, publish } = Permission;
 
 const uploadDir = path.join(__dirname, ".uploads");
@@ -16,9 +18,12 @@ describe("api", () => {
   let persistence: Persistence;
 
   beforeAll(async () => {
+    const storage = new FsStorage(uploadDir);
+
     ({ app, persistence } = await init({
       models,
-      storage: new FsStorage(uploadDir),
+      storage,
+      thumbnailProvider: new LocalThumbnailProvider(storage),
       persistenceAdapter: knexAdapter({
         client: "sqlite3",
         connection: {
