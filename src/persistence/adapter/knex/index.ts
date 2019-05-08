@@ -101,7 +101,7 @@ export default async function(
     settings: new KnexSettings(db),
     content: new KnexContent(db),
     media: new KnexMedia(db),
-    shutdown: () => promisify(db.destroy)(),
+    shutdown: () => new Promise((res, rej) => db.destroy().then(res, rej)),
     async reset(config: Config) {
       if (process.env.NODE_ENV === "test") {
         console.info("🌱 Resetting DB");
