@@ -64,8 +64,7 @@ export type Opts = {
   basePath?: string;
   persistenceAdapter: Promise<PersistenceAdapter>;
   externalDataSources?: ExternalDataSourceWithOptionalHelper[];
-  sessionSecret?: string;
-  cookieDomain?: string;
+  sessionOpts?: CookieSessionInterfaces.CookieSessionOptions;
   customThumbnailProvider?: ThumbnailProvider;
   clientMiddleware?: RequestHandler | RequestHandler[];
   anonymousPermissions?: AnonymousPermissions;
@@ -127,7 +126,7 @@ export async function init(opts: Opts) {
   const app = express();
 
   app.use(express.json());
-  app.use(session({ secret: opts.sessionSecret, domain: opts.cookieDomain }));
+  app.use(session(opts.sessionOpts));
 
   app.all("/status", (req, res) => {
     res.json({
