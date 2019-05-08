@@ -57,14 +57,16 @@ jobs:
             - coverage
           key: v1-coverage-{{ .Revision }}
   e2e:
-    <<: *defaults
+    working_directory: ~/cotype
+    docker:
+      - cypress/browsers:chrome69
     steps:
       - restore_cache:
           keys:
             - v1-repo-{{ .Revision }}
       - run:
           name: Build
-          command: npm run e2e
+          command: npm run e2e -- --browser=chrome
   build:
     <<: *defaults
     steps:
@@ -95,7 +97,7 @@ jobs:
 
 workflows:
   version: 2
-  deploy:
+  test-and-publish:
     jobs:
       - install
       - test:
