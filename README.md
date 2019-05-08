@@ -1,5 +1,7 @@
 # @cotype/core
 
+[![CircleCI](https://circleci.com/gh/cotype/core/tree/master.svg?style=shield)](https://circleci.com/gh/cotype/core/tree/master)
+
 Cotype manages structured content that can accessed via APIs.
 The system itself is not concerned with the actual rendering of the data - this is left completely to the consumer which could be a server that generates HTML, a client-rendered web app or a native app that reads the data via HTTP.
 
