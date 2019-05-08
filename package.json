@@ -26,7 +26,7 @@
     "start": "npm run dev",
     "testserver": "npm --prefix demo run testserver",
     "e2e": "with-server --run=testserver npm run cypress -- -- ",
-    "cypress": "cypress install && cypress run --config=baseUrl=$SERVER_URL",
+    "cypress": "cypress run --config=baseUrl=$SERVER_URL",
     "e2e:dev": "with-server --run=testserver npm run cypress:dev",
     "cypress:dev": "cypress open --config=baseUrl=$SERVER_URL",
     "create-test-seeds": "./scripts/createSeeds.js ./cypress/support/knexfile.js"

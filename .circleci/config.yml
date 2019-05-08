@@ -21,7 +21,7 @@ jobs:
             - v1-dependencies-{{ checksum ".package-lock-sum" }}
       - run:
           name: Install
-          command: npm install
+          command: CYPRESS_INSTALL_BINARY=0 npm install
       - save_cache:
           paths:
             - node_modules
@@ -66,10 +66,13 @@ jobs:
             - v1-repo-{{ .Revision }}
       - restore_cache:
           keys:
-            - v1-cypress
+            - v1-cypress-2.3.0
+      - run:
+          name: Install cypress
+          command: CYPRESS_INSTALL_BINARY=2.3.0 $(npm bin)/cypress install
       - run:
           name: Run cypress
-          command: npm run e2e -- --browser=chrome
+          command: npm run e2e
       - store_artifacts:
           path: cypress/videos
       - store_artifacts:
@@ -77,7 +80,7 @@ jobs:
       - save_cache:
           paths:
             - /root/.cache/Cypress
-          key: v1-cypress
+          key: v1-cypress-2.3.0
   build:
     <<: *defaults
     steps:
