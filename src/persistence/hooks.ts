@@ -1,5 +1,5 @@
 import { Model } from "../../typings";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export type PostHook = (value: any) => any;
 export type HookReturnValue = PostHook | void;

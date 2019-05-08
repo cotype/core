@@ -1,7 +1,7 @@
 import { Permission } from "../auth/acl";
 const { view, edit, publish } = Permission;
 
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import SettingsPersistence from "./SettingsPersistence";
 import ContentPersistence from "./ContentPersistence";
 import { Models } from "../../typings";
