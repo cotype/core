@@ -31,6 +31,9 @@ class Api {
   }
 
   getBody(res: Response) {
+    if (res.status === 204) {
+      return Promise.resolve();
+    }
     const contentType = res.headers.get("content-type");
     if (contentType && /application\/json/.test(contentType)) return res.json();
     return Promise.resolve();
