@@ -57,9 +57,9 @@ jobs:
             - coverage
           key: v1-coverage-{{ .Revision }}
   e2e:
-    working_directory: ~/cotype
+    <<: *defaults
     docker:
-      - cypress/browsers:chrome69
+      - image: cypress/browsers:chrome69
     steps:
       - restore_cache:
           keys:
