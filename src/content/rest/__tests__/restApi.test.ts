@@ -6,6 +6,7 @@ import request, { SuperTest, Test } from "supertest";
 import { init, Persistence, knexAdapter } from "../../..";
 import models from "./models";
 import { login } from "../../../__tests__/util";
+import FsStorage from "../../../media/storage/FsStorage";
 
 const uploadDir = path.join(__dirname, ".uploads");
 
@@ -20,7 +21,7 @@ describe("rest api", () => {
   beforeAll(async () => {
     ({ app, persistence } = await init({
       models,
-      uploadDir,
+      storage: new FsStorage(uploadDir),
       persistenceAdapter: knexAdapter({
         client: "sqlite3",
         connection: {

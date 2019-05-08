@@ -10,6 +10,7 @@ import request, { SuperTest, Test } from "supertest";
 import models from "./models";
 import { login } from "./util";
 import { init, Persistence, knexAdapter } from "..";
+import FsStorage from "../media/storage/FsStorage";
 
 let base = 0;
 function createId(): string {
@@ -78,7 +79,7 @@ describe("external data source support", () => {
   beforeAll(async () => {
     ({ app, persistence } = await init({
       models,
-      uploadDir,
+      storage: new FsStorage(uploadDir),
       persistenceAdapter: knexAdapter({
         client: "sqlite3",
         connection: {

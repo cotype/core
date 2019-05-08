@@ -4,16 +4,16 @@ import { OpenApiBuilder } from "openapi3-ts";
 import { Persistence } from "../persistence";
 import routes from "./routes";
 import describe from "./describe";
+import Storage from "./storage/Storage";
 import FsStorage from "./storage/FsStorage";
 import LocalThumbnailProvider from "./thumbnails/LocalThumbnailProvider";
 
 export default function media(
   persistence: Persistence,
   models: Models,
-  uploadDir: string,
+  storage: Storage,
   customThumbnailProvider?: ThumbnailProvider
 ) {
-  const storage = new FsStorage(uploadDir);
   const thumbnailProvider = customThumbnailProvider
     ? customThumbnailProvider
     : new LocalThumbnailProvider(storage);
@@ -23,7 +23,9 @@ export default function media(
     },
     routes(router: Router) {
       routes(router, persistence, storage);
-      router.use("/media", express.static(uploadDir));
+      if (storage instanceof FsStorage) {
+        router.use("/media", express.static(storage.uploadDir));
+      }
       router.get("/thumbs/:format/*", async (req, res) => {
         const { format } = req.params;
         const id = req.params["0"];

@@ -44,6 +44,7 @@ import {
   ExternalDataSourceWithOptionalHelper
 } from "./externalDataSourceHelper";
 import ContentPersistence from "./persistence/ContentPersistence";
+import Storage from "./media/storage/Storage";
 
 export { Persistence } from "./persistence";
 export { default as knexAdapter } from "./persistence/adapter/knex";
@@ -51,13 +52,14 @@ export * from "../typings";
 export {
   formats as thumbnailFormats
 } from "./media/thumbnails/ThumbnailProvider";
+export { default as FsStorage } from "./media/storage/FsStorage";
 
 export * from "./utils";
 
 export type Opts = {
   models: ModelOpts[];
   navigation?: NavigationOpts[];
-  uploadDir: string;
+  storage: Storage;
   baseUrls?: BaseUrls;
   basePath?: string;
   persistenceAdapter: Promise<PersistenceAdapter>;
@@ -117,7 +119,7 @@ export async function init(opts: Opts) {
   const auth = Auth(p, opts.anonymousPermissions);
   const content = Content(p, models, externalDataSources, opts.baseUrls || {});
   const settings = Settings(p, models);
-  const media = Media(p, models, opts.uploadDir, opts.customThumbnailProvider);
+  const media = Media(p, models, opts.storage, opts.customThumbnailProvider);
 
   const basePath = opts.basePath || "";
   const adminPath = `${basePath}/admin`;

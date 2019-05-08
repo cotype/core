@@ -6,6 +6,7 @@ import { init, Persistence, knexAdapter } from "..";
 import models from "./models";
 import { login, withTempRole } from "./util";
 import { Permission } from "../auth/acl";
+import FsStorage from "../media/storage/FsStorage";
 const { view, edit, publish } = Permission;
 
 const uploadDir = path.join(__dirname, ".uploads");
@@ -17,7 +18,7 @@ describe("api", () => {
   beforeAll(async () => {
     ({ app, persistence } = await init({
       models,
-      uploadDir,
+      storage: new FsStorage(uploadDir),
       persistenceAdapter: knexAdapter({
         client: "sqlite3",
         connection: {

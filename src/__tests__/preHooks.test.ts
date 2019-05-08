@@ -5,6 +5,7 @@ import request, { SuperTest, Test } from "supertest";
 import { init, Persistence, knexAdapter } from "..";
 import models from "./models";
 import { login } from "./util";
+import FsStorage from "../media/storage/FsStorage";
 
 const uploadDir = path.join(__dirname, ".uploads");
 
@@ -17,7 +18,7 @@ describe("content hooks", () => {
   beforeAll(async () => {
     ({ app, persistence } = await init({
       models,
-      uploadDir,
+      storage: new FsStorage(uploadDir),
       persistenceAdapter: knexAdapter({
         client: "sqlite3",
         connection: {
