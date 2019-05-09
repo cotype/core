@@ -12,7 +12,9 @@ export default class MediaStorageEngine implements StorageEngine {
 
   generateFilename(originalname: string) {
     const ext = path.extname(originalname).toLowerCase();
-    return `${rs(3)}/${rs(3)}/${rs(10)}${ext}`;
+    return `${rs({ length: 3 })}/${rs({ length: 3 })}/${rs({
+      length: 10
+    })}${ext}`;
   }
 
   async _handleFile(

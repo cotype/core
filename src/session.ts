@@ -34,7 +34,7 @@ function secret(
     `NOTE: Set a secret to keep sessions across server restarts and to allow horizontal scaling.`
   );
   return {
-    secret: randomString(20),
+    secret: randomString({ length: 20 }),
     signed: true
   };
 }
