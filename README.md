@@ -1,6 +1,22 @@
-# @cotype/core
+<h2 align="center">
+  <img src="https://cotype.dev/logo.svg" alt="cotype" />
+</h2>
 
-[![CircleCI](https://circleci.com/gh/cotype/core/tree/master.svg?style=shield)](https://circleci.com/gh/cotype/core/tree/master) [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release) [![Greenkeeper badge](https://badges.greenkeeper.io/cotype/core.svg)](https://greenkeeper.io/)
+<p align="center">
+  <a href="https://circleci.com/gh/cotype/core/tree/master">
+    <img src="https://circleci.com/gh/cotype/core/tree/master.svg?style=shield" alt="CircleCI">
+  </a>
+  <a href="https://www.npmjs.com/package/@cotype/core">
+    <img src="https://img.shields.io/npm/v/@cotype/core.svg" alt="npm package">
+  </a>
+  <a href="https://github.com/semantic-release/semantic-release">
+    <img src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg" alt="semantic-release">
+  </a>
+  <a href="https://greenkeeper.io/">
+    <img src="https://badges.greenkeeper.io/cotype/core.svg" alt="Greenkeeper">
+  </a>
+</p>
+<p>&nbsp;</p>
 
 Cotype manages structured content that can accessed via APIs.
 The system itself is not concerned with the actual rendering of the data - this is left completely to the consumer which could be a server that generates HTML, a client-rendered web app or a native app that reads the data via HTTP.
