@@ -96,7 +96,7 @@ jobs:
             - lib
             - client/lib
           key: v1-build-{{ .Revision }}
-  publish:
+  release:
     <<: *defaults
     steps:
       - restore_cache:
@@ -106,8 +106,8 @@ jobs:
           keys:
             - v1-build-{{ .Revision }}
       - run:
-          name: Deploy
-          command: echo 'DEPLOYING, I SWEAR!'
+          name: Release
+          command: $(npm bin)/semantic-release
 
 workflows:
   version: 2
@@ -126,7 +126,7 @@ workflows:
       - build:
           requires:
             - install
-      - publish:
+      - release:
           requires:
             - lint
             - test
