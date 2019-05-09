@@ -107,6 +107,18 @@ jobs:
       - run:
           name: Release
           command: $(npm bin)/semantic-release
+  pre-release:
+    <<: *defaults
+    steps:
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - v1-build-{{ .Revision }}
+      - run:
+          name: Pre-Release
+          command: $(npm bin)/semantish-prerelease
 
 workflows:
   version: 2
@@ -134,3 +146,12 @@ workflows:
           filters:
             branches:
               only: master
+      - pre-release:
+          requires:
+            - lint
+            - test
+            - e2e
+            - build
+          filters:
+            branches:
+              ignore: master
