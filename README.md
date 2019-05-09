@@ -1,6 +1,6 @@
 # @cotype/core
 
-[![CircleCI](https://circleci.com/gh/cotype/core/tree/master.svg?style=shield)](https://circleci.com/gh/cotype/core/tree/master)
+[![CircleCI](https://circleci.com/gh/cotype/core/tree/master.svg?style=shield)](https://circleci.com/gh/cotype/core/tree/master) [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
 Cotype manages structured content that can accessed via APIs.
 The system itself is not concerned with the actual rendering of the data - this is left completely to the consumer which could be a server that generates HTML, a client-rendered web app or a native app that reads the data via HTTP.
@@ -47,31 +47,4 @@ The database connection of the server can be configured by providing an adapter
 import { knexAdapter, postgresqlAdapter, init } from "@cotype/core";
 
 init({ persistenceAdapter: /* your adapter here... */ });
-```
-
-## Architecture
-
-This repo provides the `@cotype/core` package
-
-internally we have two other packages: client and demo
-
-- **demo**: an example/dev configuration for the server
-- **client**: the frontend which is bundled within the server releases
-
-## Development
-
-To bootstrap the project and start a development server do the following:
-
-```bash
-npm install #once
-npm start
-```
-
-## Login
-
-When the server is started for the first time, the necessary tables are created and an inital admin user is created with the following credentials:
-
-```
-Email: admin@cotype.dev
-Password: admin
 ```
