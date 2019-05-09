@@ -33,7 +33,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:cotype/core.git"
+    "url": "https://github.com/cotype/core.git"
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "dependencies": {
@@ -98,6 +98,7 @@
     "pg": "^7.9.0",
     "prettier": "^1.16.4",
     "qs": "^6.6.0",
+    "semantic-release": "15.13.12",
     "sharp": "0.22.1",
     "source-map-support": "^0.5.11",
     "sqlite3": "^4.0.6",
