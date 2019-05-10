@@ -1,0 +1,25 @@
+{
+  "include": [
+    "./src/**/*",
+    "./client/src/**/*",
+    "./typings/**/*",
+    "./client/typings/**/*"
+  ],
+  "exclude": ["**/node_modules/**"],
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": false,
+    "outDir": "lib",
+    "jsx": "react",
+    "target": "esnext",
+    "sourceMap": true,
+    "declaration": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["es6", "es2017.object", "dom", "esnext.asynciterable"]
+  }
+}
