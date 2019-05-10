@@ -113,25 +113,24 @@
     "with-server": "^1.0.0"
   },
   "jest": {
-    "testEnvironment": "node",
+    "preset": "ts-jest",
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "<rootDir>/tsconfig.test.json"
+      }
+    },
     "testMatch": [
       "**/__tests__/**/*.test.ts"
     ],
-    "moduleFileExtensions": [
-      "js",
-      "jsx",
-      "json",
-      "node",
-      "ts",
-      "tsx",
-      "d.ts"
-    ],
-    "setupFiles": [
-      "./typings/request.d.ts",
-      "./typings/untyped-modules.d.ts"
-    ],
-    "transform": {
-      "\\.ts$": "ts-jest"
-    }
+    "collectCoverageFrom": [
+      "**/*.{ts,tsx}",
+      "!**/.cache/**",
+      "!**/coverage/**",
+      "!**/cypress/**",
+      "!**/dist/**",
+      "!**/lib/**",
+      "!**/node_modules/**",
+      "!**/demo/**"
+    ]
   }
 }
