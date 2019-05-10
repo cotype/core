@@ -4,7 +4,6 @@ import { Route, Switch, match as matchType, Redirect } from "react-router-dom";
 import { History } from "history";
 import SplitPane from "../common/SplitPane";
 import { Background } from "../common/page";
-import FloatingLinkButton from "../common/FloatingLinkButton";
 import Edit from "../Edit";
 import View from "./List";
 import api from "../api";
@@ -146,7 +145,6 @@ class List extends Component<Props, State> {
       <SplitPane width={320}>
         <Background>
           <View edit={edit} model={model} match={match} ref={this.listView} />
-          {edit && <FloatingLinkButton to={`${match.url}/edit`} />}
         </Background>
         <Fragment>
           <Switch>

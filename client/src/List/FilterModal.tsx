@@ -5,7 +5,6 @@ import { Input } from "../Edit/elements";
 import Button from "../common/Button";
 import { paths } from "../common/icons";
 import ModalDialog from "../common/ModalDialog";
-import { type } from "os";
 import { Filter } from "../utils/extractFilter";
 
 export const errorClass = "error-field-label";

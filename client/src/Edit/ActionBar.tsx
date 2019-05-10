@@ -89,7 +89,7 @@ const Root = styled("div")`
   justify-content: space-between;
   align-items: center;
   z-index: 2;
-  padding: 0.65em 2em;
+  padding: 0.65em 2em 0.65em 1em;
 `;
 
 type Props = RouteComponentProps<any> & {

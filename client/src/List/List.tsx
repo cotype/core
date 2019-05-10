@@ -3,14 +3,16 @@ import React, { Component } from "react";
 import api from "../api";
 import EmptyList from "./EmptyList";
 import { RenderInfo } from "../common/ScrollList";
-import { match } from "react-router-dom";
+import { Link, match as Match } from "react-router-dom";
 import ScrollList from "../common/ScrollList";
 import Item from "./Item";
 import FilterModal, { FilterValue } from "./FilterModal";
 import styled, { css } from "react-emotion";
-import Icon, { paths } from "../common/icons";
+import { paths } from "../common/icons";
+import Icon from "../common/Icon";
 import Button from "../common/Button";
 import extractFilter from "../utils/extractFilter";
+import { testable } from "../utils/helper";
 
 type State = {
   lastRequestedIndex: number;
@@ -30,7 +32,7 @@ type State = {
 type Props = {
   edit: boolean;
   model: Cotype.Model;
-  match: match<any>;
+  match: Match<any>;
 };
 
 const FilterBar = styled("div")`
@@ -44,7 +46,7 @@ const FilterBar = styled("div")`
   justify-content: space-between;
   align-items: center;
   z-index: 2;
-  padding: 0.65em 2em;
+  padding: 0.65em 1em;
   > form {
     display: flex;
     width: 100%;
@@ -69,9 +71,10 @@ const InvisibleInput = styled("input")<{ hasValue: boolean }>`
       border-bottom: 1px solid var(--primary-color);
     `}
 `;
+
 const modelActionButtons = css`
   background: none;
-  padding-left: 0;
+  padding-right: 0;
   & > svg {
     color: var(--primary-color);
   }
@@ -80,6 +83,24 @@ const modelActionButtons = css`
     & > svg {
       color: var(--accent-color);
     }
+  }
+`;
+
+const addButtonClass = css`
+  display: inline-flex;
+  align-items: center;
+  padding: 0.7em 1em;
+  margin-right: 1em;
+  border-radius: 3px;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 0.8em;
+  background: var(--primary-color);
+  color: #fff;
+  & svg {
+    margin: 0 2px 0 -6px;
   }
 `;
 
@@ -235,25 +256,23 @@ export default class ListWithItems extends Component<Props, State> {
   };
 
   render() {
+    const { edit, match } = this.props;
     const { total, filterOpen, filterValues, searchTerm, items } = this.state;
 
     const filter = extractFilter(this.props.model);
     return (
       <>
         <FilterBar>
-          {Object.keys(filter).length > 0 && (
-            <Button
-              className={modelActionButtons}
-              icon={
-                filterValues.field === "none"
-                  ? paths.Filter
-                  : paths.FilterRemove
-              }
-              type="button"
-              onClick={this.openFilter}
-            />
+          {edit && (
+            <Link
+              {...testable("add-button")}
+              className={addButtonClass}
+              to={`${match.url}/edit`}
+            >
+              <Icon path={paths.BigPlus} />
+              Add
+            </Link>
           )}
-
           <form onSubmit={this.onSearch}>
             <InvisibleInput
               type="text"
@@ -269,6 +288,18 @@ export default class ListWithItems extends Component<Props, State> {
               type="submit"
             />
           </form>
+          {Object.keys(filter).length > 0 && (
+            <Button
+              className={modelActionButtons}
+              icon={
+                filterValues.field === "none"
+                  ? paths.Filter
+                  : paths.FilterRemove
+              }
+              type="button"
+              onClick={this.openFilter}
+            />
+          )}
         </FilterBar>
         {filterOpen && (
           <FilterModal
