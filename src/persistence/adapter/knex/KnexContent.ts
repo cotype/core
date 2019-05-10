@@ -960,6 +960,9 @@ export default class KnexContent implements ContentAdapter {
               Object.entries(criterion).forEach(([op, value]) => {
                 const sqlOp = ops[op];
                 if (!sqlOp) throw new Error("Unsupported operator: " + op);
+                if (op === "eq" && Array.isArray(value)) {
+                  return k.whereIn(`${lastContent}.id`, value);
+                }
                 k.andWhere(`${lastContent}.id`, sqlOp, value);
               });
             }
@@ -992,6 +995,12 @@ export default class KnexContent implements ContentAdapter {
               Object.entries(criterion).forEach(([op, value]) => {
                 const sqlOp = ops[op];
                 if (!sqlOp) throw new Error("Unsupported operator: " + op);
+                if (op === "eq" && Array.isArray(value)) {
+                  return k.whereIn(`${lastContent}.id`, value);
+                }
+                if (op === "ne" && Array.isArray(value)) {
+                  return k.whereNotIn(`${lastContent}.id`, value);
+                }
                 k.andWhere(`${lastContent}.id`, sqlOp, value);
               });
             }
@@ -1010,6 +1019,12 @@ export default class KnexContent implements ContentAdapter {
               const sqlOp = ops[op];
               if (!sqlOp) throw new Error("Unsupported operator: " + op);
               if (isComparable(field)) {
+                if (op === "eq" && Array.isArray(value)) {
+                  return k.whereIn(`vals${counter}.numeric`, value);
+                }
+                if (op === "ne" && Array.isArray(value)) {
+                  return k.whereNotIn(`vals${counter}.numeric`, value);
+                }
                 k.andWhere(
                   `vals${counter}.numeric`,
                   sqlOp,
@@ -1019,6 +1034,18 @@ export default class KnexContent implements ContentAdapter {
                 const v = value ? String(value).trim() : value;
                 k.andWhere(`vals${counter}.literal`, sqlOp, v);
               } else {
+                if (op === "eq" && Array.isArray(value)) {
+                  return k.whereIn(
+                    `vals${counter}.literal_lc`,
+                    value.map(val => val.toLowerCase().trim())
+                  );
+                }
+                if (op === "ne" && Array.isArray(value)) {
+                  return k.whereNotIn(
+                    `vals${counter}.literal_lc`,
+                    value.map(val => val.toLowerCase().trim())
+                  );
+                }
                 const v = value
                   ? String(value)
                       .toLowerCase()
