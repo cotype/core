@@ -9,7 +9,4 @@ module.exports = (on, config) => {
     }
     return cyParcel(ev);
   });
-  if (process.env.CI) {
-    on("after:screenshot", require("./slack"));
-  }
 };

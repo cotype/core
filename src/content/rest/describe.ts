@@ -212,20 +212,20 @@ const criteria = {
     lte: { oneOf: [float, string] }
   }),
   number: object({
-    eq: float,
-    ne: float,
+    eq: { oneOf: [float, array(float)] },
+    ne: { oneOf: [float, array(float)] },
     gt: float,
     gte: float,
     lt: float,
     lte: float
   }),
   string: object({
-    eq: string,
-    ne: string
+    eq: { oneOf: [string, array(string)] },
+    ne: { oneOf: [string, array(string)] },
   }),
   content: object({
-    eq: { oneOf: [float, string] },
-    ne: { oneOf: [float, string] },
+    eq: { oneOf: [float, string, array({ oneOf: [float, string] })] },
+    ne: { oneOf: [float, string, array({ oneOf: [float, string] })] },
     gt: { oneOf: [float, string] },
     gte: { oneOf: [float, string] },
     lt: { oneOf: [float, string] },
