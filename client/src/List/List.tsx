@@ -98,6 +98,9 @@ const addButtonClass = css`
   font-weight: 500;
   font-size: 0.8em;
   background: var(--primary-color);
+  :hover {
+    background: var(--accent-color);
+  }
   color: #fff;
   & svg {
     margin: 0 2px 0 -6px;
