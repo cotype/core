@@ -177,7 +177,7 @@ class FilterModal extends Component<Props, State> {
             <Button icon={paths.Trash} onClick={this.onDeleteFilter} light>
               Clear
             </Button>,
-            <Button icon={paths.Save} onClick={handleSubmit as any}>
+            <Button icon={paths.Filter} onClick={handleSubmit as any}>
               Apply
             </Button>
           ];
@@ -187,7 +187,6 @@ class FilterModal extends Component<Props, State> {
               title="Filter"
               style={modalDialogStyle}
               actionButtons={actions}
-              icon={paths.Filter}
             >
               <form onSubmit={handleSubmit}>
                 <Cols>
