@@ -9,7 +9,7 @@
   "scripts": {
     "clean": "rm -rf ./dist && rm -rf ./lib",
     "reinit": "rm -rf node_modules; rm -rf demo/node_modules; rm demo/dev_db; rm -rf client/node-modules; npm i",
-    "postinstall": "concurrently npm:install:client npm:install:demo npm:schema",
+    "prepare": "concurrently npm:install:client npm:install:demo npm:schema",
     "install:client": "npm --prefix client ci",
     "install:demo": "npm --prefix demo ci",
     "lint": "tslint '**/*.{ts,tsx}' --exclude '**/node_modules/**/*' --exclude '**/lib/**'",
