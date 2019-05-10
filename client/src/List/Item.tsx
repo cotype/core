@@ -16,25 +16,14 @@ const itemClass = css`
   box-sizing: border-box;
   align-items: center;
   :hover {
-    background-color: var(--light-color);
-  }
-  ::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    background-color: #70c8dc;
-    background-color: var(--accent-color);
-    width: 0;
-    transition: width 0.2s cubic-bezier(0.55, 0, 0.1, 1);
+    background-color: var(--primary-color);
+    color: #fff;
   }
 `;
 
 const activeClass = css`
-  ::before {
-    width: 8px;
-  }
+  background-color: var(--accent-color) !important;
+  color: #fff;
 `;
 
 export type ItemProps = {
