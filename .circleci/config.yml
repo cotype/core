@@ -3,6 +3,16 @@ defaults: &defaults
     - image: circleci/node:10
   working_directory: /home/circleci/cotype
 
+noStrictHost: &noStrictHost
+  name: Disable strict host checking
+  command: >
+    # We are not actually using ssh for communication with github
+    # and semantic release has hickups from time to time
+    # (https://circleci.com/gh/cotype/core/189)
+    # Ref: https://github.com/semantic-release/semantic-release/issues/1095
+    mkdir ~/.ssh/ &&
+    echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
 version: 2
 jobs:
   install:
@@ -117,6 +127,8 @@ jobs:
           keys:
             - v1-build-{{ .Revision }}
       - run:
+          <<: *noStrictHost
+      - run:
           name: Release
           command: $(npm bin)/semantic-release
   pre-release:
@@ -128,6 +140,8 @@ jobs:
       - restore_cache:
           keys:
             - v1-build-{{ .Revision }}
+      - run:
+          <<: *noStrictHost
       - run:
           name: Pre-Release
           command: $(npm bin)/semantish-prerelease
