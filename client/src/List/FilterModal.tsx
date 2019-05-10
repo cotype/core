@@ -111,7 +111,7 @@ class FilterModal extends Component<Props, State> {
       field: {
         type: "string",
         input: "select",
-        label: "field:",
+        label: "Field:",
         values: [
           { label: "please choose", value: "none", disabled: true },
           ...Object.entries(this.props.filter).map(([key, val]: any) => ({
@@ -128,12 +128,12 @@ class FilterModal extends Component<Props, State> {
         operation: {
           type: "string",
           input: "select",
-          label: "comparison operator:",
+          label: "Comparison operator:",
           values: ["=", "contains"]
         },
         value: {
           type: "string",
-          label: "value"
+          label: "Value"
         }
       };
       const filter = this.props.filter[values.field];
@@ -174,17 +174,17 @@ class FilterModal extends Component<Props, State> {
         render={(form: FormikProps<any>) => {
           const { handleSubmit } = form;
           const actions = [
-            <Button icon={paths.Save} onClick={handleSubmit as any}>
-              set filter
-            </Button>,
             <Button icon={paths.Trash} onClick={this.onDeleteFilter} light>
-              delete filter
+              Clear
+            </Button>,
+            <Button icon={paths.Save} onClick={handleSubmit as any}>
+              Apply
             </Button>
           ];
           return (
             <ModalDialog
               onClose={this.props.onClose}
-              title="filter"
+              title="Filter"
               style={modalDialogStyle}
               actionButtons={actions}
               icon={paths.Filter}
