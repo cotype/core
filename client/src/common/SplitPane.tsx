@@ -28,6 +28,7 @@ const Splitter = styled("div")`
   margin: 0 -5px;
   cursor: col-resize;
   transition: all 0.25s;
+  z-index: 3;
   border-left: 5px solid rgba(255, 255, 255, 0);
   border-right: 5px solid rgba(255, 255, 255, 0);
   :hover {

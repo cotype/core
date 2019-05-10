@@ -1,25 +1,25 @@
-import { Item } from "../../typings";
+import { Item } from "../../../typings";
 import React, { Component } from "react";
 import { css } from "react-emotion";
-import api from "./api";
-import Autocomplete from "./common/Autocomplete";
-import ResultItem from "./common/ResultItem";
+import api from "../api";
+import Autocomplete from "../common/Autocomplete";
+import ResultItem from "../common/ResultItem";
 
 export const inputClass = css`
-  background: none;
+  background: rgba(255, 255, 255, 0.05);
   border: none;
   outline: none;
   margin-left: auto;
   width: 300px;
   padding: 0.5em;
   font-size: 14px;
+  border-radius: 3px;
   color: #fff;
-  border-bottom: 1px solid hsla(0, 0%, 100%, 0.1);
   ::placeholder {
     color: #fff;
   }
   :focus {
-    background: hsla(0, 0%, 100%, 0.1);
+    background: rgba(255, 255, 255, 0.1);
   }
 `;
 

@@ -85,8 +85,10 @@ const Button = styled(ButtonImport)`
   border-width: 0;
   border-bottom: 4px solid transparent;
   border-radius: 0;
-  border-bottom-color: ${(p: P) => p.active && "#70c8dc"};
   border-bottom-color: ${(p: P) => p.active && "var(--accent-color)"};
+  :hover {
+    color: #fff;
+  }
 `;
 
 const UploadButton = styled(Button)`

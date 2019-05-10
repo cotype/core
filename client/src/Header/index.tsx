@@ -5,12 +5,12 @@ import { NavLink, NavLinkProps } from "react-router-dom";
 import basePath from "../basePath";
 import { withUser } from "../auth/UserContext";
 import Profile from "./Profile";
-import Search from "../Search";
+import Search from "./Search";
 import { testable } from "../utils/helper";
 
 const Bar = styled("div")`
   display: flex;
-  background-color: var(--primary-color);
+  background-color: #28292e;
   color: #fff;
   height: 55px;
   justify-content: space-between;
@@ -22,19 +22,21 @@ const itemClass = css`
   height: 100%;
   white-space: nowrap;
   align-items: center;
-  border-right: 1px solid hsla(0, 0%, 100%, 0.1);
 `;
 
 const linkClass = css`
   ${itemClass} color: inherit;
   text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
   :hover {
-    background-color: hsla(0, 0%, 100%, 0.1);
+    opacity: 1;
   }
 `;
 
 const activeClass = css`
-  background-color: hsla(0, 0%, 100%, 0.1);
+  font-weight: bold;
+  opacity: 1;
 `;
 
 const Item = styled("div")(itemClass);
