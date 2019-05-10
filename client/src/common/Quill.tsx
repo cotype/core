@@ -11,7 +11,7 @@ const nonInteractive = css`
   }
 `;
 const interactiveStyles = css`
-  ${inputClass} & {
+  & {
     background: #fff;
     & .ql-editor {
       min-height: 80px;
@@ -23,23 +23,40 @@ type P = {
   interactive?: boolean;
 };
 const editorClass = (p: P) => css`
-  ${p.interactive ? interactiveStyles : nonInteractive} & .ql-container {
+  ${p.interactive ? interactiveStyles : nonInteractive}
+  .ql-toolbar {
+    border-radius: 3px 3px 0 0;
+    border-bottom-color: rgba(0, 0, 0, 0.16) !important;
+  }
+  .ql-container {
+    border-radius: 0 0 3px 3px;
     font-family: inherit;
   }
-  & .ql-editor ol,
-  & .ql-editor ul,
-  & .ql-editor pre,
-  & .ql-editor blockquote,
-  & .ql-editor h1,
-  & .ql-editor h2,
-  & .ql-editor h3,
-  & .ql-editor h4,
-  & .ql-editor h5,
-  & .ql-editor h6 {
+  .ql-toolbar,
+  .ql-container {
+    border-color: rgba(0, 0, 0, 0.16);
+  }
+  .ql-editor ol,
+  .ql-editor ul,
+  .ql-editor pre,
+  .ql-editor blockquote,
+  .ql-editor h1,
+  .ql-editor h2,
+  .ql-editor h3,
+  .ql-editor h4,
+  .ql-editor h5,
+  .ql-editor h6 {
     margin-bottom: 1em;
   }
   .ql-bubble .ql-tooltip {
     z-index: 2;
+  }
+  :focus-within {
+    box-shadow: 0 0 0 3px var(--semi-transparent-accent-color);
+    .ql-toolbar,
+    .ql-container {
+      border-color: var(--accent-color);
+    }
   }
 `;
 
