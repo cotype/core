@@ -5,7 +5,7 @@ import Icon from "../common/icons";
 const Backdrop = styled("div")`
   position: fixed;
   display: flex;
-  z-index: 3;
+  z-index: 4;
   top: 0;
   right: 0;
   bottom: 0;
