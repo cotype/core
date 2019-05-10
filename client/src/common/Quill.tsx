@@ -3,7 +3,7 @@ import { css } from "react-emotion";
 import Loadable from "react-loadable";
 // import "react-quill/dist/quill.bubble.css";
 import "react-quill/dist/quill.snow.css";
-import { inputClass, outputClass } from "./styles";
+import { outputClass } from "./styles";
 
 const nonInteractive = css`
   ${outputClass} & .ql-editor {
