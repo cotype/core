@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import _ from "lodash";
 import { Router } from "express";
 import { Persistence } from "../persistence";
-import { Permissions } from "../../typings";
+import { Permissions, User } from "../../typings";
 
 export type AnonymousPermissions = (req: Request) => Partial<Permissions>;
 
@@ -28,7 +28,7 @@ export default async (
   });
 
   router.use(async (req: any, res, next) => {
-    let user = null;
+    let user: null | User = null;
     if (req.session) {
       const { userId } = req.session;
       if (userId) {
