@@ -95,6 +95,18 @@ jobs:
             - lib
             - client/lib
           key: v1-build-{{ .Revision }}
+  codecov:
+    <<: *defaults
+    steps:
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Revision }}
+      - restore_cache:
+          keys:
+            - v1-coverage-{{ .Revision }}
+      - run:
+          name: Publish Coverage
+          command: $(npm bin)/codecov
   release:
     <<: *defaults
     steps:
@@ -137,6 +149,9 @@ workflows:
       - build:
           requires:
             - install
+      - codecov:
+          requires:
+            - test
       - release:
           requires:
             - lint
