@@ -11,6 +11,7 @@ import PermissionDeniedError from "../auth/PermissionDeniedError";
 import ReferenceConflictError from "../persistence/errors/ReferenceConflictError";
 import UniqueFieldError from "../persistence/errors/UniqueFieldError";
 import ContentEventError from "../persistence/errors/ContentEventError";
+import { linkableModelNames } from "./rest/utils";
 
 export default (
   router: Router,
@@ -20,7 +21,7 @@ export default (
 ) => {
   const { content } = persistence;
   // all models that have their own page
-  const linkableModels = models.content.filter(m => m.urlPath).map(m => m.name);
+  const linkableModels = linkableModelNames(models.content);
 
   const getDataSource = (modelName: string): Cotype.DataSource => {
     return (
