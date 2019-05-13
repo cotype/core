@@ -2,7 +2,7 @@ import path from "path";
 import tempy from "tempy";
 import fs from "fs-extra";
 import { stringify } from "qs";
-import request, { SuperTest, Test } from "supertest";
+import request from "supertest";
 import { init, Persistence, knexAdapter } from "../../..";
 import models from "./models";
 import { login } from "../../../__tests__/util";
@@ -117,8 +117,6 @@ describe("rest api", () => {
   });
 
   describe("with content", () => {
-    let server: SuperTest<Test>;
-
     let expectedMedia: object;
     let expectedPublishedContent: object;
     let expectedDraftsContent: object;
@@ -169,8 +167,6 @@ describe("rest api", () => {
         title: "updated-news",
         slug: newsSlug
       };
-
-      server = request(app);
     });
 
     const list = async (
