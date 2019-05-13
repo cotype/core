@@ -12,6 +12,8 @@ import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 
 const uploadDir = path.resolve(__dirname, "..", "uploads");
 
+console.log("ENV", process.env.NODE_ENV, process.env.CLIENT_MIDDLEWARE);
+
 function getClient(url: string) {
   if (url.match(/^postgres/)) return "pg";
   if (url.match(/^mysql/)) return "mysql";
@@ -40,9 +42,10 @@ async function init(initialConfig: Opts) {
   let server: Server | null = null;
 
   const clientMiddleware =
-    process.env.NODE_ENV !== "production"
-      ? [devClientMiddleware(initialConfig.basePath)]
-      : undefined;
+    process.env.NODE_ENV === "production" ||
+    process.env.CLIENT_MIDDLEWARE === "production"
+      ? undefined
+      : [devClientMiddleware(initialConfig.basePath)];
 
   const startServer = async (config: Opts) => {
     const { app } = await initCotype({ ...config, clientMiddleware });

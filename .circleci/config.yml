@@ -75,6 +75,9 @@ jobs:
             - v1-repo-{{ .Revision }}
       - restore_cache:
           keys:
+            - v1-build-{{ .Revision }}
+      - restore_cache:
+          keys:
             - v1-cypress-3.2.0
       - run:
           name: Install cypress
@@ -157,11 +160,12 @@ workflows:
       - lint:
           requires:
             - install
-      - e2e:
-          requires:
-            - install
       - build:
           requires:
+            - install
+      - e2e:
+          requires:
+            - build
             - install
       - codecov:
           requires:
