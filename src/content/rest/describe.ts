@@ -17,6 +17,7 @@ import * as Cotype from "../../../typings";
 import visitModel from "../../model/visitModel";
 import { isComparable } from "../../persistence/adapter/knex/lookup";
 import pluralize from "pluralize";
+import { searchableModelNames } from "./utils";
 
 const describeModel = (
   model: Cotype.Model | Cotype.ObjectType,
@@ -320,10 +321,7 @@ function createJoinParams(model: Model, { content: models }: Models) {
 }
 
 export default (api: OpenApiBuilder, models: Models) => {
-  const searchableModels = models.content
-    .filter(m => m.urlPath && !m.notSearchAble)
-    .map(m => m.name);
-
+  const searchableModels = searchableModelNames(models.content);
   const includeModels = {
     name: "includeModels",
     in: "query",
@@ -356,6 +354,14 @@ export default (api: OpenApiBuilder, models: Models) => {
           ...includeModels,
           name: "excludeModels",
           description: "Select models to be excluded from search."
+        },
+        {
+          name: "linkableOnly",
+          in: "query",
+          schema: {
+            type: "boolean",
+            default: true
+          }
         }
       ],
       responses: {

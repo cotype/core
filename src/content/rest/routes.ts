@@ -16,6 +16,7 @@ import _cloneDeep from "lodash/cloneDeep";
 import prepareSearchResults from "./prepareSearchResults";
 import filterRefData, { createJoin } from "./filterRefData";
 import { checkPermissions, Permission } from "../../auth/acl";
+import { linkableModelNames, searchableModelNames } from "./utils";
 
 const modes = ["published", "drafts"];
 
@@ -27,10 +28,9 @@ export default (
   baseUrls: BaseUrls
 ) => {
   const { content, media } = persistence;
-  // all models that have their own page
-  const linkableModels = models
-    .filter(m => m.urlPath && !m.notSearchAble)
-    .map(m => m.name);
+
+  const linkableModels = linkableModelNames(models);
+  const searchableModels = searchableModelNames(models);
 
   const getDataSource = (modelName: string): DataSource => {
     return (
@@ -86,13 +86,17 @@ export default (
         limit = 50,
         offset = 0,
         includeModels = [],
-        excludeModels = []
+        excludeModels = [],
+        linkableOnly = true
       } = query;
+
+      const allSearchModels =
+        linkableOnly === "true" ? linkableModels : searchableModels;
 
       const sanitize = (m: string[]) =>
         m
           .map(n =>
-            linkableModels.find(n2 => n2.toLowerCase() === n.toLowerCase())
+            allSearchModels.find(n2 => n2.toLowerCase() === n.toLowerCase())
           )
           .filter(Boolean) as string[];
 
@@ -101,7 +105,17 @@ export default (
 
       const searchModels = sanitizedIncludes.length
         ? sanitizedIncludes
-        : linkableModels.filter(n => !sanitizedExcludes.includes(n));
+        : allSearchModels.filter(n => !sanitizedExcludes.includes(n));
+
+      if (!searchModels.length)
+        return res.json({
+          total: 0,
+          items: [],
+          _ref: {
+            media: {},
+            content: {}
+          }
+        });
 
       const items = await content.externalSearch(
         principal,

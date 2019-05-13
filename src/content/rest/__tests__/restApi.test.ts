@@ -204,6 +204,7 @@ describe("rest api", () => {
     const search = async (
       term: string,
       published: boolean = true,
+      linkableOnly: boolean = true,
       includeModels: string[] = [],
       excludeModels: string[] = []
     ) => {
@@ -211,7 +212,12 @@ describe("rest api", () => {
         .get(
           `/rest/${
             published ? "published" : "drafts"
-          }/search/content?${stringify({ term, includeModels, excludeModels })}`
+          }/search/content?${stringify({
+            term,
+            linkableOnly,
+            includeModels,
+            excludeModels
+          })}`
         )
         .expect(200);
 
@@ -314,34 +320,61 @@ describe("rest api", () => {
     });
 
     describe("search contents", () => {
+      const searchForAllContent = "Search Me";
+      const searchForProduct = "Search Me Product";
+      const searchForNews = "News Search Slug";
+      const searchForArticleNews = "ArticleNews Search Slug";
+
       it("create content for search", async () => {
         await create("products", {
-          title: "Search Me Product"
+          title: searchForProduct
         });
 
         await create("news", {
-          slug: "News Search Slug",
+          slug: searchForNews,
           title: "Search Me News"
+        });
+
+        await create("articleNews", {
+          slug: searchForArticleNews,
+          title: "Search Me ArticleNews"
         });
       });
 
-      it("should find content by search", async () => {
-        expect((await search("Search Me", false)).total).toBe(2);
-        expect((await search("News Search Slug", false)).total).toBe(1);
-        expect((await search("Search Me Product", false)).total).toBe(1);
+      it("should find all content by search", async () => {
+        expect((await search(searchForAllContent, false, false)).total).toBe(3);
+        expect((await search(searchForArticleNews, false, false)).total).toBe(
+          1
+        );
+        expect((await search(searchForNews, false, false)).total).toBe(2);
+        expect((await search(searchForProduct, false, false)).total).toBe(1);
+      });
+
+      it("should find only linkable content by search", async () => {
+        expect((await search(searchForAllContent, false)).total).toBe(2);
       });
 
       it("should find limited content by search", async () => {
-        expect((await search("Search Me", false, ["products"])).total).toBe(1);
-        expect((await search("Search Me", false, ["news"])).total).toBe(1);
         expect(
-          (await search("Search Me", false, [], ["products", "news"])).total
+          (await search(searchForAllContent, false, true, ["products"])).total
+        ).toBe(1);
+        expect(
+          (await search(searchForAllContent, false, true, ["news"])).total
+        ).toBe(1);
+        expect(
+          (await search(
+            searchForAllContent,
+            false,
+            true,
+            [],
+            ["products", "news"]
+          )).total
         ).toBe(0);
         expect(
-          (await search("Search Me Product", false, [], ["products"])).total
+          (await search(searchForProduct, false, true, [], ["products"])).total
         ).toBe(0);
         expect(
-          (await search("News Search Slug", false, ["news"], ["products"]))
+          (await search(searchForNews, false, true, ["news"], ["products"]))
             .total
         ).toBe(1);
       });

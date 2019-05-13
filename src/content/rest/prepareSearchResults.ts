@@ -10,7 +10,7 @@ export default function(
     .map(i => {
       const model = models.find(m => m.name === i.model);
 
-      if (!model || !model.urlPath || model.notSearchAble) {
+      if (!model || model.notSearchAble) {
         return null;
       }
       if (i.image) {
