@@ -6,7 +6,7 @@ export const getDeepJoins = (
   dp: Cotype.Join = {},
   models: Cotype.Model[]
 ): Cotype.Join[] => {
-  const deeps: Cotype.Join = {...dp};
+  const deeps: Cotype.Join = { ...dp };
   let deeperJoins = {};
   Object.entries(dp).forEach(([joinModel, fields]) => {
     const contentModel = models.find(
@@ -19,11 +19,22 @@ export const getDeepJoins = (
       const [first, ...deepFields] = f.split(".");
       if (deepFields.length >= 1) {
         const topField = contentModel.fields[first];
-        if (topField.type === "content" || topField.type === "references") {
-          const searchModels =
-            "models" in topField && topField.models
-              ? topField.models
-              : [topField.model];
+        if (
+          topField.type === "content" ||
+          topField.type === "references" ||
+          (topField.type === "list" &&
+            (topField.item.type === "content" ||
+              topField.item.type === "references"))
+        ) {
+          const searchModels = (("models" in topField &&
+            topField.models) ||
+            ("model" in topField && [topField.model]) ||
+            (topField.type === "list" &&
+              "models" in topField.item &&
+              topField.item.models) ||
+            (topField.type === "list" &&
+              "model" in topField.item && [topField.item.model]) ||
+            []) as string[];
           deeperJoins = {
             ...searchModels.reduce<Cotype.Join>((acc, m) => {
               if (m) {
@@ -45,7 +56,7 @@ export const getDeepJoins = (
     });
   });
   if (Object.keys(deeperJoins).length > 0) {
-    return [deeps, ...getDeepJoins(deeperJoins,models)];
+    return [deeps, ...getDeepJoins(deeperJoins, models)];
   }
 
   return [deeps];
@@ -115,7 +126,10 @@ export default function(
   join: Cotype.Join,
   models: Cotype.Model[]
 ): Cotype.Refs {
-  const withDeepJoins = getDeepJoins(join,models).reduce((acc,j)=>({...acc,...j}),{})
+  const withDeepJoins = getDeepJoins(join, models).reduce(
+    (acc, j) => ({ ...acc, ...j }),
+    {}
+  );
   const filteredJoin = createJoin(withDeepJoins, models);
 
   const content: any = {};
