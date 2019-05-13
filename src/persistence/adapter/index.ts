@@ -47,7 +47,8 @@ export type ContentAdapter = {
   ): Promise<Cotype.Content | null>;
   loadContentReferences(
     ids: string[],
-    published?: boolean
+    published?: boolean,
+    join?: Cotype.Join[]
   ): Promise<Cotype.Data[]>;
   loadMediaFromContents(
     ids: string[],

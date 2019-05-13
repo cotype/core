@@ -10,6 +10,7 @@ import { isAllowed, Permission } from "../auth/acl";
 import getRefUrl from "../content/getRefUrl";
 import convert from "../content/convert";
 import { Config } from ".";
+import { getDeepJoins } from "../content/rest/filterRefData";
 
 export default class ContentPersistence implements Cotype.VersionedDataSource {
   adapter: ContentAdapter;
@@ -195,21 +196,17 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
   async fetchRefs(
     ids: string[],
     contentFormat: string,
-    previewOpts: Cotype.PreviewOpts = {}
+    previewOpts: Cotype.PreviewOpts = {},
+    join: Cotype.Join = {}
   ): Promise<Cotype.Refs> {
     // load all content the loaded content is referencing
 
-    let contentRefs = await this.adapter.loadContentReferences(
+    const contentRefs = await this.adapter.loadContentReferences(
       ids,
-      previewOpts.publishedOnly
+      previewOpts.publishedOnly,
+      getDeepJoins(join,this.models)
     );
-    contentRefs = [
-      ...contentRefs,
-      ...(await this.adapter.loadContentReferences(
-        contentRefs.map(i => i.id),
-        previewOpts.publishedOnly
-      ))
-    ];
+
     // load meta data for media file for this content and all the references
     const mediaRefs = await this.adapter.loadMediaFromContents(
       ids.concat(contentRefs.map(c => c.id)),
@@ -257,13 +254,14 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     principal: Cotype.Principal,
     model: Cotype.Model,
     id: string,
+    join: Cotype.Join = {},
     contentFormat: string,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ContentWithRefs | null> {
     const content = await this.adapter.load(model, id, previewOpts);
     if (!content) return content;
 
-    const refs = await this.fetchRefs([id], contentFormat, previewOpts);
+    const refs = await this.fetchRefs([id], contentFormat, previewOpts,join);
 
     const convertedContentData = convert({
       content: removeDeprecatedData(content.data, model),
@@ -432,6 +430,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     model: Cotype.Model,
     opts: Cotype.ListOpts,
     contentFormat: string,
+    join: Cotype.Join,
     criteria?: Cotype.Criteria,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunkWithRefs<Cotype.Content>> {
@@ -443,11 +442,11 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       previewOpts
     );
     if (!items.total) return { ...items, _refs: { content: {}, media: {} } };
-
     const _refs = await this.fetchRefs(
       items.items.map(i => i.id),
       contentFormat,
-      previewOpts
+      previewOpts,
+      join
     );
     const convertedItems = {
       ...items,

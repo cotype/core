@@ -416,30 +416,56 @@ export default class KnexContent implements ContentAdapter {
     });
   }
 
-  async loadContentReferences(id: string[], published?: boolean) {
-    const refs = this.knex
-      .distinct(["crv.data", "c.id", "c.type"])
-      .from("content_references as cr")
-      .innerJoin("contents as c", join => {
-        join.on("c.id", "cr.id");
-        join.orOn("c.id", "cr.content");
-      })
-      .innerJoin("content_revisions as crv", join => {
-        join.on("crv.rev", published ? "c.published_rev" : "c.latest_rev");
-        join.andOn("crv.id", "c.id");
-      })
-      .where("c.deleted", false)
-      .andWhere(k => {
-        id.forEach(itemId => {
-          k.orWhere("cr.id", itemId);
-        });
-        id.forEach(itemId => {
-          k.orWhere("cr.content", itemId);
-        });
-      })
-      .groupBy("crv.data")
-      .groupBy("c.id");
-    return (await refs).map(this.parseData) as Cotype.Data[];
+  async loadContentReferences(
+    id: string[],
+    published?: boolean,
+    join: Cotype.Join[] = [{}]
+  ) {
+    let fullData: Cotype.Data[] = [];
+    const fetch = async (ids: string[], types: string[], first: boolean) => {
+      const refs = this.knex
+        .distinct(["crv.data", "c.id", "c.type"])
+        .from("contents as c")
+        .innerJoin("content_references as cr", j => {
+          j.orOn("c.id", "cr.content");
+        })
+        .innerJoin("content_revisions as crv", j => {
+          j.on("crv.rev", published ? "c.published_rev" : "c.latest_rev");
+          j.andOn("crv.id", "c.id");
+        })
+
+        .leftJoin("content_references as cr2", j => {
+          j.orOn("cr.id", "cr2.content");
+        })
+        .where("c.deleted", false)
+
+        .andWhere(k => {
+          ids.forEach(itemId => {
+            k.orWhere("cr.id", itemId);
+          });
+          ids.forEach(itemId => {
+            k.orWhere("cr.content", itemId);
+          });
+        })
+        .groupBy("crv.data")
+        .groupBy("c.id");
+      if (!first) {
+        refs.whereIn(
+          "c.type",
+          types.map(m => m[0].toLowerCase() + m.substring(1))
+        );
+      }
+      return (await refs).map(this.parseData) as Cotype.Data[];
+    };
+
+    let checkIds = id;
+    for (let i = 0; i < join.length; i++) {
+      const thisjoin = join[i];
+      const data = await fetch(checkIds, Object.keys(thisjoin), i === 0);
+      fullData = [...fullData, ...data];
+      checkIds = data.map(d => d.id);
+    }
+    return fullData;
   }
 
   async loadMediaFromContents(ids: string[], published?: boolean) {

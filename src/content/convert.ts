@@ -103,16 +103,14 @@ export default function convert({
         }
 
         // For external data sources content references don't exist
-        if (!contentRefs || !contentRefs || !contentRefs[ref.model])
+        if (!contentRefs || !contentRefs[ref.model])
           return convertedRef;
 
-        const refModel = allModels.find(m => m.name === ref.model);
-
+        const refModel = allModels.find(m => m.name.toLowerCase() === ref.model.toLowerCase());
         if (!refModel || !refModel.urlPath) return convertedRef;
 
         const allRefData = contentRefs[ref.model][ref.id];
         const url = getRefUrl((allRefData || {}).data, refModel.urlPath);
-
         convertedRef._url = url;
 
         return convertedRef;
