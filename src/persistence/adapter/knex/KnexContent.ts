@@ -422,7 +422,6 @@ export default class KnexContent implements ContentAdapter {
     join: Cotype.Join[] = [{}]
   ) {
     let fullData: Cotype.Data[] = [];
-    console.log(join)
     const fetch = async (ids: string[], types: string[], first: boolean) => {
       const refs = this.knex
         .distinct(["crv.data", "c.id", "c.type"])
@@ -467,7 +466,6 @@ export default class KnexContent implements ContentAdapter {
       fullData = [...fullData, ...data];
       checkIds = data.map(d => d.id);
     }
-    console.log(fullData)
     return fullData;
   }
 
