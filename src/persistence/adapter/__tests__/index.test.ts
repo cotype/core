@@ -757,7 +757,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
         await expect(
           await content.loadContentReferences([pageId])
-        ).toMatchObject([expect.any(Object),expect.any(Object)]);
+        ).toMatchObject([expect.any(Object)]);
       });
 
       it("should not find deleted content references", async () => {
@@ -769,7 +769,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
         await expect(
           await content.loadContentReferences([pageId])
-        ).toMatchObject([expect.any(Object)]);
+        ).toMatchObject([]);
       });
     });
 

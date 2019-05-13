@@ -154,6 +154,7 @@ export default (
             model,
             { limit: 1, offset: 0 },
             format,
+            join,
             criteria,
             req.previewOpts
           );
@@ -174,6 +175,7 @@ export default (
             model,
             { limit, offset, order, orderBy },
             format,
+            join,
             criteria,
             req.previewOpts
           );
@@ -200,6 +202,7 @@ export default (
           principal,
           model,
           params.id,
+          join,
           format,
           req.previewOpts
         );
@@ -239,6 +242,7 @@ export default (
                 model,
                 { limit: 1, offset: 0 },
                 format,
+                join,
                 criteria,
                 req.previewOpts
               );

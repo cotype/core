@@ -218,6 +218,7 @@ export type ReadOnlyDataSource = {
     principal: Principal,
     model: Model,
     id: string,
+    join: Join,
     format?: string,
     previewOpts?: PreviewOpts
   ): Promise<ContentWithRefs | null>;
@@ -237,6 +238,7 @@ export type ReadOnlyDataSource = {
     model: Model,
     opts: ListOpts,
     format: string,
+    join: Join,
     criteria?: Criteria,
     previewOpts?: PreviewOpts
   ): Promise<ListChunkWithRefs<Content>>;

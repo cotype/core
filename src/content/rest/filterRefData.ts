@@ -2,6 +2,54 @@ import * as Cotype from "../../../typings";
 import pick = require("lodash/pick");
 import visit from "./visit";
 
+export const getDeepJoins = (
+  dp: Cotype.Join = {},
+  models: Cotype.Model[]
+): Cotype.Join[] => {
+  const deeps: Cotype.Join = {...dp};
+  let deeperJoins = {};
+  Object.entries(dp).forEach(([joinModel, fields]) => {
+    const contentModel = models.find(
+      m => m.name.toLowerCase() === joinModel.toLowerCase()
+    );
+    if (!contentModel) {
+      return;
+    }
+    fields.forEach(f => {
+      const [first, ...deepFields] = f.split(".");
+      if (deepFields.length >= 1) {
+        const topField = contentModel.fields[first];
+        if (topField.type === "content" || topField.type === "references") {
+          const searchModels =
+            "models" in topField && topField.models
+              ? topField.models
+              : [topField.model];
+          deeperJoins = {
+            ...searchModels.reduce<Cotype.Join>((acc, m) => {
+              if (m) {
+                if (acc[m]) {
+                  acc[m] = [...acc[m], deepFields.join(".")];
+                } else {
+                  acc[m] = [deepFields.join(".")];
+                }
+              }
+              return acc;
+            }, deeperJoins)
+          };
+          deeps[joinModel] = fields.filter(fl => fl !== f);
+          if (!deeps[joinModel].includes(first)) {
+            deeps[joinModel].push(first);
+          }
+        }
+      }
+    });
+  });
+  if (Object.keys(deeperJoins).length > 0) {
+    return [deeps, ...getDeepJoins(deeperJoins,models)];
+  }
+
+  return [deeps];
+};
 export const createJoin = (join: Cotype.Join, models: Cotype.Model[]) => {
   // const joins = Object.keys(join || {});
   const filteredJoins: Cotype.Join = {};
@@ -67,7 +115,8 @@ export default function(
   join: Cotype.Join,
   models: Cotype.Model[]
 ): Cotype.Refs {
-  const filteredJoin = createJoin(join, models);
+  const withDeepJoins = getDeepJoins(join,models).reduce((acc,j)=>({...acc,...j}),{})
+  const filteredJoin = createJoin(withDeepJoins, models);
 
   const content: any = {};
   const media: any = {};
