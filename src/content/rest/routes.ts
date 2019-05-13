@@ -28,7 +28,9 @@ export default (
 ) => {
   const { content, media } = persistence;
   // all models that have their own page
-  const linkableModels = models.filter(m => m.urlPath).map(m => m.name);
+  const linkableModels = models
+    .filter(m => m.urlPath && !m.notSearchAble)
+    .map(m => m.name);
 
   const getDataSource = (modelName: string): DataSource => {
     return (
@@ -79,7 +81,27 @@ export default (
     router.get(`/rest/${mode}/search/content`, async (req, res) => {
       const { principal, query } = req;
 
-      const { term, limit = 50, offset = 0 } = query;
+      const {
+        term,
+        limit = 50,
+        offset = 0,
+        includeModels = [],
+        excludeModels = []
+      } = query;
+
+      const sanitize = (m: string[]) =>
+        m
+          .map(n =>
+            linkableModels.find(n2 => n2.toLowerCase() === n.toLowerCase())
+          )
+          .filter(Boolean) as string[];
+
+      const sanitizedIncludes = sanitize(includeModels);
+      const sanitizedExcludes = sanitize(excludeModels);
+
+      const searchModels = sanitizedIncludes.length
+        ? sanitizedIncludes
+        : linkableModels.filter(n => !sanitizedExcludes.includes(n));
 
       const items = await content.externalSearch(
         principal,
@@ -87,7 +109,7 @@ export default (
         {
           limit,
           offset,
-          models: linkableModels
+          models: searchModels
         },
         req.previewOpts
       );
