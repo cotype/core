@@ -221,7 +221,7 @@ const criteria = {
   }),
   string: object({
     eq: { oneOf: [string, array(string)] },
-    ne: { oneOf: [string, array(string)] },
+    ne: { oneOf: [string, array(string)] }
   }),
   content: object({
     eq: { oneOf: [float, string, array({ oneOf: [float, string] })] },
@@ -320,13 +320,44 @@ function createJoinParams(model: Model, { content: models }: Models) {
 }
 
 export default (api: OpenApiBuilder, models: Models) => {
+  const searchableModels = models.content
+    .filter(m => m.urlPath && !m.notSearchAble)
+    .map(m => m.name);
+
+  const includeModels = {
+    name: "includeModels",
+    in: "query",
+    style: "deepObject",
+    description: "Select models to be included in search.",
+    explode: true,
+    schema: array({
+      type: "string",
+      enum: searchableModels
+    })
+  } as ParameterObject;
+
   api.addPath(`/search/content`, {
     /** List contents */
     get: {
       summary: `Search contents`,
       operationId: `listContentBySearch`,
       tags: ["Suche"],
-      parameters: [param("searchTerm", { schema: string })],
+      parameters: [
+        {
+          name: "term",
+          in: "query",
+          required: true,
+          schema: {
+            type: "string"
+          }
+        },
+        includeModels,
+        {
+          ...includeModels,
+          name: "excludeModels",
+          description: "Select models to be excluded from search."
+        }
+      ],
       responses: {
         "200": {
           description: "Content List",

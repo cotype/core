@@ -2,7 +2,7 @@ import path from "path";
 import tempy from "tempy";
 import fs from "fs-extra";
 import { stringify } from "qs";
-import request, { SuperTest, Test } from "supertest";
+import request from "supertest";
 import { init, Persistence, knexAdapter } from "../../..";
 import models from "./models";
 import { login } from "../../../__tests__/util";
@@ -14,10 +14,31 @@ const uploadDir = path.join(__dirname, ".uploads");
 describe("rest api", () => {
   let app: any;
   let persistence: Persistence;
+  let server: request.SuperTest<request.Test>;
+  let headers: object;
   let imageId: string;
   let productId: string;
   let newsId: string;
   const newsSlug = "foo-bar-baz";
+
+  const create = async (type: string, data: object) => {
+    const { body } = await server
+      .post(`/admin/rest/content/${type}`)
+      .set(headers)
+      .send({ data })
+      .expect(200);
+
+    return body.id;
+  };
+  const update = async (type: string, id: string, data: object) => {
+    const { body } = await server
+      .put(`/admin/rest/content/${type}/${id}`)
+      .set(headers)
+      .send(data)
+      .expect(200);
+
+    return body;
+  };
 
   beforeAll(async () => {
     const storage = new FsStorage(uploadDir);
@@ -35,30 +56,11 @@ describe("rest api", () => {
       })
     }));
 
-    const create = async (type: string, data: object) => {
-      const { body } = await server
-        .post(`/admin/rest/content/${type}`)
-        .set(headers)
-        .send({ data })
-        .expect(200);
-
-      return body.id;
-    };
-    const update = async (type: string, id: string, data: object) => {
-      const { body } = await server
-        .put(`/admin/rest/content/${type}/${id}`)
-        .set(headers)
-        .send(data)
-        .expect(200);
-
-      return body;
-    };
-
-    const { server, headers } = await login(
+    ({ server, headers } = await login(
       request(app),
       "admin@cotype.dev",
       "admin"
-    );
+    ));
 
     const imageBuffer = Buffer.from("Lorem Ipsum", "utf8");
 
@@ -115,8 +117,6 @@ describe("rest api", () => {
   });
 
   describe("with content", () => {
-    let server: SuperTest<Test>;
-
     let expectedMedia: object;
     let expectedPublishedContent: object;
     let expectedDraftsContent: object;
@@ -167,8 +167,6 @@ describe("rest api", () => {
         title: "updated-news",
         slug: newsSlug
       };
-
-      server = request(app);
     });
 
     const list = async (
@@ -197,6 +195,23 @@ describe("rest api", () => {
           `/rest/${
             published ? "published" : "drafts"
           }/${type}/${id}?${stringify(join)}`
+        )
+        .expect(200);
+
+      return body;
+    };
+
+    const search = async (
+      term: string,
+      published: boolean = true,
+      includeModels: string[] = [],
+      excludeModels: string[] = []
+    ) => {
+      const { body } = await server
+        .get(
+          `/rest/${
+            published ? "published" : "drafts"
+          }/search/content?${stringify({ term, includeModels, excludeModels })}`
         )
         .expect(200);
 
@@ -298,6 +313,39 @@ describe("rest api", () => {
       });
     });
 
+    describe("search contents", () => {
+      it("create content for search", async () => {
+        await create("products", {
+          title: "Search Me Product"
+        });
+
+        await create("news", {
+          slug: "News Search Slug",
+          title: "Search Me News"
+        });
+      });
+
+      it("should find content by search", async () => {
+        expect((await search("Search Me", false)).total).toBe(2);
+        expect((await search("News Search Slug", false)).total).toBe(1);
+        expect((await search("Search Me Product", false)).total).toBe(1);
+      });
+
+      it("should find limited content by search", async () => {
+        expect((await search("Search Me", false, ["products"])).total).toBe(1);
+        expect((await search("Search Me", false, ["news"])).total).toBe(1);
+        expect(
+          (await search("Search Me", false, [], ["products", "news"])).total
+        ).toBe(0);
+        expect(
+          (await search("Search Me Product", false, [], ["products"])).total
+        ).toBe(0);
+        expect(
+          (await search("News Search Slug", false, ["news"], ["products"]))
+            .total
+        ).toBe(1);
+      });
+    });
     describe("joins", () => {
       it("should include joined references", async () => {
         await expect(
