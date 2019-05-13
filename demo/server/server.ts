@@ -1,5 +1,11 @@
 import * as Cotype from "../../typings";
-import { init as initCotype, knexAdapter, Opts, FsStorage } from "../../src";
+import {
+  init as initCotype,
+  knexAdapter,
+  Opts,
+  FsStorage,
+  clientMiddleware as prodClientMiddleware
+} from "../../src";
 import * as path from "path";
 import { models } from "../models";
 import { navigation } from "../navigation.json";
@@ -40,16 +46,17 @@ async function init(initialConfig: Opts) {
   let server: Server | null = null;
 
   const clientMiddleware =
-    process.env.NODE_ENV !== "production"
-      ? [devClientMiddleware(initialConfig.basePath)]
-      : undefined;
+    process.env.NODE_ENV === "production" ||
+    process.env.CLIENT_MIDDLEWARE === "production"
+      ? [prodClientMiddleware]
+      : [devClientMiddleware(initialConfig.basePath)];
 
   const startServer = async (config: Opts) => {
     const { app } = await initCotype({ ...config, clientMiddleware });
     server = app.listen({ port: PORT });
   };
 
-  if (process.env.NODE_ENV === "test" && clientMiddleware) {
+  if (process.env.NODE_ENV === "test") {
     clientMiddleware.unshift(
       reInitMiddleware((newConfig: Opts) => {
         console.info("♻️  Restarting server");
