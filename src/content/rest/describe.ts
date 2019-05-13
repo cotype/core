@@ -369,7 +369,7 @@ export default (api: OpenApiBuilder, models: Models) => {
           description: "Content List",
           content: {
             "application/json": {
-              schema: array({
+              schema: {
                 type: "object",
                 required: ["id", "title"],
                 properties: {
@@ -383,7 +383,7 @@ export default (api: OpenApiBuilder, models: Models) => {
                     }
                   })
                 }
-              })
+              }
             }
           }
         }
