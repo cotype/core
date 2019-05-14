@@ -237,6 +237,10 @@ const criteria = {
 
 const idParam: ParameterObject = param("id", { schema: string });
 
+const defaultQueryParams: ParameterObject[] = [
+  { name: "offset", in: "query", schema: integer, default: 0 },
+  { name: "limit", in: "query", schema: integer, default: 50 }
+];
 function createQueryParams(model: Model) {
   let params: ParameterObject[] = [];
   if (model.collection !== "singleton") {
@@ -249,8 +253,7 @@ function createQueryParams(model: Model) {
           enum: ["asc", "desc"]
         }
       },
-      { name: "offset", in: "query", schema: integer, default: 0 },
-      { name: "limit", in: "query", schema: integer, default: 50 }
+      ...defaultQueryParams
     ];
     const {
       values,
@@ -349,6 +352,7 @@ export default (api: OpenApiBuilder, models: Models) => {
             type: "string"
           }
         },
+        ...defaultQueryParams,
         includeModels,
         {
           ...includeModels,
