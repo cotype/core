@@ -71,7 +71,7 @@
     "@types/cookie": "^0.3.2",
     "@types/cookie-session": "^2.0.36",
     "@types/crypto-random-string": "^2.0.0",
-    "@types/fs-extra": "^5.0.5",
+    "@types/fs-extra": "^7.0.0",
     "@types/got": "^9.4.1",
     "@types/graphql": "^14.0.7",
     "@types/image-size": "^0.7.0",
