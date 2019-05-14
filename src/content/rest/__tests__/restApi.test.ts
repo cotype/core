@@ -203,17 +203,31 @@ describe("rest api", () => {
 
     const search = async (
       term: string,
-      published: boolean = true,
-      linkableOnly: boolean = true,
-      includeModels: string[] = [],
-      excludeModels: string[] = []
+      opts: {
+        published?: boolean;
+        linkableOnly?: boolean;
+        includeModels?: string[];
+        excludeModels?: string[];
+        limit?: number;
+        offset?: number;
+      }
     ) => {
+      const {
+        published = true,
+        linkableOnly = true,
+        includeModels = [],
+        excludeModels = [],
+        limit = 50,
+        offset = 0
+      } = opts;
       const { body } = await server
         .get(
           `/rest/${
             published ? "published" : "drafts"
           }/search/content?${stringify({
             term,
+            limit,
+            offset,
             linkableOnly,
             includeModels,
             excludeModels
@@ -342,41 +356,101 @@ describe("rest api", () => {
       });
 
       it("should find all content by search", async () => {
-        expect((await search(searchForAllContent, false, false)).total).toBe(3);
-        expect((await search(searchForArticleNews, false, false)).total).toBe(
-          1
-        );
-        expect((await search(searchForNews, false, false)).total).toBe(2);
-        expect((await search(searchForProduct, false, false)).total).toBe(1);
+        const opts = {
+          published: false,
+          linkableOnly: false
+        };
+        expect((await search(searchForAllContent, opts)).total).toBe(3);
+        expect((await search(searchForArticleNews, opts)).total).toBe(1);
+        expect((await search(searchForNews, opts)).total).toBe(2);
+        expect((await search(searchForProduct, opts)).total).toBe(1);
       });
 
       it("should find only linkable content by search", async () => {
-        expect((await search(searchForAllContent, false)).total).toBe(2);
+        expect(
+          (await search(searchForAllContent, {
+            published: false,
+            linkableOnly: true
+          })).total
+        ).toBe(2);
       });
 
       it("should find limited content by search", async () => {
         expect(
-          (await search(searchForAllContent, false, true, ["products"])).total
+          (await search(searchForAllContent, {
+            published: false,
+            linkableOnly: true,
+            includeModels: ["products"]
+          })).total
         ).toBe(1);
         expect(
-          (await search(searchForAllContent, false, true, ["news"])).total
+          (await search(searchForAllContent, {
+            published: false,
+            linkableOnly: true,
+            includeModels: ["news"]
+          })).total
         ).toBe(1);
         expect(
-          (await search(
-            searchForAllContent,
-            false,
-            true,
-            [],
-            ["products", "news"]
-          )).total
+          (await search(searchForAllContent, {
+            published: false,
+            linkableOnly: true,
+            excludeModels: ["news", "products"]
+          })).total
         ).toBe(0);
         expect(
-          (await search(searchForProduct, false, true, [], ["products"])).total
+          (await search(searchForProduct, {
+            published: false,
+            linkableOnly: true,
+            excludeModels: ["products"]
+          })).total
         ).toBe(0);
         expect(
-          (await search(searchForNews, false, true, ["news"], ["products"]))
-            .total
+          (await search(searchForNews, {
+            published: false,
+            linkableOnly: true,
+            includeModels: ["news"],
+            excludeModels: ["products"]
+          })).total
         ).toBe(1);
+      });
+
+      it("should limit and offset results", async () => {
+        const res1 = await search(searchForAllContent, {
+          published: false,
+          linkableOnly: false,
+          offset: 0,
+          limit: 10
+        });
+        expect(res1.total).toBe(3);
+        expect(res1.items.length).toBe(3);
+
+        const res2 = await search(searchForAllContent, {
+          published: false,
+          linkableOnly: false,
+          offset: 0,
+          limit: 1
+        });
+        expect(res2.total).toBe(3);
+        expect(res2.items.length).toBe(1);
+
+        const res3 = await search(searchForAllContent, {
+          published: false,
+          linkableOnly: false,
+          offset: 10,
+          limit: 10
+        });
+        expect(res3.total).toBe(3);
+        expect(res3.items.length).toBe(0);
+
+        const res4 = await search(searchForAllContent, {
+          published: false,
+          linkableOnly: false,
+          offset: 2,
+          limit: 10
+        });
+
+        expect(res4.total).toBe(3);
+        expect(res4.items.length).toBe(1);
       });
     });
     describe("joins", () => {
