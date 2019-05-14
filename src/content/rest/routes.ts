@@ -117,7 +117,7 @@ export default (
           }
         });
 
-      const items = await content.externalSearch(
+      const results = await content.externalSearch(
         principal,
         term,
         {
@@ -128,9 +128,9 @@ export default (
         req.previewOpts
       );
 
-      const results = prepareSearchResults(items, models, baseUrls);
+      const preparedResults = prepareSearchResults(results, models, baseUrls);
 
-      const imageData = await media.load(principal, results.mediaIds);
+      const imageData = await media.load(principal, preparedResults.mediaIds);
 
       const mediaObj: any = {};
       imageData.forEach(m => {
@@ -138,8 +138,8 @@ export default (
       });
 
       res.json({
-        total: results.items.length,
-        items: results.items,
+        total: results.total,
+        items: preparedResults.items,
         _ref: {
           media: mediaObj,
           content: {}
