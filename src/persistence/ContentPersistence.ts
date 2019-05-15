@@ -11,6 +11,20 @@ import getRefUrl from "../content/getRefUrl";
 import convert from "../content/convert";
 import { Config } from ".";
 import { getDeepJoins } from "../content/rest/filterRefData";
+import { ContentFormat } from "../../typings";
+
+function findValueByPath(path: string | undefined, data: Cotype.Data) {
+  if (!path) return;
+
+  const titlePath = path.split(".");
+
+  const title = (titlePath.reduce(
+    (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
+    data
+  ) as unknown) as (string | undefined);
+
+  return title;
+}
 
 export default class ContentPersistence implements Cotype.VersionedDataSource {
   adapter: ContentAdapter;
@@ -94,30 +108,19 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     const model = this.getModel(type);
     if (!model) return null;
-    const { title, image, singular, orderBy } = model;
+    const { title: titlePath, image, singular, orderBy } = model;
 
-    const titlePath = title.split(".");
-
-    const t = (titlePath.reduce(
-      (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
-      data
-    ) as unknown) as string;
-
-    const orderPath = (orderBy || title).split(".");
-
-    const orderValue = (orderPath.reduce(
-      (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
-      data
-    ) as unknown) as string;
+    const title = findValueByPath(titlePath, data);
+    const orderValue = findValueByPath(orderBy || title, data);
 
     return {
       id,
       model: type,
       type: model.type,
-      title: t || singular,
+      title: title || singular,
       image: image && ((data || {})[image] || null),
       kind: singular,
-      orderValue: orderValue || t
+      orderValue: orderValue || title
     };
   };
 
@@ -128,18 +131,28 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     const model = this.getModel(type);
     if (!model) return null;
-    const { title, image, singular } = model;
+    const {
+      title: titlePath,
+      image,
+      singular,
+      description: descriptionPath
+    } = model;
 
-    const titlePath = title.split(".");
+    const title = findValueByPath(titlePath, data);
 
-    const t = (titlePath.reduce(
-      (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
-      data
-    ) as unknown) as string;
+    const convertedData = convert({
+      content: JSON.parse(JSON.stringify(data)),
+      contentModel: model,
+      allModels: this.models,
+      contentFormat: "plaintext"
+    });
+
+    const description = findValueByPath(descriptionPath, convertedData);
 
     return {
       id,
-      title: t || singular,
+      title: title || singular,
+      description: typeof description === "string" ? description : undefined,
       image: image && ((data || {})[image] || null),
       model: model.name,
       url: getRefUrl(data, model.urlPath) as string
@@ -195,7 +208,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
   async fetchRefs(
     ids: string[],
-    contentFormat: string,
+    contentFormat: ContentFormat,
     previewOpts: Cotype.PreviewOpts = {},
     join: Cotype.Join = {}
   ): Promise<Cotype.Refs> {
@@ -204,7 +217,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     const contentRefs = await this.adapter.loadContentReferences(
       ids,
       previewOpts.publishedOnly,
-      getDeepJoins(join,this.models)
+      getDeepJoins(join, this.models)
     );
 
     // load meta data for media file for this content and all the references
@@ -255,13 +268,13 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     model: Cotype.Model,
     id: string,
     join: Cotype.Join = {},
-    contentFormat: string,
+    contentFormat: ContentFormat,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ContentWithRefs | null> {
     const content = await this.adapter.load(model, id, previewOpts);
     if (!content) return content;
 
-    const refs = await this.fetchRefs([id], contentFormat, previewOpts,join);
+    const refs = await this.fetchRefs([id], contentFormat, previewOpts, join);
 
     const convertedContentData = convert({
       content: removeDeprecatedData(content.data, model),
@@ -429,7 +442,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     principal: Cotype.Principal,
     model: Cotype.Model,
     opts: Cotype.ListOpts,
-    contentFormat: string,
+    contentFormat: Cotype.ContentFormat,
     join: Cotype.Join,
     criteria?: Cotype.Criteria,
     previewOpts?: Cotype.PreviewOpts
@@ -497,6 +510,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.SearchResultItem>> {
     const { total, items } = await this.adapter.search(term, opts, previewOpts);
+
     return {
       total,
       items: this.createSearchResultItems(items, principal)

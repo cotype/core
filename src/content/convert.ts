@@ -4,7 +4,8 @@ import {
   BaseUrls,
   Data,
   ContentRefs,
-  PreviewOpts
+  PreviewOpts,
+  ContentFormat
 } from "../../typings";
 import visit from "../model/visit";
 import formatQuillDelta from "./formatQuillDelta";
@@ -17,12 +18,13 @@ import getRefUrl from "./getRefUrl";
  * NOTE: Currently `richtext` is the only type that gets converted.
  * This could also be a good place to convert `media` ids to full URLs.
  */
+
 type ConvertProps = {
   content: Data;
   contentRefs?: ContentRefs;
   contentModel: Model;
   allModels: Model[];
-  contentFormat: string;
+  contentFormat: ContentFormat;
   baseUrls?: BaseUrls;
   previewOpts?: PreviewOpts;
 };
@@ -103,10 +105,11 @@ export default function convert({
         }
 
         // For external data sources content references don't exist
-        if (!contentRefs || !contentRefs[ref.model])
-          return convertedRef;
+        if (!contentRefs || !contentRefs[ref.model]) return convertedRef;
 
-        const refModel = allModels.find(m => m.name.toLowerCase() === ref.model.toLowerCase());
+        const refModel = allModels.find(
+          m => m.name.toLowerCase() === ref.model.toLowerCase()
+        );
         if (!refModel || !refModel.urlPath) return convertedRef;
 
         const allRefData = contentRefs[ref.model][ref.id];

@@ -383,7 +383,8 @@ export default (api: OpenApiBuilder, models: Models) => {
                     properties: {
                       id: string,
                       title: string,
-                      image: string
+                      image: string,
+                      description: string
                     }
                   })
                 }
