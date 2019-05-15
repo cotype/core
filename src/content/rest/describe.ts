@@ -8,7 +8,8 @@ import {
   object,
   param,
   addExternalModel,
-  toTypeName
+  toTypeName,
+  media
 } from "../../api/oapi";
 import { OpenApiBuilder, ParameterObject, ReferenceObject } from "openapi3-ts";
 import { hasType } from "../../model/introspection";
@@ -375,7 +376,7 @@ export default (api: OpenApiBuilder, models: Models) => {
             "application/json": {
               schema: {
                 type: "object",
-                required: ["id", "title"],
+                required: ["total", "items"],
                 properties: {
                   total: integer,
                   items: array({
@@ -383,8 +384,10 @@ export default (api: OpenApiBuilder, models: Models) => {
                     properties: {
                       id: string,
                       title: string,
-                      image: string
-                    }
+                      image: media,
+                      url: string
+                    },
+                    required: ["id", "title"]
                   })
                 }
               }

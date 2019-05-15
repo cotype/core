@@ -18,6 +18,16 @@ const integer = { type: "integer" };
 
 export { stringType as string, booleanType as boolean, float, integer };
 
+export const media = {
+  type: "object",
+  properties: {
+    _id: { type: "string" },
+    _ref: { type: "string", enum: ["media"] },
+    _src: { type: "string" }
+  },
+  required: ["_id", "_ref", "_src"]
+};
+
 export const scalars: SchemaObject = {
   string: stringType,
   position: stringType,
@@ -154,15 +164,7 @@ export function createDefinition(
   }
 
   if (model.type === "media") {
-    return {
-      type: "object",
-      properties: {
-        _id: { type: "string" },
-        _ref: { type: "string", enum: ["media"] },
-        _src: { type: "string" }
-      },
-      required: ["_id", "_ref", "_src"]
-    };
+    return media;
   }
 
   if (model.type === "union") {
