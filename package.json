@@ -86,7 +86,7 @@
     "@types/temp-write": "^3.3.0",
     "@types/tempy": "^0.3.0",
     "@types/tough-cookie": "^2.3.5",
-    "codecov": "3.4.0",
+    "codecov": "3.5.0",
     "concurrently": "^4.0.0",
     "cypress": "^3.2.0",
     "cypress-parcel-preprocessor": "^1.0.0",
