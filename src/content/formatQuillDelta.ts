@@ -8,12 +8,10 @@ import { QuillDelta } from "../../typings";
 
 function plaintext(data: QuillDelta): string {
   if (!data) return "";
-  return data.ops
-    .reduce((text, op) => {
-      if (typeof op.insert !== "string") return text + " ";
-      return text + op.insert.replace(/(\r\n|\n|\r)/gm, " ");
-    }, "")
-    .trim();
+  return data.ops.reduce((text, op) => {
+    if (typeof op.insert !== "string") return text + " ";
+    return text + op.insert;
+  }, "");
 }
 
 function html(delta: QuillDelta): string {
