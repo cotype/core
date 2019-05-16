@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://circleci.com/gh/cotype/core/tree/master">
-    <img src="https://img.shields.io/circleci/project/github/cotype/core/master.svg" alt="CircleCI">
+    <img src="https://circleci.com/gh/cotype/core/tree/master.svg?style=shield" alt="CircleCI">
   </a>
   <a href="https://www.npmjs.com/package/@cotype/core">
     <img src="https://img.shields.io/npm/v/@cotype/core.svg" alt="npm package">
