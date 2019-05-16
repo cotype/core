@@ -338,8 +338,9 @@ describe("rest api", () => {
       const searchForProduct = "Search Me Product";
       const searchForNews = "News Search Slug";
       const searchForArticleNews = "ArticleNews Search Slug";
+      const description = "description-test";
 
-      it("create content for search", async () => {
+      beforeAll(async () => {
         await create("products", {
           title: searchForProduct
         });
@@ -353,6 +354,16 @@ describe("rest api", () => {
           slug: searchForArticleNews,
           title: "Search Me ArticleNews"
         });
+
+        await create("news", {
+          slug: "foo-bar",
+          title: description
+        });
+
+        await create("articleNews", {
+          slug: "foo-bar",
+          title: description
+        });
       });
 
       it("should find all content by search", async () => {
@@ -364,6 +375,26 @@ describe("rest api", () => {
         expect((await search(searchForArticleNews, opts)).total).toBe(1);
         expect((await search(searchForNews, opts)).total).toBe(2);
         expect((await search(searchForProduct, opts)).total).toBe(1);
+      });
+
+      it("results should contain description if path is provided in model", async () => {
+        expect(
+          (await search(description, {
+            published: false,
+            linkableOnly: false,
+            includeModels: ["news"]
+          })).items[0]
+        ).toMatchObject({ description });
+      });
+
+      it("should not contain description in result when no path is provided in model", async () => {
+        expect(
+          (await search(description, {
+            published: false,
+            linkableOnly: false,
+            includeModels: ["articleNews"]
+          })).items[0].description
+        ).toBe(undefined);
       });
 
       it("should find only linkable content by search", async () => {

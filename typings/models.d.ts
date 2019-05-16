@@ -202,11 +202,12 @@ export type ModelOpts = {
   fields: {
     [key: string]: Field & { unique?: boolean };
   };
-  customQuery?:{
-    [s:string]: string;
-  }
+  customQuery?: {
+    [s: string]: string;
+  };
   uniqueFields?: string[];
   title?: string;
+  description?: string;
   image?: string;
   group?: string;
   notSearchAble?: boolean;

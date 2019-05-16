@@ -384,6 +384,7 @@ export default (api: OpenApiBuilder, models: Models) => {
                     properties: {
                       id: string,
                       title: string,
+                      description: string,
                       image: media,
                       url: string
                     },

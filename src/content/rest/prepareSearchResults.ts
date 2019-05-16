@@ -18,6 +18,7 @@ export default function(
       }
       return {
         id: i.id,
+        description: i.description,
         image: {
           _id: i.image,
           _ref: "media",

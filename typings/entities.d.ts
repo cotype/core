@@ -15,6 +15,8 @@ export type ListOpts = {
   };
 };
 
+export type ContentFormat = "html" | "plaintext" | "json" | "markdown";
+
 export type MediaListOpts = {
   offset?: string | number;
   limit?: string | number;
@@ -188,6 +190,7 @@ export type SearchResultItem = {
   id: string;
   model: string;
   title: string;
+  description?: string;
   image: string | undefined;
   url: string;
 };
