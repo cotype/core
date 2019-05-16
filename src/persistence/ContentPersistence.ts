@@ -19,7 +19,7 @@ function findValueByPath(path: string | undefined, data: Cotype.Data) {
   const titlePath = path.split(".");
 
   const title = (titlePath.reduce(
-    (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
+    (obj, key) => (obj ? obj[key] : undefined),
     data
   ) as unknown) as (string | undefined);
 
