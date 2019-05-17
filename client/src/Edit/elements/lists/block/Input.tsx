@@ -43,19 +43,33 @@ export default class ListInput extends Component<Props, State> {
     isSorting: false
   };
 
+  get mustNotAddItems() {
+    const {
+      maxLength,
+      field: { value }
+    } = this.props;
+    return maxLength ? value && value.length >= maxLength : false;
+  }
+
   renderItemOptions = (arrayHelpers: any, index: number, lastIndex: number) => {
-    const { sortable, schedule } = this.props;
+    const {
+      sortable,
+      schedule,
+      field: { value }
+    } = this.props;
     const actions = [
       {
         label: "Remove",
         onClick: () => arrayHelpers.remove(index)
-      },
-      {
+      }
+    ];
+    if (!this.mustNotAddItems) {
+      actions.push({
         label: "Add new item",
         onClick: () =>
           this.createItem(item => arrayHelpers.insert(index + 1, item))
-      }
-    ];
+      });
+    }
 
     if (schedule) {
       actions.unshift({
@@ -75,7 +89,7 @@ export default class ListInput extends Component<Props, State> {
       });
     }
 
-    if (sortable) {
+    if (sortable && value && value.length > 1) {
       actions.push(
         {
           label: "Move to top",
@@ -124,10 +138,6 @@ export default class ListInput extends Component<Props, State> {
     const ItemComponent = inputs.get(itemType);
     const { Factory, isSorting, schedule, onSchedule } = this.state;
 
-    const isNotAllowedToAddMoreItems = maxLength
-      ? value && value.length >= maxLength
-      : false;
-
     return (
       <FieldArray
         validateOnChange={false}
@@ -157,7 +167,7 @@ export default class ListInput extends Component<Props, State> {
             )}
             <ListButton
               type="button"
-              disabled={isNotAllowedToAddMoreItems}
+              disabled={this.mustNotAddItems}
               onClick={() => this.createItem(item => arrayHelpers.push(item))}
             >
               <span>{addLabel || "Add"}</span>
