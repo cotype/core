@@ -13,7 +13,7 @@
     "date.js": "^0.3.3",
     "downshift": "^3.2.7",
     "emotion": "^9.2.12",
-    "formik": "^1.5.1",
+    "formik": "^1.5.6",
     "javascript-time-ago": "^2.0.1",
     "moment": "^2.24.0",
     "mudder": "^1.0.4",
