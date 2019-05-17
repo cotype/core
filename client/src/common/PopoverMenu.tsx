@@ -66,7 +66,7 @@ export default class PopoverMenu extends Component<Props> {
         position={position}
         align={align}
         content={this.renderPopover}
-        containerStyle={{ overflow: "visible", zIndex: "3" }}
+        containerStyle={{ overflow: "visible", zIndex: "4" }}
         onClickOutside={this.close}
         transitionDuration={0}
       >
