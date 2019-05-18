@@ -17,6 +17,7 @@ import express, {
 } from "express";
 import promiseRouter from "express-promise-router";
 import * as path from "path";
+import { resolve as resolveUrl } from "url";
 import * as fs from "fs-extra";
 import session from "./session";
 
@@ -113,8 +114,11 @@ export const clientMiddleware = promiseRouter()
 
 export async function init(opts: Opts) {
   const basePath = opts.basePath || "";
+  const baseUrl = `${basePath
+    .replace(/(\n|\r|\r\n)/g, "/")
+    .replace(/\/$/, "")}/`;
   const baseUrls = {
-    cms: basePath,
+    cms: baseUrl,
     ...(opts.baseUrls || {})
   };
   const externalDataSources = provideExternalDataSourceHelper(
@@ -130,7 +134,7 @@ export async function init(opts: Opts) {
   const content = Content(p, models, externalDataSources, baseUrls);
   const settings = Settings(p, models);
   const media = Media(p, models, opts.storage, opts.thumbnailProvider);
-  const adminPath = `${basePath}/admin`;
+  const adminPath = resolveUrl(baseUrl, "admin");
 
   const app = express();
 
@@ -147,7 +151,7 @@ export async function init(opts: Opts) {
   });
 
   const router = promiseRouter();
-  app.use(basePath, router);
+  app.use(baseUrl.replace(/\/$/, ""), router);
 
   auth.routes(router); // login, principal, logout
   media.routes(router); // static, thumbs
@@ -206,7 +210,7 @@ export async function init(opts: Opts) {
     opts.customSetup(app, p.content);
   }
 
-  app.get(basePath, (req, res) => res.redirect(adminPath));
+  app.get(baseUrl, (_, res) => res.redirect(adminPath));
 
   app.use((err: Error, req: Request, res: Response, _: () => void) => {
     if (err instanceof HttpError) {

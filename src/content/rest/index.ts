@@ -1,9 +1,10 @@
 import { Models, ExternalDataSource, BaseUrls } from "../../../typings";
-import apiBuilder from "./apiBuilder";
+import getApiBuilder from "./getApiBuilder";
 import routes from "./routes";
 import describe from "./describe";
 import swaggerUi from "../../api/swaggerUi";
 
+import { resolve } from "url";
 import { Router } from "express";
 import { Persistence } from "../../persistence";
 
@@ -14,6 +15,7 @@ export default function rest(
   externalDataSources: ExternalDataSource[],
   baseUrls: BaseUrls
 ) {
+  const apiBuilder = getApiBuilder(baseUrls);
   describe(apiBuilder, models);
   router.get("/rest", (req, res) => res.redirect("/docs/"));
   router.get("/rest/swagger.json", (req, res) => {
@@ -21,5 +23,8 @@ export default function rest(
   });
   routes(router, persistence, models.content, externalDataSources, baseUrls);
 
-  router.use("/docs", swaggerUi("/rest/swagger.json"));
+  router.use(
+    "/docs",
+    swaggerUi(resolve(baseUrls.cms || "/", "rest/swagger.json"))
+  );
 }
