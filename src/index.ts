@@ -46,12 +46,23 @@ import {
 import ContentPersistence from "./persistence/ContentPersistence";
 import Storage from "./media/storage/Storage";
 
+type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
+
 export { Persistence } from "./persistence";
 export { default as knexAdapter } from "./persistence/adapter/knex";
 export * from "../typings";
 export { default as FsStorage } from "./media/storage/FsStorage";
 
 export * from "./utils";
+export {
+  PersistenceAdapter,
+  Storage,
+  ExternalDataSourceWithOptionalHelper,
+  SessionOpts,
+  RequestHandler,
+  AnonymousPermissions,
+  ContentPersistence
+};
 
 export type Opts = {
   models: ModelOpts[];
@@ -61,7 +72,7 @@ export type Opts = {
   basePath?: string;
   persistenceAdapter: Promise<PersistenceAdapter>;
   externalDataSources?: ExternalDataSourceWithOptionalHelper[];
-  sessionOpts?: CookieSessionInterfaces.CookieSessionOptions;
+  sessionOpts?: SessionOpts;
   thumbnailProvider: ThumbnailProvider;
   clientMiddleware?: RequestHandler | RequestHandler[];
   anonymousPermissions?: AnonymousPermissions;
