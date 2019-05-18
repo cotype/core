@@ -112,23 +112,24 @@ export const clientMiddleware = promiseRouter()
   });
 
 export async function init(opts: Opts) {
+  const basePath = opts.basePath || "";
+  const baseUrls = {
+    cms: basePath,
+    ...(opts.baseUrls || {})
+  };
   const externalDataSources = provideExternalDataSourceHelper(
     opts.externalDataSources,
-    {
-      baseUrls: opts.baseUrls || {}
-    }
+    { baseUrls }
   ).map(withAuth);
   const models = buildModels(opts.models, externalDataSources);
   const p = await persistence(models, await opts.persistenceAdapter, {
-    baseUrls: opts.baseUrls,
+    baseUrls,
     contentHooks: opts.contentHooks
   });
   const auth = Auth(p, opts.anonymousPermissions);
-  const content = Content(p, models, externalDataSources, opts.baseUrls || {});
+  const content = Content(p, models, externalDataSources, baseUrls);
   const settings = Settings(p, models);
   const media = Media(p, models, opts.storage, opts.thumbnailProvider);
-
-  const basePath = opts.basePath || "";
   const adminPath = `${basePath}/admin`;
 
   const app = express();
@@ -163,9 +164,7 @@ export async function init(opts: Opts) {
     res.json({
       ...filteredInfo,
       models: filteredModels,
-      baseUrls: {
-        preview: opts.baseUrls ? opts.baseUrls.preview : undefined
-      },
+      baseUrls,
       user: req.principal
     });
   });
