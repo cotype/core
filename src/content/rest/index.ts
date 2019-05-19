@@ -1,5 +1,6 @@
 import { Models, ExternalDataSource, BaseUrls } from "../../../typings";
-import getApiBuilder from "./getApiBuilder";
+import { OpenApiBuilder } from "openapi3-ts";
+import createApiBuilder from "./getApiBuilder";
 import routes from "./routes";
 import describe from "./describe";
 import swaggerUi from "../../api/swaggerUi";
@@ -8,6 +9,16 @@ import { resolve } from "url";
 import { Router } from "express";
 import { Persistence } from "../../persistence";
 
+export function getApiBuilder(
+  models: Models,
+  baseUrls: BaseUrls
+): OpenApiBuilder {
+  const apiBuilder = createApiBuilder(baseUrls);
+  describe(apiBuilder, models);
+
+  return apiBuilder;
+}
+
 export default function rest(
   router: Router,
   persistence: Persistence,
@@ -15,8 +26,7 @@ export default function rest(
   externalDataSources: ExternalDataSource[],
   baseUrls: BaseUrls
 ) {
-  const apiBuilder = getApiBuilder(baseUrls);
-  describe(apiBuilder, models);
+  const apiBuilder = getApiBuilder(models, baseUrls);
   router.get("/rest", (req, res) => res.redirect("/docs/"));
   router.get("/rest/swagger.json", (req, res) => {
     res.json(apiBuilder.getSpec());

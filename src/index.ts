@@ -32,7 +32,7 @@ import icons from "./icons";
 
 import Auth, { AnonymousPermissions } from "./auth";
 import withAuth from "./auth/withAuth";
-import Content from "./content";
+import Content, { getRestApiBuilder as createRestApiBuilder } from "./content";
 import Settings from "./settings";
 import Media from "./media";
 
@@ -112,7 +112,7 @@ export const clientMiddleware = promiseRouter()
     } else next();
   });
 
-export async function init(opts: Opts) {
+function getUrls(opts: Pick<Opts, "basePath" | "baseUrls">) {
   const basePath = opts.basePath || "";
   const baseUrl = `${basePath
     .replace(/(\n|\r|\r\n)/g, "/")
@@ -121,11 +121,42 @@ export async function init(opts: Opts) {
     cms: baseUrl,
     ...(opts.baseUrls || {})
   };
+
+  return {
+    basePath,
+    baseUrl,
+    baseUrls
+  };
+}
+
+function getModels(
+  opts: Pick<Opts, "externalDataSources" | "models">,
+  baseUrls: BaseUrls
+) {
   const externalDataSources = provideExternalDataSourceHelper(
     opts.externalDataSources,
     { baseUrls }
   ).map(withAuth);
-  const models = buildModels(opts.models, externalDataSources);
+
+  return {
+    models: buildModels(opts.models, externalDataSources),
+    externalDataSources
+  };
+}
+
+export async function getRestApiBuilder(
+  opts: Pick<Opts, "models" | "basePath" | "baseUrls" | "externalDataSources">
+) {
+  const { baseUrls } = getUrls(opts);
+  const { models } = getModels(opts, baseUrls);
+
+  return createRestApiBuilder(models, baseUrls);
+}
+
+export async function init(opts: Opts) {
+  const { baseUrls, baseUrl } = getUrls(opts);
+  const { models, externalDataSources } = getModels(opts, baseUrls);
+
   const p = await persistence(models, await opts.persistenceAdapter, {
     baseUrls,
     contentHooks: opts.contentHooks
