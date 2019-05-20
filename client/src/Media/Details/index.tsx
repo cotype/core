@@ -10,7 +10,11 @@ import Button from "../../common/Button";
 import { paths } from "../../common/icons";
 import ChipList from "../../common/ChipList";
 import api from "../../api";
+import { inputClass } from "../../common/styles";
 
+const MetaInput = styled("div")`
+  margin-bottom: 10px;
+`;
 const MetaData = styled("div")`
   background-color: #f5f5f5;
   border-radius: 4px;
@@ -42,6 +46,7 @@ const MetaItemLabel = styled("div")`
   font-weight: 500;
   font-size: 14px;
   font-size: 0.875rem;
+  margin-bottom: 0.5em;
 `;
 const MetaItemValue = styled("div")`
   white-space: nowrap;
@@ -80,19 +85,23 @@ type Props = {
 };
 
 type State = {
-  x?: number | null;
-  y?: number | null;
+  x: number | null;
+  y: number | null;
   tags: string[];
+  alt: string | null;
+  credit: string | null;
 };
 export default class Details extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    const [{ focusX, focusY, tags }] = this.props.data;
+    const [{ focusX, focusY, tags, credit, alt }] = this.props.data;
 
     this.state = {
       x: focusX,
       y: focusY,
-      tags: tags ? tags : []
+      tags: tags ? tags : [],
+      alt,
+      credit
     };
   }
 
@@ -101,14 +110,16 @@ export default class Details extends Component<Props, State> {
   };
 
   onSave = () => {
-    const { x, y, tags } = this.state;
+    const { x, y, tags, credit, alt } = this.state;
     const [media] = this.props.data;
 
     api
       .updateMedia(media.id, {
         focusX: x,
         focusY: y,
-        tags
+        tags,
+        credit,
+        alt
       })
       .then(() => {
         this.props.fetchMediaItem(media);
@@ -131,7 +142,7 @@ export default class Details extends Component<Props, State> {
   render() {
     const { onClose, data } = this.props;
 
-    const { x, y, tags } = this.state;
+    const { x, y, tags, credit, alt } = this.state;
     if (!data) return null;
 
     const [media] = this.props.data;
@@ -180,6 +191,30 @@ export default class Details extends Component<Props, State> {
           <Content style={{ overflowY: "scroll" }}>
             <Outset style={!hasPreview ? { marginLeft: 0 } : undefined}>
               <MetaData>
+                <MetaInput>
+                  <MetaItemLabel>Alt</MetaItemLabel>
+                  <input
+                    className={inputClass}
+                    value={alt || ""}
+                    onChange={e => this.setState({ alt: e.target.value })}
+                  />
+                </MetaInput>
+                <MetaInput>
+                  <MetaItemLabel>Credit</MetaItemLabel>
+                  <input
+                    className={inputClass}
+                    value={credit || ""}
+                    onChange={e => this.setState({ credit: e.target.value })}
+                  />
+                </MetaInput>
+                <MetaItemLabel>Tags</MetaItemLabel>
+                <ChipList
+                  onAdd={this.onAddTag}
+                  onDelete={this.onDeleteTag}
+                  values={tags}
+                />
+              </MetaData>
+              <MetaData style={{ marginTop: "1em" }}>
                 <Grid>
                   <MetaItem label="File name" value={originalname} />
                   <MetaItem label="File type" value={imagetype} />
@@ -196,14 +231,6 @@ export default class Details extends Component<Props, State> {
                     />
                   )}
                 </Grid>
-              </MetaData>
-              <MetaData style={{ marginTop: "1em" }}>
-                <MetaItemLabel>Tags</MetaItemLabel>
-                <ChipList
-                  onAdd={this.onAddTag}
-                  onDelete={this.onDeleteTag}
-                  values={tags}
-                />
               </MetaData>
             </Outset>
           </Content>

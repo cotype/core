@@ -67,9 +67,11 @@ export type Meta = {
 };
 
 export type ImageMeta = {
-  focusX?: number | null;
-  focusY?: number | null;
+  focusX: number | null;
+  focusY: number | null;
   tags: string[] | null;
+  credit: string | null;
+  alt: string | null;
 };
 
 export type Media = Meta &

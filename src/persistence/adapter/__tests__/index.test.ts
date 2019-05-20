@@ -1,4 +1,4 @@
-import { Model, PreviewOpts } from "../../../../typings";
+import { Model, PreviewOpts, Media } from "../../../../typings";
 import tempy from "tempy";
 import {
   PersistenceAdapter,
@@ -1246,6 +1246,78 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         email: "media@example.com",
         password: "xxx"
       });
+    });
+
+    it("should create media", async () => {
+      const image = {
+        id: "createImage.jpg",
+        size: 1000,
+        originalname: "world.jpg",
+        mimetype: "image/jpeg",
+        imagetype: "jpeg",
+        width: 800,
+        height: 600
+      };
+
+      await media.create(image);
+      expect(await media.load([image.id])).toMatchObject([
+        {
+          id: "createImage.jpg",
+          size: 1000,
+          originalname: "world.jpg",
+          mimetype: "image/jpeg",
+          imagetype: "jpeg",
+          width: 800,
+          height: 600,
+          focusX: null,
+          focusY: null,
+          tags: null,
+          search: " world.jpg",
+          hash: null,
+          credit: null,
+          alt: null
+        }
+      ]);
+    });
+
+    it("should update media", async () => {
+      const image = {
+        id: "updateMe.exe",
+        size: 1000,
+        originalname: "world.jpg",
+        mimetype: "image/jpeg",
+        imagetype: "jpeg",
+        width: 800,
+        height: 600
+      };
+      await media.create(image);
+
+      await media.update(image.id, {
+        focusX: 10,
+        focusY: 10,
+        tags: ["foo", "bar", "baz"],
+        credit: "Mother of Dragons",
+        alt: "Winter is coming"
+      } as Media);
+
+      expect(await media.load([image.id])).toMatchObject([
+        {
+          id: "updateMe.exe",
+          size: 1000,
+          originalname: "world.jpg",
+          mimetype: "image/jpeg",
+          imagetype: "jpeg",
+          width: 800,
+          height: 600,
+          search: "foo bar baz world.jpg",
+          hash: null,
+          focusX: 10,
+          focusY: 10,
+          tags: ["foo", "bar", "baz"],
+          credit: "Mother of Dragons",
+          alt: "Winter is coming"
+        }
+      ]);
     });
 
     it("should list media", async () => {
