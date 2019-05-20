@@ -1,7 +1,7 @@
 import * as Cotype from "../../../../typings";
 import React, { Component } from "react";
 import styled from "react-emotion";
-import { TimeAgo } from "react-time-ago";
+import TimeAgo from "react-time-ago";
 import { formatBytes } from "../../utils/helper";
 import ModalDialog from "../../common/ModalDialog";
 import { Cols, Content, Outset } from "../../common/page";
@@ -149,10 +149,10 @@ export default class Details extends Component<Props, State> {
 
     const actions = [
       <Button icon={paths.Save} onClick={this.onSave}>
-        Übernehmen
+        Save
       </Button>,
       <Button icon={paths.Clear} onClick={onClose} light>
-        Abbrechen
+        Cancel
       </Button>
     ];
 
@@ -186,7 +186,7 @@ export default class Details extends Component<Props, State> {
                   <MetaItem label="File size" value={formatBytes(size)} />
                   <MetaItem
                     label="Upload date"
-                    value={<TimeAgo>{new Date(created_at)}</TimeAgo>}
+                    value={<TimeAgo date={new Date(created_at)} />}
                   />
                   {width && (
                     <MetaItem
