@@ -177,7 +177,8 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       date: "2018-09-13",
       text: {
         ops: [{ insert: "Hello world" }]
-      }
+      },
+      inverseRef: []
     };
     let author: string;
 
@@ -309,6 +310,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         }
       ]);
     });
+
 
     describe("publish", () => {
       it("should succeed", async () => {
@@ -587,7 +589,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
 
       it("should list content", async () => {
-        const cnt = await content.find(news, {},models.content);
+        const cnt = await content.find(news, {}, models.content);
         await expect(cnt.total).toBeGreaterThan(2);
         await expect(cnt).toMatchObject({
           items: expect.arrayContaining([
@@ -607,12 +609,9 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         );
 
         const find = (order: string) =>
-          content.find(
-            news,
-            { order, orderBy: "title" },
-            models.content,
-            { "data.date": { eq: "2050-01-01" } }
-          );
+          content.find(news, { order, orderBy: "title" }, models.content, {
+            "data.date": { eq: "2050-01-01" }
+          });
 
         const listAsc = await find("asc");
         const ascTitles = listAsc.items.map(i => i.data.title);
@@ -631,7 +630,11 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       it("could be sort by auto indexed field (title)", async () => {
         const find = (order: string) =>
-          content.find(indexContent, { order, orderBy: indexContent.title },models.content);
+          content.find(
+            indexContent,
+            { order, orderBy: indexContent.title },
+            models.content
+          );
 
         const listAsc = await find("asc");
         const ascTitles = listAsc.items.map(i => i.data.name);
@@ -646,12 +649,16 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       it("could be sort by auto indexed field (uniqueField)", async () => {
         const find = (order: string) =>
-          content.find(indexContent, {
-            order,
-            orderBy: indexContent.uniqueFields
-              ? indexContent.uniqueFields[0]
-              : ""
-          },models.content);
+          content.find(
+            indexContent,
+            {
+              order,
+              orderBy: indexContent.uniqueFields
+                ? indexContent.uniqueFields[0]
+                : ""
+            },
+            models.content
+          );
 
         const listAsc = await find("asc");
         const ascTitles = listAsc.items.map(i => i.data.slug);
@@ -666,7 +673,11 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       it("could not be sort by not indexed field instead sort id", async () => {
         const find = (order: string) =>
-          content.find(indexContent, { order, orderBy: "test" },models.content);
+          content.find(
+            indexContent,
+            { order, orderBy: "test" },
+            models.content
+          );
 
         const listAsc = await find("asc");
         const ascTitles = listAsc.items.map(i => i.id);
@@ -681,7 +692,9 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       it("should list content ordered by id", async () => {
         const find = (order: string) =>
-          content.find(news, { order }, models.content,{ "data.date": { eq: "2050-01-01" } });
+          content.find(news, { order }, models.content, {
+            "data.date": { eq: "2050-01-01" }
+          });
 
         const listAsc = await find("asc");
         const idsAsc = listAsc.items.map(i => Number(i.id));
@@ -700,7 +713,9 @@ describe.each(implementations)("%s adapter", (_, impl) => {
           { title: "YADDI bazinga" }
         );
 
-        const list = await content.list(news, models.content,{ search: { term: "yad" } });
+        const list = await content.list(news, models.content, {
+          search: { term: "yad" }
+        });
 
         await expect(list.items).toHaveLength(2);
         await expect(list.total).toBe(2);
@@ -708,7 +723,9 @@ describe.each(implementations)("%s adapter", (_, impl) => {
           createdNewsIds.sort()
         );
 
-        const list2 = await content.list(news, models.content,{ search: { term: "DDI" } });
+        const list2 = await content.list(news, models.content, {
+          search: { term: "DDI" }
+        });
 
         await expect(list2.items).toHaveLength(2);
         await expect(list2.total).toBe(2);
@@ -716,7 +733,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
           createdNewsIds.sort()
         );
 
-        const list3 = await content.list(news, models.content,{
+        const list3 = await content.list(news, models.content, {
           search: { term: "bazing" }
         });
         await expect(list3.items).toHaveLength(1);
@@ -725,12 +742,16 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
 
       it("should support paging", async () => {
-        const cnt = await content.find(news, {},models.content);
+        const cnt = await content.find(news, {}, models.content);
         const i = cnt.items.findIndex(i2 => i2.id === ids[0]);
-        const page = await content.find(news, {
-          offset: i,
-          limit: 2
-        },models.content);
+        const page = await content.find(
+          news,
+          {
+            offset: i,
+            limit: 2
+          },
+          models.content
+        );
         await expect(page).toMatchObject({
           total: cnt.total,
           items: cnt.items.slice(i, i + 2)
@@ -738,10 +759,10 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
 
       it("should not list deleted content", async () => {
-        const list = await content.find(news, {},models.content);
+        const list = await content.find(news, {}, models.content);
         const first = list.items[0].id;
         await content.delete(news, first);
-        const altered = await content.find(news, {},models.content);
+        const altered = await content.find(news, {}, models.content);
         const e: any = expect;
         await expect(altered).toMatchObject({
           total: list.total - 1,
@@ -757,7 +778,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
         await expect(
           await content.loadContentReferences([pageId])
-        ).toMatchObject([expect.any(Object),expect.any(Object)]);
+        ).toMatchObject([expect.any(Object), expect.any(Object)]);
       });
 
       it("should not find deleted content references", async () => {
@@ -770,6 +791,60 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         await expect(
           await content.loadContentReferences([pageId])
         ).toMatchObject([expect.any(Object)]);
+      });
+
+
+      it("should contain inverseReferences", async () => {
+        const [newsId] = await createNews({date:"2020-01-01"});
+        const [pageId] = await createPages({
+          optionalNews: { id: newsId, model: "news" }
+        });
+        const c = await content.load(news, newsId, { publishedOnly: false });
+        await expect(c).toMatchObject({
+          data: {
+            date: "2020-01-01",
+            inverseRef: [{ _content: "pages", _id: String(pageId), _ref: "content" }],
+            text: {
+              ops: [
+                {
+                  insert: "Hello world"
+                }
+              ]
+            },
+            title: "Sample news"
+          },
+          id: newsId,
+          type: "news",
+          visibleFrom: null,
+          visibleUntil: null
+        });
+      });
+      it("should contain inverseReferences find", async () => {
+        const [newsId] = await createNews({date:"2020-01-02"});
+        const [pageId] = await createPages({
+          optionalNews: { id: newsId, model: "news" }
+        });
+        const c = await content.find(news, {}, models.content,{"data.date":{
+            eq:"2020-01-02"
+          } },{publishedOnly: false});
+        await expect(c.items[0]).toMatchObject({
+          data: {
+            date: "2020-01-02",
+            inverseRef: [{ _content: "pages", _id: String(pageId), _ref: "content" }],
+            text: {
+              ops: [
+                {
+                  insert: "Hello world"
+                }
+              ]
+            },
+            title: "Sample news"
+          },
+          id: newsId,
+          type: "news",
+          visibleFrom: null,
+          visibleUntil: null
+        });
       });
     });
 
@@ -813,40 +888,42 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       it("should query content", async () => {
         await expect(
-          await content.find(news, {}, models.content,{ "data.title": { eq: "Lorem ipsum" } })
+          await content.find(news, {}, models.content, {
+            "data.title": { eq: "Lorem ipsum" }
+          })
         ).toMatchObject({ total: 1, items: [{ id: ids[0] }] });
 
         await expect(
-          await content.find(
-            news,
-            {},models.content,
-            { "data.date": { gt: "2018-09-13", lt: "2018-10-01" } }
-          )
+          await content.find(news, {}, models.content, {
+            "data.date": { gt: "2018-09-13", lt: "2018-10-01" }
+          })
         ).toMatchObject({
           total: 1,
           items: [{ id: ids[1] }]
         });
 
         await expect(
-          await content.find(pages, {}, models.content,{ "data.news": { eq: ids[1] } })
+          await content.find(pages, {}, models.content, {
+            "data.news": { eq: ids[1] }
+          })
         ).toMatchObject({
           total: 1,
           items: [{ id: pageIds[1] }]
         });
 
         await expect(
-          await content.find(pages, {}, models.content,{ "data.newsList": { eq: ids[1] } })
+          await content.find(pages, {}, models.content, {
+            "data.newsList": { eq: ids[1] }
+          })
         ).toMatchObject({
           total: 1,
           items: [{ id: pageIds[1] }]
         });
 
         await expect(
-          await content.find(
-            pages,
-            {},models.content,
-            { "data.stringList": { eq: "Find Me" } }
-          )
+          await content.find(pages, {}, models.content, {
+            "data.stringList": { eq: "Find Me" }
+          })
         ).toMatchObject({
           total: 1,
           items: [{ id: pageIds[0] }]
@@ -865,7 +942,9 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         );
 
         await expect(
-          await content.find(news, {}, models.content,{ "data.title": { eq: "Find me" } })
+          await content.find(news, {}, models.content, {
+            "data.title": { eq: "Find me" }
+          })
         ).toMatchObject({ total: 0 });
 
         // Query published content
@@ -873,7 +952,8 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         await expect(
           await content.find(
             news,
-            {},models.content,
+            {},
+            models.content,
             { "data.date": { gt: "2018-09-13" } },
             { publishedOnly: true }
           )
@@ -887,7 +967,8 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         await expect(
           await content.find(
             news,
-            {},models.content,
+            {},
+            models.content,
             { "data.date": { gt: "2018-09-13" } },
             { publishedOnly: true }
           )
@@ -964,7 +1045,13 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         contains: boolean,
         previewOpts: PreviewOpts
       ) => {
-        const list = await content.find(news, {}, models.content,undefined, previewOpts);
+        const list = await content.find(
+          news,
+          {},
+          models.content,
+          undefined,
+          previewOpts
+        );
         const e = contains ? expect : expect.not;
         await expect(list).toMatchObject({
           items: e.arrayContaining([expect.objectContaining({ id })])
@@ -1086,6 +1173,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         { id, type: "news", data: { image } }
       ]);
     });
+
   });
 
   describe("media", () => {
@@ -1266,5 +1354,6 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       newModels.shift();
       await media.delete(image.id, newModels);
     });
+
   });
 });

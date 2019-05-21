@@ -7,7 +7,11 @@ const models: ModelOpts[] = [
       title: { type: "string" },
       date: { type: "string", input: "date", index: true },
       image: { type: "media" },
-      text: { type: "richtext" }
+      text: { type: "richtext" },
+      inverseRef: {
+        type:'references',
+        model:'pages'
+      }
     }
   },
   {
@@ -31,7 +35,7 @@ const models: ModelOpts[] = [
           type: "string",
           index: true
         }
-      }
+      },
     }
   },
   {
