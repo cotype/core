@@ -17,6 +17,7 @@ import express, {
 } from "express";
 import promiseRouter from "express-promise-router";
 import * as path from "path";
+import { resolve as resolveUrl } from "url";
 import * as fs from "fs-extra";
 import session from "./session";
 
@@ -31,7 +32,7 @@ import icons from "./icons";
 
 import Auth, { AnonymousPermissions } from "./auth";
 import withAuth from "./auth/withAuth";
-import Content from "./content";
+import Content, { getRestApiBuilder as createRestApiBuilder } from "./content";
 import Settings from "./settings";
 import Media from "./media";
 
@@ -46,12 +47,23 @@ import {
 import ContentPersistence from "./persistence/ContentPersistence";
 import Storage from "./media/storage/Storage";
 
+type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
+
 export { Persistence } from "./persistence";
 export { default as knexAdapter } from "./persistence/adapter/knex";
 export * from "../typings";
 export { default as FsStorage } from "./media/storage/FsStorage";
 
 export * from "./utils";
+export {
+  PersistenceAdapter,
+  Storage,
+  ExternalDataSourceWithOptionalHelper,
+  SessionOpts,
+  RequestHandler,
+  AnonymousPermissions,
+  ContentPersistence
+};
 
 export type Opts = {
   models: ModelOpts[];
@@ -61,7 +73,7 @@ export type Opts = {
   basePath?: string;
   persistenceAdapter: Promise<PersistenceAdapter>;
   externalDataSources?: ExternalDataSourceWithOptionalHelper[];
-  sessionOpts?: CookieSessionInterfaces.CookieSessionOptions;
+  sessionOpts?: SessionOpts;
   thumbnailProvider: ThumbnailProvider;
   clientMiddleware?: RequestHandler | RequestHandler[];
   anonymousPermissions?: AnonymousPermissions;
@@ -100,25 +112,60 @@ export const clientMiddleware = promiseRouter()
     } else next();
   });
 
-export async function init(opts: Opts) {
+function getUrls(opts: Pick<Opts, "basePath" | "baseUrls">) {
+  const basePath = opts.basePath || "";
+  const baseUrl = `${basePath
+    .replace(/(\n|\r|\r\n)/g, "/")
+    .replace(/\/$/, "")}/`;
+  const baseUrls = {
+    cms: baseUrl,
+    ...(opts.baseUrls || {})
+  };
+
+  return {
+    basePath,
+    baseUrl,
+    baseUrls
+  };
+}
+
+function getModels(
+  opts: Pick<Opts, "externalDataSources" | "models">,
+  baseUrls: BaseUrls
+) {
   const externalDataSources = provideExternalDataSourceHelper(
     opts.externalDataSources,
-    {
-      baseUrls: opts.baseUrls || {}
-    }
+    { baseUrls }
   ).map(withAuth);
-  const models = buildModels(opts.models, externalDataSources);
+
+  return {
+    models: buildModels(opts.models, externalDataSources),
+    externalDataSources
+  };
+}
+
+export async function getRestApiBuilder(
+  opts: Pick<Opts, "models" | "basePath" | "baseUrls" | "externalDataSources">
+) {
+  const { baseUrls } = getUrls(opts);
+  const { models } = getModels(opts, baseUrls);
+
+  return createRestApiBuilder(models, baseUrls);
+}
+
+export async function init(opts: Opts) {
+  const { baseUrls, baseUrl } = getUrls(opts);
+  const { models, externalDataSources } = getModels(opts, baseUrls);
+
   const p = await persistence(models, await opts.persistenceAdapter, {
-    baseUrls: opts.baseUrls,
+    baseUrls,
     contentHooks: opts.contentHooks
   });
   const auth = Auth(p, opts.anonymousPermissions);
-  const content = Content(p, models, externalDataSources, opts.baseUrls || {});
+  const content = Content(p, models, externalDataSources, baseUrls);
   const settings = Settings(p, models);
   const media = Media(p, models, opts.storage, opts.thumbnailProvider);
-
-  const basePath = opts.basePath || "";
-  const adminPath = `${basePath}/admin`;
+  const adminPath = resolveUrl(baseUrl, "admin");
 
   const app = express();
 
@@ -135,7 +182,7 @@ export async function init(opts: Opts) {
   });
 
   const router = promiseRouter();
-  app.use(basePath, router);
+  app.use(baseUrl.replace(/\/$/, ""), router);
 
   auth.routes(router); // login, principal, logout
   media.routes(router); // static, thumbs
@@ -152,9 +199,7 @@ export async function init(opts: Opts) {
     res.json({
       ...filteredInfo,
       models: filteredModels,
-      baseUrls: {
-        preview: opts.baseUrls ? opts.baseUrls.preview : undefined
-      },
+      baseUrls,
       user: req.principal
     });
   });
@@ -196,7 +241,7 @@ export async function init(opts: Opts) {
     opts.customSetup(app, p.content);
   }
 
-  app.get(basePath, (req, res) => res.redirect(adminPath));
+  app.get(baseUrl, (_, res) => res.redirect(adminPath));
 
   app.use((err: Error, req: Request, res: Response, _: () => void) => {
     if (err instanceof HttpError) {

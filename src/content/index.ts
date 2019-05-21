@@ -2,10 +2,12 @@ import { Models, ExternalDataSource, BaseUrls } from "../../typings";
 import routes from "./routes";
 import describe from "./describe";
 import graphql from "./graphql";
-import rest from "./rest";
+import rest, { getApiBuilder as getRestApiBuilder } from "./rest";
 
 import { Router } from "express";
 import { Persistence } from "../persistence";
+
+export { getRestApiBuilder };
 
 export default (
   persistence: Persistence,

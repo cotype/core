@@ -1,4 +1,4 @@
-import { Principal, User } from "../../../typings";
+import { Principal, User, BaseUrls, ModelPaths } from "../../../typings";
 import React, { Component } from "react";
 import PopoverMenu, { Menu, Item } from "../common/PopoverMenu";
 
@@ -6,14 +6,17 @@ import ImageCircle from "../common/ImageCircle";
 import api from "../api";
 import { withUser } from "../auth/UserContext";
 import { testable } from "../utils/helper";
+import { withModelPaths } from "../ModelPathsContext";
 
 type Props = {
   user: Principal & User | null;
+  modelPaths: ModelPaths;
+  baseUrls: BaseUrls;
 };
 class Profile extends Component<Props> {
   logout = () => {
     api.post("/logout", {}).then(() => {
-      window.location.href = "/";
+      window.location.href = this.props.baseUrls.cms || "/";
     });
   };
 
@@ -41,4 +44,4 @@ class Profile extends Component<Props> {
   }
 }
 
-export default withUser(Profile);
+export default withModelPaths(withUser(Profile));
