@@ -817,7 +817,16 @@ export default class KnexContent implements ContentAdapter {
       } else {
         k.where("text", "like", `%${text}%`);
       }
-      k.join("contents", "content_search.id", "contents.id");
+
+      k.join("contents", join => {
+        join.on("content_search.id", "contents.id");
+        join.on(
+          "content_search.rev",
+          previewOpts.publishedOnly
+            ? "contents.published_rev"
+            : "contents.latest_rev"
+        );
+      });
     } else {
       k = this.knex("contents");
     }
@@ -836,14 +845,10 @@ export default class KnexContent implements ContentAdapter {
     }
 
     k.join("content_revisions", join => {
-      join.on("contents.id", "content_revisions.id");
-      join.on(
-        previewOpts.publishedOnly
-          ? "contents.published_rev"
-          : "contents.latest_rev",
-        "content_revisions.rev"
-      );
+      join.on("content_search.id", "content_revisions.id");
+      join.on("content_search.rev", "content_revisions.rev");
     });
+
     k.whereNot("contents.deleted", true);
 
     const { limit = 50, offset = 0, models = [] } = listOpts;
@@ -856,7 +861,7 @@ export default class KnexContent implements ContentAdapter {
       .countDistinct(`${term ? "content_search.id" : "contents.id"} as total`);
     const total = Number(count.total);
 
-    k.distinct([
+    k.select([
       `${term ? "content_search.id" : "contents.id"}`,
       "contents.type",
       "content_revisions.data"
@@ -865,7 +870,6 @@ export default class KnexContent implements ContentAdapter {
     k.offset(Number(offset)).limit(Number(limit));
 
     const items = await k;
-
     return {
       total,
       items: items.map(this.parseData)

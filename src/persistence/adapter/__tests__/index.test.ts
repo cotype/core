@@ -854,7 +854,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       beforeAll(async () => {
         ids = await createNews(
           {
-            title: "Lorem ipsum",
+            title: "Lorem ipsum dolor sit",
             slug: "ipsum"
           },
           {
@@ -866,6 +866,34 @@ describe.each(implementations)("%s adapter", (_, impl) => {
             date: "2018-10-01"
           }
         );
+
+        // Create a second revision...
+        const rev = await content.createRevision(
+          news,
+          ids[0],
+          author,
+          {
+            ...sampleNews,
+            title: "Lorem ipsum dolor"
+          },
+          models.content
+        );
+
+        // ...and a third one
+        await content.createRevision(
+          news,
+          ids[0],
+          author,
+          {
+            ...sampleNews,
+            title: "Lorem ipsum"
+          },
+          models.content
+        );
+
+        // ...and publish it
+        await content.setPublishedRev(news, ids[0], rev, models.content);
+
         pageIds = await createPages(
           {
             news: { id: ids[0], model: "news" },
