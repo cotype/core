@@ -5,28 +5,35 @@ const modelMocks: ModelOpts[] = [
     name: "foos",
     singular: "Foo",
     fields: {
-      name: { type: "string",index:true }
+      name: { type: "string", index: true }
     }
   },
   {
     name: "bars",
     singular: "Bar",
     fields: {
-      name: { type: "string",index:true }
+      name: { type: "string", index: true }
     }
   },
   {
     name: "bazs",
     singular: "Baz",
     fields: {
-      name: { type: "string",index:true }
+      name: { type: "string", index: true }
     }
   },
   {
     name: "quxs",
     singular: "Qux",
     fields: {
-      name: { type: "string",index:true }
+      name: { type: "string", index: true }
+    }
+  },
+  {
+    name: "media",
+    singular: "Media",
+    fields: {
+      media: { type: "media" }
     }
   }
 ];

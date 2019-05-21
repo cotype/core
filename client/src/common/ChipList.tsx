@@ -4,6 +4,7 @@ import ColorHash from "color-hash";
 import { inputClass } from "./styles";
 import Button from "./Button";
 import Icon, { paths } from "./icons";
+import { testable } from "../utils/helper";
 
 const colorHash = new ColorHash({ saturation: 0.7, lightness: 0.6 });
 
@@ -91,6 +92,7 @@ export default class ChipList extends Component<Props, State> {
           }}
         >
           <input
+            {...testable("chip-list-input")}
             className={inputClass}
             value={newValue}
             onChange={e => this.setState({ newValue: e.target.value })}

@@ -2,7 +2,7 @@ import * as Cotype from "../../../../typings";
 import React, { Component } from "react";
 import styled from "react-emotion";
 import TimeAgo from "react-time-ago";
-import { formatBytes } from "../../utils/helper";
+import { formatBytes, testable } from "../../utils/helper";
 import ModalDialog from "../../common/ModalDialog";
 import { Cols, Content, Outset } from "../../common/page";
 import FocusPoint from "./FocusPoint";
@@ -194,6 +194,7 @@ export default class Details extends Component<Props, State> {
                 <MetaInput>
                   <MetaItemLabel>Alt</MetaItemLabel>
                   <input
+                    {...testable("meta-data-alt")}
                     className={inputClass}
                     value={alt || ""}
                     onChange={e => this.setState({ alt: e.target.value })}

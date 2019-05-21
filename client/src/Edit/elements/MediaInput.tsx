@@ -13,6 +13,7 @@ import UploadZone from "../../Media/UploadZone";
 import { UploadField } from "@navjobs/upload";
 import { required } from "./validation";
 import { sizeFormat } from "../../utils/formatters";
+import { testable } from "../../utils/helper";
 
 const Root = styled("div")`
   display: flex;
@@ -248,7 +249,7 @@ export default class MediaInput extends Component<Props, State> {
           maxHeight
         }}
         render={({ progress, complete, onFiles }: any) => (
-          <Root>
+          <Root {...testable("upload-zone")}>
             {progress && !complete ? (
               <ProgressCircle size={150} percentage={progress} />
             ) : media ? (
