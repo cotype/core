@@ -7,6 +7,7 @@ import extractValues from "../../../model/extractValues";
 import { serialize, toNumber, isComparable } from "./lookup";
 import ReferenceConflictError from "../../errors/ReferenceConflictError";
 import _flatten from "lodash/flatten";
+import _update from "lodash/update";
 import UniqueFieldError, {
   NonUniqueField
 } from "../../errors/UniqueFieldError";
@@ -114,43 +115,7 @@ export default class KnexContent implements ContentAdapter {
   constructor(inputKnex: knex) {
     this.knex = inputKnex;
   }
-  parseData = (i?: any) => {
-    if (i) {
-      const data = i.data ? JSON.parse(i.data) : {};
-      Object.entries(i).forEach(([key, value]) => {
-        if (key.startsWith("EXTRAFIELD.")) {
-          const path = key.replace("EXTRAFIELD.", "").split(".");
-          let setValue: Array<{
-            _id: string;
-            _ref: string;
-            _content: string;
-          }> = [];
-          if (value) {
-            const values =
-              this.knex.client.config.client !== "pg"
-                ? (value as string).split(",")
-                : (value as string[]);
-            setValue = values.map(val => {
-              const [id, model] = (val as string).split("-");
-              return { _id: id, _ref: "content", _content: model };
-            });
-          }
-          path.reduce((acc, p, index) => {
-            if (index === path.length - 1) {
-              acc[p] = setValue;
-            }
-            if (!acc[p]) {
-              acc[p] = {};
-            }
-            return acc[p];
-          }, data);
-          delete i[key];
-        }
-      });
-      return { ...i, data };
-    }
-    return {};
-  };
+
   async create(
     model: Cotype.Model,
     data: any,
@@ -456,7 +421,9 @@ export default class KnexContent implements ContentAdapter {
           types.map(m => m[0].toLowerCase() + m.substring(1))
         );
       }
-      return (await refs).map(this.parseData) as Cotype.Data[];
+      return (await refs).map((ref: any) =>
+        this.parseData(ref)
+      ) as Cotype.Data[];
     };
 
     let checkIds = id;
@@ -528,42 +495,32 @@ export default class KnexContent implements ContentAdapter {
     }
     const inverseReferences = getInverseReferenceFields(model);
     if (inverseReferences.length > 0) {
-      const concatString =
-        this.knex.client.config.client !== "pg"
-          ? `GROUP_CONCAT(?? || '-' || ??)`
-          : `ARRAY_AGG(?? || '-' || ??)`;
-      inverseReferences.forEach((inverseRef, i) => {
-        const a = this.knex("content_references as iRef" + i)
-          .select(
-            this.knex.raw(concatString, [`iCont${i}.id`, `iCont${i}.type`])
-          )
-          .leftJoin("contents as iCont" + i, join => {
-            join.on(`iRef${i}.id`, `iCont${i}.id`);
-            join.andOnIn(`iCont${i}.type`, [inverseRef.model]);
-            join.andOn(
-              `iRef${i}.rev`,
-              previewOpts.publishedOnly
-                ? `iCont${i}.published_rev`
-                : `iCont${i}.latest_rev`
-            );
-          })
-          .whereRaw("?? = ??", [`iRef${i}.content`, "contents.id"])
-          .andWhere(where => {
-            where.whereNull(`iRef${i}.id`);
-            where.orWhereNotNull(`iCont${i}.id`);
-          })
-          .groupBy(`iRef${i}.content`);
-        k.select(
-          this.knex.raw(`(${a.toQuery()}) as "EXTRAFIELD.${inverseRef.path}"`)
-        );
-      });
+      const inverseRefs = this.knex("content_references as iRef")
+        .select(this.aggregateRefs("iCont.id", "iCont.type"))
+        .leftJoin("contents as iCont", join => {
+          join.on("iRef.id", "iCont.id");
+          join.andOn(
+            "iRef.rev",
+            previewOpts.publishedOnly
+              ? "iCont.published_rev"
+              : "iCont.latest_rev"
+          );
+        })
+        .where("iRef.content", (this.knex as any).ref("contents.id"))
+        .andWhere(where => {
+          where.whereNull("iRef.id");
+          where.orWhereNotNull("iCont.id");
+        })
+        .groupBy("iRef.content")
+        .as("inverseRefs");
+      k.select(inverseRefs);
     }
 
     const content = await k
       .select(["contents.*", "content_revisions.data"])
       .first();
 
-    return content ? this.parseData(content) : null;
+    return content ? this.parseData(content, model) : null;
   }
 
   async loadRevision(
@@ -706,7 +663,7 @@ export default class KnexContent implements ContentAdapter {
 
     if (references.length > 0) {
       const err = new ReferenceConflictError({ type: "content" });
-      err.refs = references.map(this.parseData);
+      err.refs = references.map((ref: any) => this.parseData(ref));
       throw err;
     }
   }
@@ -1108,41 +1065,31 @@ export default class KnexContent implements ContentAdapter {
     const total = Number(count.total);
     if (total === 0) return { total, items: [] };
 
-    k.distinct(["contents.id"]);
+    k.distinct(["contents.id"]); // TODO get rid of distinct?
+
     const inverseReferences = getInverseReferenceFields(model);
     if (inverseReferences.length > 0) {
-      const concatString =
-        this.knex.client.config.client !== "pg"
-          ? this.knex.client.config.client === "sqlite3"
-            ? `GROUP_CONCAT(?? || '-' || ??)`
-            : `GROUP_CONCAT(??, '-', ??)`
-          : `ARRAY_AGG(?? || '-' || ??)`;
-      inverseReferences.forEach((inverseRef, i) => {
-        const a = this.knex("content_references as iRef" + i)
-          .select(
-            this.knex.raw(concatString, [`iCont${i}.id`, `iCont${i}.type`])
-          )
-          .leftJoin("contents as iCont" + i, join => {
-            join.on(`iRef${i}.id`, `iCont${i}.id`);
-            join.andOnIn(`iCont${i}.type`, [inverseRef.model]);
-            join.andOn(
-              `iRef${i}.rev`,
-              previewOpts.publishedOnly
-                ? `iCont${i}.published_rev`
-                : `iCont${i}.latest_rev`
-            );
-          })
-          .whereRaw("?? = ??", [`iRef${i}.content`, "contents.id"])
-          .andWhere(where => {
-            where.whereNull(`iRef${i}.id`);
-            where.orWhereNotNull(`iCont${i}.id`);
-          })
-          .groupBy(`iRef${i}.content`);
-        k.select(
-          this.knex.raw(`(${a.toQuery()}) as "EXTRAFIELD.${inverseRef.path}"`)
-        );
-      });
+      const inverseRefs = this.knex("content_references as iRef")
+        .select(this.aggregateRefs("iCont.id", "iCont.type"))
+        .leftJoin("contents as iCont", join => {
+          join.on("iRef.id", "iCont.id");
+          join.andOn(
+            "iRef.rev",
+            previewOpts.publishedOnly
+              ? "iCont.published_rev"
+              : "iCont.latest_rev"
+          );
+        })
+        .where("iRef.content", (this.knex as any).ref("contents.id"))
+        .andWhere(where => {
+          where.whereNull("iRef.id");
+          where.orWhereNotNull("iCont.id");
+        })
+        .groupBy("iRef.content")
+        .as("inverseRefs");
+      k.select(inverseRefs);
     }
+
     const orderByIsNumeric = orderByFieldExists && orderByFieldExists.isNumeric;
     const orderByUpperCase =
       orderByFieldExists && orderByFieldExists.withUpperCase;
@@ -1172,7 +1119,49 @@ export default class KnexContent implements ContentAdapter {
     const items = k.select(selectColumns);
     return {
       total,
-      items: (await items).map(this.parseData)
+      items: (await items).map((item: any) => this.parseData(item, model))
     };
+  }
+
+  private aggregateRefs(idCol: string, typeCol: string) {
+    const concatString =
+      this.knex.client.config.client !== "pg"
+        ? this.knex.client.config.client === "sqlite3"
+          ? `GROUP_CONCAT(?? || ':' || ??)`
+          : `GROUP_CONCAT(??, ':', ??)`
+        : `ARRAY_AGG(?? || ':' || ??)`;
+
+    return this.knex.raw(concatString, [typeCol, idCol]);
+  }
+
+  private parseData(
+    {
+      data,
+      inverseRefs,
+      ...rest
+    }: { data: string; inverseRefs?: string | string[] },
+    model?: Cotype.Model
+  ) {
+    const parsedData = JSON.parse(data);
+    if (inverseRefs && model) {
+      const fields = getInverseReferenceFields(model);
+      const refs =
+        typeof inverseRefs === "string" ? inverseRefs.split(",") : inverseRefs;
+
+      refs.forEach(ref => {
+        const [, _content, _id] = /(.+?):(.+)/.exec(ref)!;
+        const field = fields.find(f => f.model === _content);
+        if (field) {
+          _update(parsedData, field.path, val =>
+            (val || []).concat({
+              _ref: "content",
+              _content,
+              _id
+            })
+          );
+        }
+      });
+    }
+    return { data: parsedData, ...rest } as any;
   }
 }

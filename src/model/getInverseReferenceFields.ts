@@ -7,10 +7,10 @@ const getInverseReferenceFields = (
 ): Array<{ path: string; model: string }> => {
   const referenceFields: Array<{ path: string; model: string }> = [];
   visit({}, model, {
-    references(s, field: InverseReferenceType, d, stringPath) {
-      if (stringPath)
+    references(_value, field: InverseReferenceType, _parent, path) {
+      if (path)
         referenceFields.push({
-          path: stringPath,
+          path,
           model: field.model
         });
     }
