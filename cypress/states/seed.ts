@@ -1,16 +1,17 @@
 import { resolve } from "path";
+import { KnexConfig } from "../../src/persistence/adapter/knex";
 
-export default function whenSeed(seed?: string) {
-  before(() => {
-    if (!seed) {
-      return cy.resetDb();
-    }
+export default function andSeed(seed?: string): Partial<KnexConfig> | "reset" {
+  if (!seed) {
+    return "reset";
+  }
 
-    const root = (Cypress.config() as any).projectRoot;
+  const root = (Cypress.config() as any).projectRoot;
 
-    return cy.resetDb({
+  return {
+    seeds: {
       directory: resolve(root, "cypress/seeds", seed),
       uploads: resolve(root, "demo/uploads")
-    });
-  });
+    }
+  };
 }

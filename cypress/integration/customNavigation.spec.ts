@@ -1,4 +1,3 @@
-import whenHavingModels from "../states/havingModels";
 import whenLoggedIn from "../states/loggedIn";
 
 import frame from "../pages/frame";
@@ -7,7 +6,9 @@ import mockedModels from "../mocks/models";
 const models = mockedModels();
 
 context("Custom Navigation", () => {
-  whenHavingModels(models);
+  before(() => {
+    cy.reinit({ models, navigation: [] }, "reset");
+  });
   whenLoggedIn();
 
   it("displays all models as content", () => {
