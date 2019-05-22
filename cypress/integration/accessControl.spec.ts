@@ -1,5 +1,4 @@
 import whenLoggedIn from "../states/loggedIn";
-import seed from "../states/seed";
 import withContext from "../states/context";
 
 import frame from "../pages/frame";
@@ -14,11 +13,9 @@ const published = api.rest.published();
 
 context("Access Control", () => {
   before(() => {
-    cy.reinit(
-      { models: mockedModels(4), navigation: [] },
-      seed("mixed-access")
-    );
-
+    cy.seed("mixed-access").then(seed => {
+      cy.reinit({ models: mockedModels(4), navigation: [] }, seed);
+    });
     cy.randomStr("test-baz-%s").as("bazName");
   });
 
