@@ -1,4 +1,6 @@
 import { ReinitOpts } from "../../demo/server/reInitMiddleware";
+import { resolve } from "path";
+import { KnexConfig } from "../../src/persistence/adapter/knex";
 
 function testableSelector(id) {
   return `[data-test-id="${id}"]`;
@@ -35,9 +37,24 @@ Cypress.Commands.add("randomStr", (lengthI, templateI) => {
   return cy.wrap(template.replace("%s", str.substring(0, length)));
 });
 
+Cypress.Commands.add(
+  "seed",
+  (name: string): Partial<KnexConfig> => {
+    const root = (Cypress.config() as any).projectRoot;
+
+    return {
+      seeds: {
+        directory: resolve(root, "cypress/seeds", name),
+        uploads: resolve(root, "demo/uploads")
+      }
+    };
+  }
+);
+
 declare global {
   namespace Cypress {
     interface Chainable {
+      seed: (name?: string) => Cypress.Chainable<Partial<KnexConfig>>;
       reinit: (
         config?: ReinitOpts["config"],
         db?: ReinitOpts["db"]
