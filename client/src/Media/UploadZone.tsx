@@ -2,7 +2,7 @@ import React, { Component, InputHTMLAttributes } from "react";
 import { Uploader } from "@navjobs/upload";
 import Dropzone from "react-dropzone";
 import api from "../api";
-import { matchMime } from "../utils/helper";
+import { matchMime, testable } from "../utils/helper";
 
 type Props = {
   render: any;

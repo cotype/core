@@ -125,6 +125,8 @@ describe("rest api", () => {
       expectedMedia = {
         [imageId]: {
           created_at: expect.any(String),
+          alt: null,
+          credit: null,
           focusX: null,
           focusY: null,
           hash: expect.any(String),

@@ -10,6 +10,7 @@ import ConflictDialog from "../common/ConflictDialog";
 import Topbar from "./Topbar";
 import { MediaType } from "../../../typings";
 import ModalDialog from "../common/ModalDialog";
+import { testable } from "../utils/helper";
 
 const Root = styled("div")`
   height: 100%;
@@ -253,7 +254,7 @@ export default class Media extends Component<Props, State> {
       filters
     } = this.state;
     return (
-      <Root>
+      <Root {...testable("upload-zone")}>
         {conflictingItems && (
           <ConflictDialog
             onClose={this.closeConflict}
