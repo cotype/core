@@ -1,6 +1,3 @@
-import whenLoggedIn, { login } from "../states/loggedIn";
-import { logout } from "../states/loggedOut";
-
 import frame from "../pages/frame";
 import loginPage from "../pages/login";
 import { roles, users } from "../pages/settings";
@@ -8,10 +5,15 @@ import { roles, users } from "../pages/settings";
 import mockedModels from "../mocks/models";
 
 context("Settings", () => {
+  let session: string;
   before(() => {
     cy.reinit({ models: mockedModels(4), navigation: [] }, "reset");
+    cy.login().then(s => (session = s));
   });
-  whenLoggedIn();
+
+  beforeEach(() => {
+    cy.restoreSession(session);
+  });
 
   before(() => {
     cy.randomStr("test-role-%s").as("roleName");
@@ -55,7 +57,7 @@ context("Settings", () => {
 
   it("creates a user that actually can log in", () => {
     cy.withContext(({ userEmail, password, userName }) => {
-      login({ email: userEmail, password, name: userName });
+      cy.login({ email: userEmail, password, name: userName });
       frame.navigation("Settings").should("have.length", 0);
       frame.sidebarItems().should("have.length", 1);
       frame.sidebarItem("Foos").should("have.length", 1);
@@ -74,7 +76,7 @@ context("Settings", () => {
 
   it("prevents deleted user from logging in again", () => {
     cy.withContext(({ userEmail, password }) => {
-      logout();
+      cy.logout();
       loginPage.login(userEmail, password);
 
       loginPage.profile().should("have.length", 0);

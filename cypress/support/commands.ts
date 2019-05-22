@@ -1,6 +1,14 @@
 import { ReinitOpts } from "../../demo/server/reInitMiddleware";
 import { resolve } from "path";
 import { KnexConfig } from "../../src/persistence/adapter/knex";
+import loginPage from "../pages/login";
+import { admin } from "../mocks/users";
+
+type User = {
+  email: string;
+  password: string;
+  name: string;
+};
 
 function testableSelector(id) {
   return `[data-test-id="${id}"]`;
@@ -57,9 +65,25 @@ Cypress.Commands.add("withContext", function(
   return cb(this);
 });
 
+Cypress.Commands.add("logout", () => cy.clearCookies().visit("/"));
+Cypress.Commands.add("login", ({ email, password, name }: User = admin) => {
+  return cy.logout().then(() => {
+    loginPage.login(email, password);
+    loginPage.profile().should("have.text", name.substring(0, 2));
+
+    return cy.getCookie("session").then(({ value }) => value);
+  });
+});
+Cypress.Commands.add("restoreSession", (session: string) => {
+  return cy.setCookie("session", session).visit("/");
+});
+
 declare global {
   namespace Cypress {
     interface Chainable {
+      logout: () => Cypress.Chainable<void>;
+      login: (user?: User) => Promise<string>;
+      restoreSession: (session: string) => Cypress.Chainable<JQuery>;
       withContext: (cb: (context: Mocha.ITestCallbackContext) => any) => any;
       seed: (name?: string) => Cypress.Chainable<Partial<KnexConfig>>;
       reinit: (

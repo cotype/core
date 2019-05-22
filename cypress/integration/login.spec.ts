@@ -1,8 +1,9 @@
-import whenLoggedOut from "../states/loggedOut";
 import loginPage from "../pages/login";
 
 context("Login", () => {
-  whenLoggedOut();
+  beforeEach(() => {
+    cy.logout();
+  });
 
   it("logs in", () => {
     loginPage.login("admin@cotype.dev", "admin");
