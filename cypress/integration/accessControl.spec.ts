@@ -1,5 +1,3 @@
-import whenLoggedIn from "../states/loggedIn";
-
 import frame from "../pages/frame";
 import content from "../pages/content";
 import api from "../pages/api";
@@ -11,14 +9,18 @@ const drafts = api.rest.drafts();
 const published = api.rest.published();
 
 context("Access Control", () => {
+  let session: string;
   before(() => {
     cy.seed("mixed-access").then(seed => {
       cy.reinit({ models: mockedModels(4), navigation: [] }, seed);
     });
     cy.randomStr("test-baz-%s").as("bazName");
+    cy.login(mixedAccess).then(s => (session = s));
   });
 
-  whenLoggedIn(mixedAccess);
+  beforeEach(() => {
+    cy.restoreSession(session);
+  });
 
   it("shows all three accessible contents in ui", () => {
     frame.navigation("Content").click();
