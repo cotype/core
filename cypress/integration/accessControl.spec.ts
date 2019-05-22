@@ -1,6 +1,5 @@
-import whenHavingModels from "../states/havingModels";
 import whenLoggedIn from "../states/loggedIn";
-import whenSeed from "../states/seed";
+import seed from "../states/seed";
 import withContext from "../states/context";
 
 import frame from "../pages/frame";
@@ -14,13 +13,16 @@ const drafts = api.rest.drafts();
 const published = api.rest.published();
 
 context("Access Control", () => {
-  whenHavingModels(mockedModels(4));
-  whenSeed("mixed-access");
-  whenLoggedIn(mixedAccess);
-
   before(() => {
+    cy.reinit(
+      { models: mockedModels(4), navigation: [] },
+      seed("mixed-access")
+    );
+
     cy.randomStr("test-baz-%s").as("bazName");
   });
+
+  whenLoggedIn(mixedAccess);
 
   it("shows all three accessible contents in ui", () => {
     frame.navigation("Content").click();

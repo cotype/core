@@ -225,14 +225,6 @@ export async function init(opts: Opts) {
   router.use("/admin/rest/docs", swaggerUi("/admin/rest/swagger.json"));
   router.get("/admin/rest", (req, res) => res.redirect("/admin/rest/docs/"));
 
-  if (process.env.NODE_ENV === "test" && p.adapter.reset) {
-    router.post("/admin/__reset", async (req, res) => {
-      await p.adapter.reset!(req.body);
-      await p.init(models);
-      res.end();
-    });
-  }
-
   content.routes(router);
 
   router.use("/admin", opts.clientMiddleware || clientMiddleware);

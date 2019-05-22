@@ -1,4 +1,4 @@
-import { Opts } from "../../src/index";
+import { ReinitOpts } from "../../demo/server/reInitMiddleware";
 
 function testableSelector(id) {
   return `[data-test-id="${id}"]`;
@@ -10,11 +10,6 @@ function random() {
     .substring(2);
 }
 
-type SeedConfig = {
-  directory: string;
-  uploads: string;
-};
-
 Cypress.Commands.add("testable", (id, options) => {
   return cy.get(testableSelector(id), options);
 });
@@ -23,12 +18,11 @@ Cypress.Commands.add("testableContains", (id, contains, options) => {
   return cy.contains(testableSelector(id), contains, options);
 });
 
-Cypress.Commands.add("reinit", (opts?: Partial<Opts>) => {
-  return cy.request("POST", "/admin/__reinit", opts);
-});
-
-Cypress.Commands.add("resetDb", (seeds: SeedConfig) => {
-  return cy.request("POST", "/admin/__reset", { seeds });
+Cypress.Commands.add("reinit", (config, db) => {
+  return cy.request("POST", "/admin/__reinit", {
+    config,
+    db
+  });
 });
 
 Cypress.Commands.add("randomStr", (lengthI, templateI) => {
@@ -44,8 +38,10 @@ Cypress.Commands.add("randomStr", (lengthI, templateI) => {
 declare global {
   namespace Cypress {
     interface Chainable {
-      resetDb: (seeds?: SeedConfig) => Cypress.Chainable<void>;
-      reinit: (opts?: Partial<Opts>) => Cypress.Chainable<void>;
+      reinit: (
+        config?: ReinitOpts["config"],
+        db?: ReinitOpts["db"]
+      ) => Cypress.Chainable<JQuery>;
       testable: (
         id: string,
         options?: Partial<Loggable & Timeoutable>

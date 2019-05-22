@@ -1,7 +1,5 @@
-import whenHavingModels from "../states/havingModels";
 import whenLoggedIn, { login } from "../states/loggedIn";
 import { logout } from "../states/loggedOut";
-import whenSeed from "../states/seed";
 import withContext from "../states/context";
 
 import frame from "../pages/frame";
@@ -11,8 +9,9 @@ import { roles, users } from "../pages/settings";
 import mockedModels from "../mocks/models";
 
 context("Settings", () => {
-  whenSeed();
-  whenHavingModels(mockedModels(4));
+  before(() => {
+    cy.reinit({ models: mockedModels(4), navigation: [] }, "reset");
+  });
   whenLoggedIn();
 
   before(() => {

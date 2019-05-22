@@ -27,7 +27,7 @@ function getClient(url: string) {
 const PORT = process.env.PORT || 4000;
 
 function getKnexConfig() {
-  if (!process.env.DB) {
+  if (!process.env.DB || process.env.NODE_ENV === "test") {
     return {
       client: "sqlite3",
       connection: {
@@ -42,9 +42,12 @@ function getKnexConfig() {
   };
 }
 
-async function init(initialConfig: Opts) {
-  let server: Server | null = null;
+export type InitState = {
+  server?: Server;
+};
 
+async function init(initialConfig: Opts) {
+  const state: InitState = {};
   const clientMiddleware =
     process.env.NODE_ENV === "production" ||
     process.env.CLIENT_MIDDLEWARE === "production"
@@ -53,17 +56,12 @@ async function init(initialConfig: Opts) {
 
   const startServer = async (config: Opts) => {
     const { app } = await initCotype({ ...config, clientMiddleware });
-    server = app.listen({ port: PORT });
+    state.server = app.listen({ port: PORT });
   };
 
   if (process.env.NODE_ENV === "test") {
     clientMiddleware.unshift(
-      reInitMiddleware((newConfig: Opts) => {
-        console.info("♻️  Restarting server");
-        server!.close();
-        const config = { ...initialConfig, ...newConfig };
-        return startServer(config);
-      })
+      reInitMiddleware(initialConfig, startServer, getKnexConfig, state)
     );
   }
 
