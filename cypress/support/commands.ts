@@ -51,9 +51,16 @@ Cypress.Commands.add(
   }
 );
 
+Cypress.Commands.add("withContext", function(
+  cb: (context: Mocha.ITestCallbackContext) => any
+) {
+  return cb(this);
+});
+
 declare global {
   namespace Cypress {
     interface Chainable {
+      withContext: (cb: (context: Mocha.ITestCallbackContext) => any) => any;
       seed: (name?: string) => Cypress.Chainable<Partial<KnexConfig>>;
       reinit: (
         config?: ReinitOpts["config"],

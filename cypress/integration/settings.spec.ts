@@ -1,6 +1,5 @@
 import whenLoggedIn, { login } from "../states/loggedIn";
 import { logout } from "../states/loggedOut";
-import withContext from "../states/context";
 
 import frame from "../pages/frame";
 import loginPage from "../pages/login";
@@ -28,9 +27,8 @@ context("Settings", () => {
     frame.sidebarItem("Roles").should("have.length", 1);
   });
 
-  it(
-    "allows creating a new role",
-    withContext(({ roleName }) => {
+  it("allows creating a new role", () => {
+    cy.withContext(({ roleName }) => {
       frame.navigation("Settings").click();
       frame.sidebarItem("Roles").click();
       roles.add();
@@ -38,12 +36,11 @@ context("Settings", () => {
       roles.addContent("foos", "edit");
       roles.save();
       roles.listItem(roleName).should("have.length", 1);
-    })
-  );
+    });
+  });
 
-  it(
-    "allows creating a new user",
-    withContext(({ userName, userEmail, roleName, password }) => {
+  it("allows creating a new user", () => {
+    cy.withContext(({ userName, userEmail, roleName, password }) => {
       frame.navigation("Settings").click();
       frame.sidebarItem("Users").click();
       users.add();
@@ -53,49 +50,45 @@ context("Settings", () => {
       users.setPassword(password);
       users.save();
       users.listItem(userName).should("have.length", 1);
-    })
-  );
+    });
+  });
 
-  it(
-    "creates a user that actually can log in",
-    withContext(({ userEmail, password, userName }) => {
+  it("creates a user that actually can log in", () => {
+    cy.withContext(({ userEmail, password, userName }) => {
       login({ email: userEmail, password, name: userName });
       frame.navigation("Settings").should("have.length", 0);
       frame.sidebarItems().should("have.length", 1);
       frame.sidebarItem("Foos").should("have.length", 1);
-    })
-  );
+    });
+  });
 
-  it(
-    "allows deleting a user",
-    withContext(({ userName }) => {
+  it("allows deleting a user", () => {
+    cy.withContext(({ userName }) => {
       frame.navigation("Settings").click();
       frame.sidebarItem("Users").click();
       users.listItem(userName).click();
       users.delete();
       users.listItem(userName).should("have.length", 0);
-    })
-  );
+    });
+  });
 
-  it(
-    "prevents deleted user from logging in again",
-    withContext(({ userEmail, password }) => {
+  it("prevents deleted user from logging in again", () => {
+    cy.withContext(({ userEmail, password }) => {
       logout();
       loginPage.login(userEmail, password);
 
       loginPage.profile().should("have.length", 0);
       loginPage.email().should("have.value", "");
-    })
-  );
+    });
+  });
 
-  it(
-    "allows deleting a role",
-    withContext(({ roleName }) => {
+  it("allows deleting a role", () => {
+    cy.withContext(({ roleName }) => {
       frame.navigation("Settings").click();
       frame.sidebarItem("Roles").click();
       roles.listItem(roleName).click();
       roles.delete();
       roles.listItem(roleName).should("have.length", 0);
-    })
-  );
+    });
+  });
 });
