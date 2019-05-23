@@ -37,8 +37,9 @@ export type ContentAdapter = {
   list(
     model: Cotype.Model,
     models: Cotype.Model[],
-    listOpts: Cotype.ListOpts,
-    criteria?: Cotype.Criteria
+    listOpts?: Cotype.ListOpts,
+    criteria?: Cotype.Criteria,
+    previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.Content>>;
   load(
     model: Cotype.Model,
@@ -79,15 +80,6 @@ export type ContentAdapter = {
     term: string,
     exact: boolean,
     opts: Cotype.ListOpts,
-    previewOpts?: Cotype.PreviewOpts
-  ): Promise<Cotype.ListChunk<Cotype.Content>>;
-
-  // For the read-only API:
-  find(
-    model: Cotype.Model,
-    opts: Cotype.ListOpts,
-    models: Cotype.Model[],
-    criteria?: Cotype.Criteria,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.Content>>;
 };

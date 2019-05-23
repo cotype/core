@@ -588,7 +588,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
 
       it("should list content", async () => {
-        const cnt = await content.find(news, {}, models.content);
+        const cnt = await content.list(news, models.content);
         await expect(cnt.total).toBeGreaterThan(2);
         await expect(cnt).toMatchObject({
           items: expect.arrayContaining([
@@ -608,9 +608,14 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         );
 
         const find = (order: string) =>
-          content.find(news, { order, orderBy: "title" }, models.content, {
-            "data.date": { eq: "2050-01-01" }
-          });
+          content.list(
+            news,
+            models.content,
+            { order, orderBy: "title" },
+            {
+              "data.date": { eq: "2050-01-01" }
+            }
+          );
 
         const listAsc = await find("asc");
         const ascTitles = listAsc.items.map(i => i.data.title);
@@ -629,11 +634,10 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       it("could be sort by auto indexed field (title)", async () => {
         const find = (order: string) =>
-          content.find(
-            indexContent,
-            { order, orderBy: indexContent.title },
-            models.content
-          );
+          content.list(indexContent, models.content, {
+            order,
+            orderBy: indexContent.title
+          });
 
         const listAsc = await find("asc");
         const ascTitles = listAsc.items.map(i => i.data.name);
@@ -648,16 +652,12 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       it("could be sort by auto indexed field (uniqueField)", async () => {
         const find = (order: string) =>
-          content.find(
-            indexContent,
-            {
-              order,
-              orderBy: indexContent.uniqueFields
-                ? indexContent.uniqueFields[0]
-                : ""
-            },
-            models.content
-          );
+          content.list(indexContent, models.content, {
+            order,
+            orderBy: indexContent.uniqueFields
+              ? indexContent.uniqueFields[0]
+              : ""
+          });
 
         const listAsc = await find("asc");
         const ascTitles = listAsc.items.map(i => i.data.slug);
@@ -672,11 +672,10 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       it("could not be sort by not indexed field instead sort id", async () => {
         const find = (order: string) =>
-          content.find(
-            indexContent,
-            { order, orderBy: "test" },
-            models.content
-          );
+          content.list(indexContent, models.content, {
+            order,
+            orderBy: "test"
+          });
 
         const listAsc = await find("asc");
         const ascTitles = listAsc.items.map(i => i.id);
@@ -691,9 +690,14 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       it("should list content ordered by id", async () => {
         const find = (order: string) =>
-          content.find(news, { order }, models.content, {
-            "data.date": { eq: "2050-01-01" }
-          });
+          content.list(
+            news,
+            models.content,
+            { order },
+            {
+              "data.date": { eq: "2050-01-01" }
+            }
+          );
 
         const listAsc = await find("asc");
         const idsAsc = listAsc.items.map(i => Number(i.id));
@@ -741,16 +745,12 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
 
       it("should support paging", async () => {
-        const cnt = await content.find(news, {}, models.content);
+        const cnt = await content.list(news, models.content);
         const i = cnt.items.findIndex(i2 => i2.id === ids[0]);
-        const page = await content.find(
-          news,
-          {
-            offset: i,
-            limit: 2
-          },
-          models.content
-        );
+        const page = await content.list(news, models.content, {
+          offset: i,
+          limit: 2
+        });
         await expect(page).toMatchObject({
           total: cnt.total,
           items: cnt.items.slice(i, i + 2)
@@ -758,10 +758,10 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
 
       it("should not list deleted content", async () => {
-        const list = await content.find(news, {}, models.content);
+        const list = await content.list(news, models.content);
         const first = list.items[0].id;
         await content.delete(news, first);
-        const altered = await content.find(news, {}, models.content);
+        const altered = await content.list(news, models.content);
         const e: any = expect;
         await expect(altered).toMatchObject({
           total: list.total - 1,
@@ -824,10 +824,10 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         const [pageId] = await createPages({
           optionalNews: { id: newsId, model: "news" }
         });
-        const c = await content.find(
+        const c = await content.list(
           news,
-          {},
           models.content,
+          {},
           {
             "data.date": {
               eq: "2020-01-02"
@@ -926,42 +926,67 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       it("should query content", async () => {
         await expect(
-          await content.find(news, {}, models.content, {
-            "data.title": { eq: "Lorem ipsum" }
-          })
+          await content.list(
+            news,
+            models.content,
+            {},
+            {
+              "data.title": { eq: "Lorem ipsum" }
+            }
+          )
         ).toMatchObject({ total: 1, items: [{ id: ids[0] }] });
 
         await expect(
-          await content.find(news, {}, models.content, {
-            "data.date": { gt: "2018-09-13", lt: "2018-10-01" }
-          })
+          await content.list(
+            news,
+            models.content,
+            {},
+            {
+              "data.date": { gt: "2018-09-13", lt: "2018-10-01" }
+            }
+          )
         ).toMatchObject({
           total: 1,
           items: [{ id: ids[1] }]
         });
 
         await expect(
-          await content.find(pages, {}, models.content, {
-            "data.news": { eq: ids[1] }
-          })
+          await content.list(
+            pages,
+            models.content,
+            {},
+            {
+              "data.news": { eq: ids[1] }
+            }
+          )
         ).toMatchObject({
           total: 1,
           items: [{ id: pageIds[1] }]
         });
 
         await expect(
-          await content.find(pages, {}, models.content, {
-            "data.newsList": { eq: ids[1] }
-          })
+          await content.list(
+            pages,
+            models.content,
+            {},
+            {
+              "data.newsList": { eq: ids[1] }
+            }
+          )
         ).toMatchObject({
           total: 1,
           items: [{ id: pageIds[1] }]
         });
 
         await expect(
-          await content.find(pages, {}, models.content, {
-            "data.stringList": { eq: "Find Me" }
-          })
+          await content.list(
+            pages,
+            models.content,
+            {},
+            {
+              "data.stringList": { eq: "Find Me" }
+            }
+          )
         ).toMatchObject({
           total: 1,
           items: [{ id: pageIds[0] }]
@@ -980,18 +1005,23 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         );
 
         await expect(
-          await content.find(news, {}, models.content, {
-            "data.title": { eq: "Find me" }
-          })
+          await content.list(
+            news,
+            models.content,
+            {},
+            {
+              "data.title": { eq: "Find me" }
+            }
+          )
         ).toMatchObject({ total: 0 });
 
         // Query published content
         await content.setPublishedRev(news, ids[2], 1, models.content);
         await expect(
-          await content.find(
+          await content.list(
             news,
-            {},
             models.content,
+            {},
             { "data.date": { gt: "2018-09-13" } },
             { publishedOnly: true }
           )
@@ -1003,10 +1033,10 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         // Unpublish
         await content.setPublishedRev(news, ids[2], null, models.content);
         await expect(
-          await content.find(
+          await content.list(
             news,
-            {},
             models.content,
+            {},
             { "data.date": { gt: "2018-09-13" } },
             { publishedOnly: true }
           )
@@ -1083,10 +1113,10 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         contains: boolean,
         previewOpts: PreviewOpts
       ) => {
-        const list = await content.find(
+        const list = await content.list(
           news,
-          {},
           models.content,
+          {},
           undefined,
           previewOpts
         );
