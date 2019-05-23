@@ -165,8 +165,7 @@ export default (
       router.get(`/rest/${mode}/${type}`, async (req, res) => {
         const { principal, query } = req;
         const {
-          q,
-          title,
+          search = {},
           limit = 50,
           offset = 0,
           join,
@@ -174,7 +173,7 @@ export default (
           orderBy,
           ...rest
         } = query;
-        const search = { term: q, title };
+
         const opts: ListOpts = { search, offset, limit, order, orderBy };
 
         checkPermissionToJoin(req.principal, join);

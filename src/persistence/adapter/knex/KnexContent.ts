@@ -895,9 +895,30 @@ export default class KnexContent implements ContentAdapter {
       );
     });
 
-    if (search) {
-      if (search.term && model.title) {
-        criteria[model.title] = { like: `%${search.term}%` };
+    if (search && search.term) {
+      if (search.scope === "title") {
+        if (model.title) criteria[model.title] = { like: `%${search.term}%` };
+      } else {
+        k.join("content_search", join => {
+          join.on("contents.id", "content_search.id");
+          join.on(
+            previewOpts.publishedOnly
+              ? "contents.published_rev"
+              : "contents.latest_rev",
+            "content_search.rev"
+          );
+        });
+
+        if (this.knex.client.config.client === "pg") {
+          k.whereRaw(
+            "content_search.text @@ plainto_tsquery(?)",
+            `${search.term}:*`
+          );
+        } else if (this.knex.client.config.client === "mysql") {
+          k.whereRaw("match(text) against(?)", search.term);
+        } else {
+          k.where("content_search.text", "like", `%${search.term}%`);
+        }
       }
     }
 

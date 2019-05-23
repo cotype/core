@@ -72,7 +72,8 @@ export default class SingleReferenceInput extends Component<Props, State> {
   }
 
   onInputValueChange = (inputValue, downshift) => {
-    if (inputValue) this.fetchItems({ q: inputValue });
+    if (inputValue)
+      this.fetchItems({ search: { term: inputValue, scope: "title" } });
     else this.fetchItems({});
   };
 

@@ -139,7 +139,7 @@ describe("external data source support", () => {
         .query({
           offset: "2",
           limit: "500",
-          q: "foo"
+          search: { term: "foo", scope: "title" }
         })
         .expect(200);
 
@@ -149,7 +149,7 @@ describe("external data source support", () => {
         expect.objectContaining({
           offset: "2",
           limit: "500",
-          search: { term: "foo" }
+          search: { term: "foo", scope: "title" }
         }),
         undefined
       );

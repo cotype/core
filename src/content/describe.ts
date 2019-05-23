@@ -10,6 +10,7 @@ import {
   body,
   empty
 } from "../api/oapi";
+import { listSearchParams } from "./rest/describe";
 
 const tags = ["Content"];
 const produces = ["application/json"];
@@ -52,7 +53,7 @@ export default (api: OpenApiBuilder) => {
     get: {
       summary: "List contents of the give type",
       operationId: "listContents",
-      parameters: [param("type", { schema: string })],
+      parameters: [param("type", { schema: string }), listSearchParams],
       tags,
       produces,
       responses: {

@@ -58,9 +58,8 @@ export default (
   router.get("/admin/rest/content/:modelName", async (req, res) => {
     const { principal, params, query } = req;
     const { modelName } = params;
-    const { q, limit = 50, offset = 0, ...rest } = query;
+    const { search = {}, limit = 50, offset = 0, ...rest } = query;
     const criteria = rest && Object.keys(rest).length ? rest : undefined;
-    const search = q ? { term: q } : undefined;
     const opts: Cotype.ListOpts = { search, offset, limit };
     const model = getModel(modelName);
 

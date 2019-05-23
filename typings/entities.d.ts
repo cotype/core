@@ -11,7 +11,8 @@ export type ListOpts = {
   models?: string[];
   search?: {
     prop?: string;
-    term: string;
+    term?: string;
+    scope?: "title" | "global";
   };
 };
 
