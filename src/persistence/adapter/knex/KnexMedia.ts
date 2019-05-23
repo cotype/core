@@ -91,7 +91,7 @@ export default class KnexMedia implements MediaAdapter {
       args.tags = JSON.stringify(args.tags);
     }
 
-    return await this.knex("media")
+    return this.knex("media")
       .where({ id })
       .update({ ...args, search });
   }
