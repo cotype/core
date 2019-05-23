@@ -86,7 +86,13 @@ export default function routes(
     const { principal, params, body } = req;
     const id = params.id;
 
+    console.info("⚠  UPDATE BODY");
+    console.info({ body });
+
     const data = await media.update(principal, id, body);
+
+    console.info("⚠  UPDATE RESPONSE DATA");
+    console.info({ data });
 
     if (data) {
       res.status(200).end();
