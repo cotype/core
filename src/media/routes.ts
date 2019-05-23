@@ -75,29 +75,32 @@ export default function routes(
     res.json(list);
   });
 
-  router.get("/admin/rest/media/:id", async (req, res) => {
+  router.get("/admin/rest/media/*", async (req, res) => {
     const { principal, params } = req;
-    const id = params.id;
+    const id = prepareMediaId(params[0]);
+
     const [data] = await media.load(principal, [id]);
+
+    if (!data) return res.status(404).end();
     res.json(data);
   });
 
-  router.post("/admin/rest/media/:id", async (req, res) => {
+  router.post("/admin/rest/media/*", async (req, res) => {
     const { principal, params, body } = req;
-    const id = params.id;
+    const id = prepareMediaId(params[0]);
 
     const data = await media.update(principal, id, body);
 
     if (data) {
       res.status(200).end();
     } else {
-      res.status(500).end();
+      res.status(400).end();
     }
   });
 
-  router.delete("/admin/rest/media/:id", async (req, res) => {
+  router.delete("/admin/rest/media/*", async (req, res) => {
     const { principal, params } = req;
-    const id = params.id;
+    const id = prepareMediaId(params[0]);
     try {
       await media.delete(principal, id);
       storage.remove(id);
@@ -111,4 +114,9 @@ export default function routes(
       }
     }
   });
+}
+
+// Remove trailing slash
+function prepareMediaId(id: string) {
+  return id.replace(/\/$/g, "");
 }
