@@ -311,7 +311,6 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       ]);
     });
 
-
     describe("publish", () => {
       it("should succeed", async () => {
         const [newsId] = await createNews({});
@@ -793,9 +792,8 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         ).toMatchObject([expect.any(Object)]);
       });
 
-
       it("should contain inverseReferences", async () => {
-        const [newsId] = await createNews({date:"2020-01-01"});
+        const [newsId] = await createNews({ date: "2020-01-01" });
         const [pageId] = await createPages({
           optionalNews: { id: newsId, model: "news" }
         });
@@ -803,7 +801,9 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         await expect(c).toMatchObject({
           data: {
             date: "2020-01-01",
-            inverseRef: [{ _content: "pages", _id: String(pageId), _ref: "content" }],
+            inverseRef: [
+              { _content: "pages", _id: String(pageId), _ref: "content" }
+            ],
             text: {
               ops: [
                 {
@@ -820,17 +820,27 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         });
       });
       it("should contain inverseReferences find", async () => {
-        const [newsId] = await createNews({date:"2020-01-02"});
+        const [newsId] = await createNews({ date: "2020-01-02" });
         const [pageId] = await createPages({
           optionalNews: { id: newsId, model: "news" }
         });
-        const c = await content.find(news, {}, models.content,{"data.date":{
-            eq:"2020-01-02"
-          } },{publishedOnly: false});
+        const c = await content.find(
+          news,
+          {},
+          models.content,
+          {
+            "data.date": {
+              eq: "2020-01-02"
+            }
+          },
+          { publishedOnly: false }
+        );
         await expect(c.items[0]).toMatchObject({
           data: {
             date: "2020-01-02",
-            inverseRef: [{ _content: "pages", _id: String(pageId), _ref: "content" }],
+            inverseRef: [
+              { _content: "pages", _id: String(pageId), _ref: "content" }
+            ],
             text: {
               ops: [
                 {
@@ -1204,7 +1214,6 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         { id, type: "news", data: { image } }
       ]);
     });
-
   });
 
   describe("media", () => {
@@ -1385,6 +1394,5 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       newModels.shift();
       await media.delete(image.id, newModels);
     });
-
   });
 });
