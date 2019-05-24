@@ -1,14 +1,18 @@
-import whenHavingModels from "../states/havingModels";
-import whenLoggedIn from "../states/loggedIn";
-
 import frame from "../pages/frame";
 
 import mockedModels from "../mocks/models";
 const models = mockedModels();
 
 context("Custom Navigation", () => {
-  whenHavingModels(models);
-  whenLoggedIn();
+  let session: string;
+  before(() => {
+    cy.reinit({ models, navigation: [] }, "reset");
+    cy.login().then(s => (session = s));
+  });
+
+  beforeEach(() => {
+    cy.restoreSession(session);
+  });
 
   it("displays all models as content", () => {
     frame.navigation("Content").click();

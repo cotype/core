@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import styled from "react-emotion";
 import Icon from "../common/icons";
+import { testable } from "../utils/helper";
 const Backdrop = styled("div")`
   position: fixed;
   display: flex;
@@ -57,7 +58,7 @@ export default class Overlay extends Component<Props> {
   renderOverlay() {
     const { style, onClose, children } = this.props;
     return (
-      <Backdrop>
+      <Backdrop {...testable("overlay")}>
         <Modal onClick={ev => ev.stopPropagation()} style={style}>
           {children}
           <Close onClick={this.close}>

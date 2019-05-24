@@ -105,6 +105,5 @@ export type PersistenceAdapter = {
   settings: SettingsAdapter;
   content: ContentAdapter;
   media: MediaAdapter;
-  reset?: (...params: any[]) => Promise<void>;
   shutdown: () => void | Promise<any>;
 };

@@ -1155,6 +1155,10 @@ export default class KnexContent implements ContentAdapter {
       const refs =
         typeof inverseRefs === "string" ? inverseRefs.split(",") : inverseRefs;
 
+      fields.forEach(field => {
+        _update(parsedData, field.path, () => []);
+      });
+
       refs.forEach(ref => {
         const [, _content, _id] = /(.+?):(.+)/.exec(ref)!;
         const field = fields.find(f => f.model === _content);

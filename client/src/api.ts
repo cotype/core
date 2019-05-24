@@ -17,10 +17,10 @@ class ApiError extends Error {
   }
 }
 
-function encodeMediaId(s: string) {
+function prepareMediaId(s: string) {
   // NOTE: We add a trailing slash to the URL as some caching proxies otherwise
-  // think we are requesting a static image resouce and drop the Cookie header.
-  return encodeURIComponent(s) + "/";
+  // think we are requesting a static image resource and drop the Cookie header.
+  return s + "/";
 }
 
 class Api {
@@ -164,15 +164,15 @@ class Api {
   }
 
   loadMedia(id: string): Promise<Cotype.Media> {
-    return this.get(`/media/${encodeMediaId(id)}`);
+    return this.get(`/media/${prepareMediaId(id)}`);
   }
 
   updateMedia(id: string, meta: Cotype.ImageMeta): Promise<void> {
-    return this.post(`/media/${encodeMediaId(id)}`, meta);
+    return this.post(`/media/${prepareMediaId(id)}`, meta);
   }
 
   deleteMedia(id: string): Promise<void> {
-    return this.del(`/media/${encodeMediaId(id)}`);
+    return this.del(`/media/${prepareMediaId(id)}`);
   }
 }
 

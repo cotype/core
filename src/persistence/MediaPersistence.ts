@@ -35,9 +35,7 @@ export default class MediaPeristence {
     id: string,
     data: Cotype.Media
   ): Promise<Cotype.Settings> {
-    // checkPermissions(principal, model, Permission.edit);
-    const media = await this.adapter.update(id, data);
-    return media;
+    return this.adapter.update(id, data);
   }
 
   load(principal: Cotype.Principal, ids: string[]) {

@@ -1,6 +1,6 @@
 import React from "react";
 import { css } from "react-emotion";
-import CircularProgressbar from "react-circular-progressbar";
+import { CircularProgressbar } from "react-circular-progressbar";
 
 const classes = {
   path: css`
@@ -29,7 +29,7 @@ type Props = {
 export default function ProgressCircle({ percentage, size = "100%" }: Props) {
   return (
     <CircularProgressbar
-      percentage={percentage}
+      value={percentage}
       text={`${percentage}%`}
       classes={classes}
       styles={{ root: { width: size } }}

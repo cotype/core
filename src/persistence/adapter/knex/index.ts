@@ -13,7 +13,7 @@ type KnexSeedsConfig = SeedsConfig & {
   uploads?: string;
 };
 
-type KnexConfig = Config & {
+export type KnexConfig = Config & {
   migrate?: boolean;
   seeds?: KnexSeedsConfig;
 };
@@ -86,32 +86,11 @@ export default async function(
     return k;
   }
 
-  async function rollbackToStart(k: knex) {
-    const version = await k.migrate.currentVersion();
-
-    await k.migrate.rollback(migrationOptions);
-
-    if (!["none", "00000000000000"].includes(version)) {
-      await rollbackToStart(k);
-    }
-  }
-
   const db = await init();
   return {
     settings: new KnexSettings(db),
     content: new KnexContent(db),
     media: new KnexMedia(db),
-    shutdown: () => new Promise((res, rej) => db.destroy().then(res, rej)),
-    async reset(config: Config) {
-      if (process.env.NODE_ENV === "test") {
-        console.info("🌱 Resetting DB");
-        db.client.removeAllListeners(); // knex leaks listeners
-        await rollbackToStart(db);
-        await db.migrate.latest(migrationOptions);
-        if (config.seeds) await db.seed.run(config.seeds);
-        return;
-      }
-      throw new Error("Resetting DB is a test-only feature");
-    }
+    shutdown: () => new Promise((res, rej) => db.destroy().then(res, rej))
   };
 }

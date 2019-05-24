@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import styled, { css } from "react-emotion";
 import Icon from "../common/icons";
+import { testable } from "../utils/helper";
 
 type P = {
   onClick?: (ev: any) => void;
-  disabled?: boolean
+  disabled?: boolean;
 };
 const Tile = styled("div")`
   position: relative;
@@ -110,11 +111,16 @@ export default class Image extends Component<Props> {
 
     return (
       <div>
-        <Tile style={style} onClick={!editable && !disabled ? onSelect : undefined} disabled={disabled}>
+        <Tile
+          style={style}
+          onClick={!editable && !disabled ? onSelect : undefined}
+          disabled={disabled}
+          {...testable("media-tile")}
+        >
           {!disabled && editable && (
-            <ItemActions>
+            <ItemActions {...testable("media-tile-actions")}>
               {onSelect && (
-                <Action onClick={onSelect}>
+                <Action onClick={onSelect} {...testable("media-details")}>
                   <Icon.Details />
                 </Action>
               )}
@@ -122,6 +128,7 @@ export default class Image extends Component<Props> {
                 <Action
                   onClick={onDelete}
                   style={{ backgroundColor: "#ff5e49", color: "#fff" }}
+                  {...testable("media-delete")}
                 >
                   <Icon.Trash />
                 </Action>
@@ -129,7 +136,7 @@ export default class Image extends Component<Props> {
             </ItemActions>
           )}
           {width ? this.renderImage() : this.renderIcon()}
-          <Caption>{originalname}</Caption>
+          <Caption {...testable("media-caption")}>{originalname}</Caption>
         </Tile>
       </div>
     );
@@ -143,6 +150,7 @@ export default class Image extends Component<Props> {
         src={id.includes("://") ? id : `/thumbs/square/${id}`}
         width="150"
         height="150"
+        {...testable("media-preview")}
       />
     );
   }
@@ -152,7 +160,7 @@ export default class Image extends Component<Props> {
     const ext = originalname && originalname.replace(/.*\./, "");
     return (
       <Doc>
-        <Icon.Document width={48} height={48} />
+        <Icon.Document width={48} height={48} {...testable("media-preview")} />
         {ext}
       </Doc>
     );
