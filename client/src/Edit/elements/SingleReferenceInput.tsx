@@ -88,8 +88,10 @@ export default class SingleReferenceInput extends Component<Props, State> {
   fetchItems = opts => {
     const { type, model } = this.props;
 
+    const queryString = stringify(opts);
+
     return api
-      .get(`/${type}/${model}?${stringify(opts)}`)
+      .get(`/${type}/${model}${queryString ? "?" + queryString : ""}`)
       .then(({ items }) => this.setState({ items }));
   };
 
