@@ -207,7 +207,6 @@ export type ModelOpts = {
   };
   uniqueFields?: string[];
   title?: string;
-  description?: string;
   image?: string;
   group?: string;
   notSearchAble?: boolean;

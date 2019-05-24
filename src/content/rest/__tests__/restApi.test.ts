@@ -357,12 +357,18 @@ describe("rest api", () => {
 
         await create("news", {
           slug: "foo-bar",
-          title: description
+          title: description,
+          text: {
+            ops: [{ insert: description }]
+          }
         });
 
         await create("articleNews", {
           slug: "foo-bar",
-          title: description
+          title: description,
+          text: {
+            ops: [{ insert: description }]
+          }
         });
       });
 
@@ -377,7 +383,7 @@ describe("rest api", () => {
         expect((await search(searchForProduct, opts)).total).toBe(1);
       });
 
-      it("results should contain description if path is provided in model", async () => {
+      it("results should contain description", async () => {
         expect(
           (await search(description, {
             published: false,
@@ -385,16 +391,6 @@ describe("rest api", () => {
             includeModels: ["news"]
           })).items[0]
         ).toMatchObject({ description });
-      });
-
-      it("should not contain description in result when no path is provided in model", async () => {
-        expect(
-          (await search(description, {
-            published: false,
-            linkableOnly: false,
-            includeModels: ["articleNews"]
-          })).items[0].description
-        ).toBe(undefined);
       });
 
       it("should find only linkable content by search", async () => {

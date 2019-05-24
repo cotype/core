@@ -12,6 +12,7 @@ import convert from "../content/convert";
 import { Config } from ".";
 import { getDeepJoins } from "../content/rest/filterRefData";
 import { ContentFormat } from "../../typings";
+import extractMatch from "../model/extractMatch";
 
 function findValueByPath(path: string | undefined, data: Cotype.Data) {
   if (!path) return;
@@ -125,34 +126,21 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
   };
 
   createSearchResultItem = (
-    content: Cotype.Content
+    content: Cotype.Content,
+    term: string
   ): Cotype.SearchResultItem | null => {
     const { id, type, data } = content;
 
     const model = this.getModel(type);
     if (!model) return null;
-    const {
-      title: titlePath,
-      image,
-      singular,
-      description: descriptionPath
-    } = model;
+    const { title: titlePath, image, singular } = model;
 
     const title = findValueByPath(titlePath, data);
-
-    const convertedData = convert({
-      content: JSON.parse(JSON.stringify(data)),
-      contentModel: model,
-      allModels: this.models,
-      contentFormat: "plaintext"
-    });
-
-    const description = findValueByPath(descriptionPath, convertedData);
 
     return {
       id,
       title: title || singular,
-      description: typeof description === "string" ? description : undefined,
+      description: extractMatch(data, model, term),
       image: image && ((data || {})[image] || null),
       model: model.name,
       url: getRefUrl(data, model.urlPath) as string
@@ -168,10 +156,11 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
   createSearchResultItems(
     contents: Cotype.Content[],
+    term: string,
     principal?: Cotype.Principal
   ): Cotype.SearchResultItem[] {
     return contents
-      .map(this.createSearchResultItem)
+      .map(c => this.createSearchResultItem(c, term))
       .filter(this.canView(principal));
   }
 
@@ -513,7 +502,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     return {
       total,
-      items: this.createSearchResultItems(items, principal)
+      items: this.createSearchResultItems(items, term, principal)
     };
   }
 }

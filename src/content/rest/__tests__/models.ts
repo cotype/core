@@ -6,7 +6,6 @@ const models: ModelOpts[] = [
     singular: "News",
     uniqueFields: ["slug", "title"],
     urlPath: "path/to/:slug",
-    description: "title",
     fields: {
       title: { type: "string" },
       slug: { type: "string", input: "slug" },
