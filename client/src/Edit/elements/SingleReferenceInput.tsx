@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import styled, { css } from "react-emotion";
 import { FieldProps } from "formik";
-import query from "object-to-querystring";
 import { inputClass } from "../../common/styles";
 import Autocomplete from "../../common/Autocomplete";
 import ImageCircle from "../../common/ImageCircle";
 import api from "../../api";
 import { required } from "./validation";
+import { stringify } from "qs";
 
 const Root = styled("div")`
   ${inputClass} padding: 0;
@@ -86,8 +86,9 @@ export default class SingleReferenceInput extends Component<Props, State> {
 
   fetchItems = opts => {
     const { type, model } = this.props;
+
     return api
-      .get(`/${type}/${model}/${query(opts)}`)
+      .get(`/${type}/${model}?${stringify(opts)}`)
       .then(({ items }) => this.setState({ items }));
   };
 
