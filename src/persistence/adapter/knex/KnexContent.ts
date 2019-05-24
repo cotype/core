@@ -752,6 +752,7 @@ export default class KnexContent implements ContentAdapter {
 
   async search(
     term: string,
+    exact: boolean,
     listOpts: Cotype.ListOpts,
     previewOpts: Cotype.PreviewOpts = {}
   ) {
@@ -765,14 +766,20 @@ export default class KnexContent implements ContentAdapter {
       if (this.knex.client.config.client === "pg") {
         k.whereRaw("text @@ plainto_tsquery(?)", `${text}:*`);
       } else if (this.knex.client.config.client === "mysql") {
-        // TODO: REVISIT: Find a cleaner solution
-        k.whereRaw(
-          "MATCH(text) AGAINST(? IN BOOLEAN MODE)",
-          cleanSearchTerm(text)
-        );
-        // k.whereRaw("match(text) against(?)", text);
+        if (exact) {
+          k.whereRaw(
+            "MATCH(text) AGAINST(? IN BOOLEAN MODE)",
+            cleanSearchTerm(text)
+          );
+        } else {
+          k.whereRaw("MATCH(text) AGAINST(?)", text);
+        }
       } else {
-        k.where("text", "like", `%${text}%`);
+        if (exact) {
+          k.where("text", "like", `%${text}%`);
+        } else {
+          text.split(/\s+/).forEach(t => k.andWhere("text", "like", `%${t}%`));
+        }
       }
 
       k.join("contents", join => {

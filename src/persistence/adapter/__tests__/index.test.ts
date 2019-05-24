@@ -1004,7 +1004,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
 
       it("shoud search", async () => {
-        const res = await content.search("ipsum", {});
+        const res = await content.search("ipsum lore", false, {});
         expect(res).toMatchObject({
           total: 1,
           items: [{ type: "news", data: { title: "Lorem ipsum" } }]
@@ -1012,12 +1012,12 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
 
       it("shoud not throw erros for specials chars in search", async () => {
-        await content.search(" ", {});
-        await content.search("+", {});
-        await content.search("-", {});
-        await content.search("~", {});
-        await content.search("(~)", {});
-        await content.search("hello- world ", {});
+        await content.search(" ", true, {});
+        await content.search("+", true, {});
+        await content.search("-", true, {});
+        await content.search("~", true, {});
+        await content.search("(~)", true, {});
+        await content.search("hello- world ", true, {});
       });
     });
 
@@ -1153,6 +1153,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         });
         const c = await content.search(
           "tttest",
+          true,
           { models: ["news"] },
           { publishedOnly: true }
         );
@@ -1166,6 +1167,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         });
         const c = await content.search(
           "tttest",
+          true,
           { models: ["news"] },
           { publishedOnly: true }
         );
@@ -1178,6 +1180,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         });
         const c = await content.search(
           "tttest",
+          true,
           { models: ["news"] },
           { publishedOnly: true }
         );

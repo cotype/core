@@ -482,10 +482,16 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
   async search(
     principal: Cotype.Principal,
     term: string,
+    exact: boolean,
     opts: Cotype.ListOpts,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.Item>> {
-    const { total, items } = await this.adapter.search(term, opts, previewOpts);
+    const { total, items } = await this.adapter.search(
+      term,
+      exact,
+      opts,
+      previewOpts
+    );
     return {
       total,
       items: this.createItems(items, principal)
@@ -498,7 +504,12 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     opts: Cotype.ListOpts,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.SearchResultItem>> {
-    const { total, items } = await this.adapter.search(term, opts, previewOpts);
+    const { total, items } = await this.adapter.search(
+      term,
+      false,
+      opts,
+      previewOpts
+    );
 
     return {
       total,

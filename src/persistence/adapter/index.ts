@@ -77,6 +77,7 @@ export type ContentAdapter = {
   delete(model: Cotype.Model, id: string): Promise<any>;
   search(
     term: string,
+    exact: boolean,
     opts: Cotype.ListOpts,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.Content>>;
