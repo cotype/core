@@ -743,9 +743,11 @@ export default class KnexContent implements ContentAdapter {
     previewOpts: Cotype.PreviewOpts = {}
   ) {
     let k: knex.QueryBuilder;
-    let text = "";
+    let text = term || "";
 
-    if (term) {
+    const searchTable = text ? "content_search" : "contents";
+
+    if (text) {
       text = term.toLowerCase().trim();
       k = this.knex("content_search");
 
@@ -795,8 +797,17 @@ export default class KnexContent implements ContentAdapter {
     }
 
     k.join("content_revisions", join => {
-      join.on("content_search.id", "content_revisions.id");
-      join.on("content_search.rev", "content_revisions.rev");
+      join.on(`${searchTable}.id`, "content_revisions.id");
+      if (term) {
+        join.on("content_search.rev", "content_revisions.rev");
+      } else {
+        join.on(
+          `contents.${
+            previewOpts.publishedOnly ? "published_rev" : "latest_rev"
+          }`,
+          "content_revisions.rev"
+        );
+      }
     });
 
     k.whereNot("contents.deleted", true);
@@ -806,20 +817,15 @@ export default class KnexContent implements ContentAdapter {
       k.andWhere("contents.type", "in", models.map(m => m));
     }
 
-    const [count] = await k
-      .clone()
-      .countDistinct(`${term ? "content_search.id" : "contents.id"} as total`);
+    const [count] = await k.clone().countDistinct(`${searchTable}.id as total`);
     const total = Number(count.total);
 
-    k.select([
-      `${term ? "content_search.id" : "contents.id"}`,
-      "contents.type",
-      "content_revisions.data"
-    ]);
+    k.select([`${searchTable}.id`, "contents.type", "content_revisions.data"]);
 
     k.offset(Number(offset)).limit(Number(limit));
 
     const items = await k;
+
     return {
       total,
       items: items.map(this.parseData)
