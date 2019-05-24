@@ -1,4 +1,10 @@
-import { Model, QuillDelta } from "../../typings";
+import {
+  Model,
+  QuillDelta,
+  StringType,
+  NumberType,
+  RichtextType
+} from "../../typings";
 
 /**
  * Recursively walks through a content object and extracts all texts.
@@ -9,14 +15,15 @@ import formatQuillDelta from "../content/formatQuillDelta";
 export default function extractText(obj: object, model: Model) {
   const tokens: string[] = [];
   visit(obj, model, {
-    string(s: string) {
-      if (s) tokens.push(s);
+    string(s: string, field: StringType) {
+      if (s && field.search !== false) tokens.push(s);
     },
-    number(n: number) {
-      tokens.push(String(n));
+    number(n: number, field: NumberType) {
+      if (field.search !== false) tokens.push(String(n));
     },
-    richtext(delta: QuillDelta) {
-      tokens.push(formatQuillDelta(delta, "plaintext"));
+    richtext(delta: QuillDelta, field: RichtextType) {
+      const text = formatQuillDelta(delta, "plaintext");
+      if (text && field.search !== false) tokens.push(text);
     }
   });
   return tokens.join(" ");

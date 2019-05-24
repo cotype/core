@@ -14,6 +14,7 @@ export type NumberType = {
   placeholder?: string;
   required?: boolean;
   index?: boolean;
+  search?: boolean;
   hidden?: boolean;
 };
 export type RichtextType = {
@@ -24,6 +25,7 @@ export type RichtextType = {
     [key: string]: any;
   };
   index?: boolean;
+  search?: boolean;
   hidden?: boolean;
 };
 
@@ -34,6 +36,7 @@ type Text = {
   maxLength?: number;
   required?: boolean;
   index?: boolean;
+  search?: boolean;
   hidden?: boolean;
 };
 type TextArea = {
@@ -44,6 +47,7 @@ type TextArea = {
   readOnly?: boolean;
   maxLength?: number;
   index?: boolean;
+  search?: boolean;
   hidden?: boolean;
 };
 
@@ -52,6 +56,7 @@ type Slug = {
   input: "slug";
   required?: boolean;
   index?: boolean;
+  search?: boolean;
   hidden?: boolean;
 };
 
@@ -62,6 +67,7 @@ type DateString = {
   placeholder?: string;
   defaultValue?: string;
   index?: boolean;
+  search?: boolean;
   hidden?: boolean;
 };
 
@@ -73,6 +79,7 @@ type Select = {
   values?: string[];
   required?: boolean;
   index?: boolean;
+  search?: boolean;
   hidden?: boolean;
 };
 type PositionType = {
