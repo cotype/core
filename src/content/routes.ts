@@ -46,7 +46,7 @@ export default (
     const { principal, query } = req;
     /* tslint:disable-next-line:no-shadowed-variable */
     const { q, limit = 50, offset = 0, models = [], linkable } = query;
-    const items = await content.search(principal, q, {
+    const items = await content.search(principal, q, true, {
       limit,
       offset,
       models: models.length > 1 ? models : linkable ? linkableModels : []
