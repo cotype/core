@@ -137,8 +137,8 @@ export default class ReferenceInput extends Component<Props, State> {
       models: models.length ? models : undefined
     });
 
-    return api.get(`/${type}?${queryString}`).then(res => {
-      if (res) this.setState({ items: res.items });
+    return api.get(`/${type}?${queryString}`).then(({ items }) => {
+      this.setState({ items });
     });
   };
 
