@@ -106,7 +106,23 @@ init(opts).then(({ app }) => {
 
   Please see [`@cotype/local-thumbnail-provider`](https://github.com/cotype/local-thumbnail-provider) for a straight-forward implementation.
 
-* #### `sessionOpts: SessionOpts`
+* #### `basePath: string`
+
+  **Default: `/`**
+
+  Can be used to mount the app on a sub-path.
+  For example `http://localhost:3000/cms`.
+
+  ```ts
+  import { init } from "@cotype/core";
+
+  init({
+    /* ... */
+    basePath: "/cms"
+  });
+  ```
+
+- #### `sessionOpts: SessionOpts`
 
   The server uses a [cookie-session](https://github.com/expressjs/cookie-session)
   that holds nothing but the user's id.
