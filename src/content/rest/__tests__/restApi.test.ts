@@ -240,6 +240,37 @@ describe("rest api", () => {
       return body;
     };
 
+    const suggest = async (
+      term: string,
+      opts: {
+        published?: boolean;
+        linkableOnly?: boolean;
+        includeModels?: string[];
+        excludeModels?: string[];
+      }
+    ) => {
+      const {
+        published = true,
+        linkableOnly = true,
+        includeModels = [],
+        excludeModels = []
+      } = opts;
+      const { body } = await server
+        .get(
+          `/rest/${
+            published ? "published" : "drafts"
+          }/search/suggest?${stringify({
+            term,
+            linkableOnly,
+            includeModels,
+            excludeModels
+          })}`
+        )
+        .expect(200);
+
+      return body;
+    };
+
     const findByField = async (
       type: string,
       field: string,
@@ -480,6 +511,14 @@ describe("rest api", () => {
 
         expect(res4.total).toBe(3);
         expect(res4.items.length).toBe(1);
+      });
+
+      it("shoud suggest terms", async () => {
+        const res = await suggest("search", {
+          published: false,
+          includeModels: ["news"]
+        });
+        expect(res).toMatchObject(["Search Me", "Search Slug"]);
       });
     });
     describe("joins", () => {

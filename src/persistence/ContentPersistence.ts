@@ -3,6 +3,9 @@
  */
 
 import * as Cotype from "../../typings";
+import _escapeRegExp from "lodash/escapeRegExp";
+import _flatten from "lodash/flatten";
+import _uniq from "lodash/uniq";
 import { ContentAdapter } from "./adapter";
 import removeDeprecatedData from "./removeDeprecatedData";
 import ReferenceConflictError from "./errors/ReferenceConflictError";
@@ -13,6 +16,7 @@ import { Config } from ".";
 import { getDeepJoins } from "../content/rest/filterRefData";
 import { ContentFormat } from "../../typings";
 import extractMatch from "../model/extractMatch";
+import extractText from "../model/extractText";
 
 function findValueByPath(path: string | undefined, data: Cotype.Data) {
   if (!path) return;
@@ -47,9 +51,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
   }
 
   canView(principal?: Cotype.Principal) {
-    return (
-      item: Cotype.Item | Cotype.SearchResultItem | null
-    ): item is any => {
+    return (item: { model: string } | null): item is any => {
       if (!item || !item.model) return false;
       const model = this.getModel(item.model);
       if (!model) return false;
@@ -152,16 +154,6 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     principal?: Cotype.Principal
   ): Cotype.Item[] {
     return contents.map(this.createItem).filter(this.canView(principal));
-  }
-
-  createSearchResultItems(
-    contents: Cotype.Content[],
-    term: string,
-    principal?: Cotype.Principal
-  ): Cotype.SearchResultItem[] {
-    return contents
-      .map(c => this.createSearchResultItem(c, term))
-      .filter(this.canView(principal));
   }
 
   async create(
@@ -513,7 +505,33 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     return {
       total,
-      items: this.createSearchResultItems(items, term, principal)
+      items: items
+        .map(c => this.createSearchResultItem(c, term))
+        .filter(this.canView(principal))
     };
+  }
+
+  async suggest(
+    principal: Cotype.Principal,
+    term: string,
+    previewOpts?: Cotype.PreviewOpts
+  ): Promise<string[]> {
+    const { items } = await this.adapter.search(term, true, {}, previewOpts);
+    const pattern = `${_escapeRegExp(term)}(\\S+|\\s\\S+)`;
+    const re = new RegExp(pattern, "ig");
+    const terms: string[] = [];
+    items.forEach(item => {
+      const model = this.getModel(item.type);
+      if (model && this.canView(principal)({ model: item.type })) {
+        const text = extractText(item.data, model);
+        const m = text.match(re);
+        if (m) {
+          m.forEach(s => {
+            if (s && !terms.includes(s)) terms.push(s);
+          });
+        }
+      }
+    });
+    return terms;
   }
 }

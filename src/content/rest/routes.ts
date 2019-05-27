@@ -56,6 +56,26 @@ export default (
     });
   };
 
+  function getSearchModels(query: any) {
+    const {
+      includeModels = [],
+      excludeModels = [],
+      linkableOnly = "true"
+    } = query;
+
+    const all = linkableOnly === "true" ? linkableModels : searchableModels;
+
+    const pickModels = (names: string[]) =>
+      all.filter(name =>
+        names.some(n => n.toLowerCase() === name.toLowerCase())
+      );
+
+    const includes = pickModels(includeModels);
+    const excludes = pickModels(excludeModels);
+
+    return includes.length ? includes : all.filter(n => !excludes.includes(n));
+  }
+
   modes.forEach(mode => {
     /**
      * Set req.previewOpts, check preview permission and set cache headers.
@@ -80,34 +100,10 @@ export default (
     /** Search */
     router.get(`/rest/${mode}/search/content`, async (req, res) => {
       const { principal, query } = req;
+      const { term, limit = 50, offset = 0 } = query;
+      const searchModels = getSearchModels(query);
 
-      const {
-        term,
-        limit = 50,
-        offset = 0,
-        includeModels = [],
-        excludeModels = [],
-        linkableOnly = true
-      } = query;
-
-      const allSearchModels =
-        linkableOnly === "true" ? linkableModels : searchableModels;
-
-      const sanitize = (m: string[]) =>
-        m
-          .map(n =>
-            allSearchModels.find(n2 => n2.toLowerCase() === n.toLowerCase())
-          )
-          .filter(Boolean) as string[];
-
-      const sanitizedIncludes = sanitize(includeModels);
-      const sanitizedExcludes = sanitize(excludeModels);
-
-      const searchModels = sanitizedIncludes.length
-        ? sanitizedIncludes
-        : allSearchModels.filter(n => !sanitizedExcludes.includes(n));
-
-      if (!searchModels.length)
+      if (!searchModels.length) {
         return res.json({
           total: 0,
           items: [],
@@ -116,6 +112,7 @@ export default (
             content: {}
           }
         });
+      }
 
       const results = await content.externalSearch(
         principal,
@@ -145,6 +142,19 @@ export default (
           content: {}
         }
       });
+    });
+
+    router.get(`/rest/${mode}/search/suggest`, async (req, res) => {
+      const { principal, query } = req;
+      const { term } = query;
+      const searchModels = getSearchModels(query);
+
+      if (!searchModels.length) {
+        return res.json([]);
+      }
+
+      const results = await content.suggest(principal, term, req.previewOpts);
+      res.json(results);
     });
 
     models.forEach(model => {
