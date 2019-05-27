@@ -16,29 +16,21 @@ const hideExplorer = `
   .swagger-ui .topbar .download-url-wrapper { display: none }
 `;
 
-const hasSlash = (req: Request) => /\/$/.test(req.originalUrl);
-const addSlash = (req: Request, res: Response) =>
-  res.redirect(`${req.originalUrl}/`);
-
 /**
  * Returns an express middleware to serve the ui for the given
  * swagger document.
  */
-export default (docUrl: string) => {
+export default (docsUrl: string, specUrl: string) => {
   // inject css and replace the petstore with the provided URL:
   const html = indexHtml
     .replace("</style>", `${hideExplorer}$&`)
-    .replace("https://petstore.swagger.io/v2/swagger.json", docUrl);
+    .replace("</title>", `$&<base href="${docsUrl}" />`)
+    .replace("https://petstore.swagger.io/v2/swagger.json", specUrl);
 
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.path === "/") {
-      if (hasSlash(req)) {
-        // send the tweaked html
-        res.send(html);
-      } else {
-        // add slash to make relative URLs work
-        addSlash(req, res);
-      }
+      // send the tweaked html
+      res.send(html);
     } else {
       // serve the static asset
       serve(req, res, next);
