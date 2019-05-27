@@ -1,6 +1,6 @@
 import * as Cotype from "../../../typings";
 import React, { Fragment } from "react";
-import { TimeAgo } from "react-time-ago";
+import TimeAgo from "react-time-ago";
 import styled, { css } from "react-emotion";
 import StatusLight from "../common/StatusLight";
 import MoreButton from "../common/MoreButton";
@@ -96,7 +96,7 @@ function VersionList({
           }
           onClick={() => onSelectVersion(v)}
         >
-          <TimeAgo className={dateClass}>{new Date(v.date)}</TimeAgo>
+          <TimeAgo className={dateClass} date={new Date(new Date(v.date))} />
           {v.published && (
             <Status>
               <StatusLight color="green" /> Published
