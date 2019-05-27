@@ -90,7 +90,7 @@ const SortableItem = SortableElement(
             }
           }}
         />
-        <StyledButton type="Button" onClick={() => removeItem(sortIndex)}>
+        <StyledButton type="button" onClick={() => removeItem(sortIndex)}>
           <Icon.ClearCircle className={clearClass} />
         </StyledButton>
       </Item>
