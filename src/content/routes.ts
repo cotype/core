@@ -49,7 +49,7 @@ export default (
     const items = await content.search(principal, q, true, {
       limit,
       offset,
-      models: models.length > 1 ? models : linkable ? linkableModels : []
+      models: !!models.length ? models : linkable ? linkableModels : []
     });
     res.json(items);
   });
