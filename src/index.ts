@@ -112,20 +112,26 @@ export const clientMiddleware = promiseRouter()
     } else next();
   });
 
+function addSlash(str: string) {
+  return `${str.replace(/\/$/, "")}/`;
+}
+
 function getUrls(opts: Pick<Opts, "basePath" | "baseUrls">) {
-  const basePath = opts.basePath || "";
-  const baseUrl = `${basePath
-    .replace(/(\n|\r|\r\n)/g, "/")
-    .replace(/\/$/, "")}/`;
+  const basePath = (opts.basePath || "").replace(
+    new RegExp(path.posix.sep, "g"),
+    "/"
+  );
   const baseUrls = {
-    cms: baseUrl,
+    cms: basePath,
     ...(opts.baseUrls || {})
   };
 
   return {
-    basePath,
-    baseUrl,
-    baseUrls
+    basePath: addSlash(basePath),
+    baseUrls: {
+      ...baseUrls,
+      cms: addSlash(baseUrls.cms)
+    }
   };
 }
 
@@ -154,7 +160,7 @@ export async function getRestApiBuilder(
 }
 
 export async function init(opts: Opts) {
-  const { baseUrls, baseUrl } = getUrls(opts);
+  const { baseUrls, basePath } = getUrls(opts);
   const { models, externalDataSources } = getModels(opts, baseUrls);
 
   const p = await persistence(models, await opts.persistenceAdapter, {
@@ -165,7 +171,7 @@ export async function init(opts: Opts) {
   const content = Content(p, models, externalDataSources, baseUrls);
   const settings = Settings(p, models);
   const media = Media(p, models, opts.storage, opts.thumbnailProvider);
-  const adminPath = resolveUrl(baseUrl, "admin");
+  const adminPath = resolveUrl(basePath, "admin");
 
   const app = express();
 
@@ -182,7 +188,7 @@ export async function init(opts: Opts) {
   });
 
   const router = promiseRouter();
-  app.use(baseUrl.replace(/\/$/, ""), router);
+  app.use(basePath.replace(/\/$/, ""), router);
 
   auth.routes(router); // login, principal, logout
   media.routes(router); // static, thumbs
@@ -222,8 +228,16 @@ export async function init(opts: Opts) {
     res.json(apiBuilder.getSpec());
   });
 
-  router.use("/admin/rest/docs", swaggerUi("/admin/rest/swagger.json"));
-  router.get("/admin/rest", (req, res) => res.redirect("/admin/rest/docs/"));
+  router.use(
+    "/admin/rest/docs",
+    swaggerUi(
+      resolveUrl(baseUrls.cms || "/", "admin/rest/docs/"),
+      resolveUrl(baseUrls.cms || "/", "admin/rest/swagger.json")
+    )
+  );
+  router.get("/admin/rest", (req, res) =>
+    res.redirect(resolveUrl(baseUrls.cms || "/", "admin/rest/docs"))
+  );
 
   content.routes(router);
 
@@ -233,7 +247,7 @@ export async function init(opts: Opts) {
     opts.customSetup(app, p.content);
   }
 
-  app.get(baseUrl, (_, res) => res.redirect(adminPath));
+  app.get(basePath, (_, res) => res.redirect(adminPath));
 
   app.use((err: Error, req: Request, res: Response, _: () => void) => {
     if (err instanceof HttpError) {

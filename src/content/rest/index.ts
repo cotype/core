@@ -27,7 +27,9 @@ export default function rest(
   baseUrls: BaseUrls
 ) {
   const apiBuilder = getApiBuilder(models, baseUrls);
-  router.get("/rest", (req, res) => res.redirect("/docs/"));
+  router.get("/rest", (req, res) =>
+    res.redirect(resolve(baseUrls.cms || "/", "docs/"))
+  );
   router.get("/rest/swagger.json", (req, res) => {
     res.json(apiBuilder.getSpec());
   });
@@ -35,6 +37,9 @@ export default function rest(
 
   router.use(
     "/docs",
-    swaggerUi(resolve(baseUrls.cms || "/", "rest/swagger.json"))
+    swaggerUi(
+      resolve(baseUrls.cms || "/", "docs/"),
+      resolve(baseUrls.cms || "/", "rest/swagger.json")
+    )
   );
 }
