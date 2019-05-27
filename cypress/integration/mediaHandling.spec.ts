@@ -53,7 +53,7 @@ context("Media", () => {
       subjectType: "drag-n-drop"
     });
   });
-
+  /*
   it("should show duplicate alter", () => {
     cy.testable("upload-zone").upload(
       {
@@ -129,7 +129,7 @@ context("Media", () => {
     cy.testable("meta-data-alt").should("have.value", altText);
     cy.contains("div", tagText);
   });
-
+ */
   it("create new content with media", () => {
     frame.navigation("Content").click();
     frame.sidebarItem("Media").should("have.length", 1);
