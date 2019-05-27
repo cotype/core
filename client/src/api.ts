@@ -95,7 +95,7 @@ class Api {
 
   list(
     model: Cotype.Model,
-    listOpts: { q?: string } & Omit<Cotype.ListOpts, "search">,
+    listOpts: Cotype.ListOpts,
     criteria: Cotype.Criteria = {}
   ): Promise<Cotype.ListChunk<Cotype.Item>> {
     const { type, name } = model;

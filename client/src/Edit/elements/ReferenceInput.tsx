@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import styled, { css, cx } from "react-emotion";
 import { FieldProps } from "formik";
-import query from "object-to-querystring";
+import { stringify } from "qs";
 import { inputClass } from "../../common/styles";
 import Autocomplete from "../../common/Autocomplete";
 import ImageCircle from "../../common/ImageCircle";
@@ -130,24 +130,16 @@ export default class ReferenceInput extends Component<Props, State> {
 
   fetchItems = opts => {
     const { type, models } = this.props;
-    const [firstModel, ...otherModels] = models;
 
-    const queryString = query({
+    const queryString = stringify({
       ...opts,
       linkable: models.length === 0,
-      models: otherModels && otherModels.length ? models : undefined
+      models: models.length ? models : undefined
     });
 
-    // if reference has only one options, use list instead of search
-    return api
-      .get(
-        `/${type}${
-          models.length === 0 || otherModels.length > 0 ? "" : `/${firstModel}/`
-        }${queryString}`
-      )
-      .then(res => {
-        if (res) this.setState({ items: res.items });
-      });
+    return api.get(`/${type}?${queryString}`).then(({ items }) => {
+      this.setState({ items });
+    });
   };
 
   fetchItem = refObj => {

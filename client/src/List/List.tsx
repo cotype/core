@@ -157,7 +157,7 @@ export default class ListWithItems extends Component<Props, State> {
     api
       .list(
         model,
-        { offset, limit, q: searchTerm },
+        { offset, limit, search: { term: searchTerm, scope: "title" } },
         this.createFilterCriterita()
       )
       .then(res => {

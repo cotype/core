@@ -17,7 +17,6 @@
     "javascript-time-ago": "^2.0.1",
     "moment": "^2.24.0",
     "mudder": "^1.0.4",
-    "object-to-querystring": "^1.0.8",
     "quill-delta": "^4.2.0",
     "rc-input-number": "^4.4.0",
     "react": "^16.8.4",

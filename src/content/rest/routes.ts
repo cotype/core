@@ -6,7 +6,8 @@ import {
   ExternalDataSource,
   BaseUrls,
   Principal,
-  Join
+  Join,
+  ListOpts
 } from "../../../typings";
 
 import { Router } from "express";
@@ -163,7 +164,17 @@ export default (
       // List
       router.get(`/rest/${mode}/${type}`, async (req, res) => {
         const { principal, query } = req;
-        const { limit = 50, offset = 0, join, order, orderBy, ...rest } = query;
+        const {
+          search = {},
+          limit = 50,
+          offset = 0,
+          join,
+          order,
+          orderBy,
+          ...rest
+        } = query;
+
+        const opts: ListOpts = { search, offset, limit, order, orderBy };
 
         checkPermissionToJoin(req.principal, join);
 
@@ -176,7 +187,7 @@ export default (
           const { items, total, _refs } = await dataSource.find(
             principal,
             model,
-            { limit: 1, offset: 0 },
+            opts,
             format,
             join,
             criteria,
@@ -197,7 +208,7 @@ export default (
           const { total, items, _refs } = await dataSource.find(
             principal,
             model,
-            { limit, offset, order, orderBy },
+            opts,
             format,
             join,
             criteria,

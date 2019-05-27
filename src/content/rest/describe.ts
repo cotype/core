@@ -20,6 +20,24 @@ import { isComparable } from "../../persistence/adapter/knex/lookup";
 import pluralize from "pluralize";
 import { searchableModelNames } from "./utils";
 
+export const listSearchParams: ParameterObject = {
+  in: "query",
+  name: `search`,
+  style: "deepObject",
+  explode: true,
+  schema: {
+    type: "object",
+    properties: {
+      term: string,
+      scope: {
+        type: "string",
+        enum: ["title", "global"],
+        default: "global"
+      }
+    }
+  }
+};
+
 const describeModel = (
   model: Cotype.Model | Cotype.ObjectType,
   prefix = "",
@@ -462,7 +480,11 @@ export default (api: OpenApiBuilder, models: Models) => {
         summary: singleton ? `Load ${singularName}` : `List ${pluralName}`,
         operationId: singleton ? `load_${singularName}` : `list_${pluralName}`,
         tags,
-        parameters: createQueryParams(model).concat(commonParams),
+        parameters: [
+          ...createQueryParams(model),
+          ...commonParams,
+          listSearchParams
+        ],
         responses: {
           "200": {
             description: singleton

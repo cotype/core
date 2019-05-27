@@ -124,16 +124,12 @@ export default class KnexContent implements ContentAdapter {
   ) {
     await this.testUniqueFields(model, models, data);
     if (model.orderBy) {
-      const lastItem = await this.find(
-        model,
-        {
-          limit: 1,
-          orderBy: model.orderBy,
-          order: "desc",
-          offset: 0
-        },
-        models
-      );
+      const lastItem = await this.list(model, models, {
+        limit: 1,
+        orderBy: model.orderBy,
+        order: "desc",
+        offset: 0
+      });
 
       const orderPath = model.orderBy.split(".");
 
@@ -182,8 +178,8 @@ export default class KnexContent implements ContentAdapter {
 
           criteria[`data.${f}`] = { eq: value, ne: "" };
           const opts = { offset: 0, limit: 1 };
-          const p1 = this.find(model, opts, models, criteria);
-          const p2 = this.find(model, opts, models, criteria, {
+          const p1 = this.list(model, models, opts, criteria);
+          const p2 = this.list(model, models, opts, criteria, {
             publishedOnly: true,
             ignoreSchedule: true
           });
@@ -207,7 +203,11 @@ export default class KnexContent implements ContentAdapter {
   /**
    * Test if a value of a position field already Exists
    */
-  async testPositionFields(model: Cotype.Model, data: any): Promise<any> {
+  async testPositionFields(
+    model: Cotype.Model,
+    models: Cotype.Model[],
+    data: any
+  ): Promise<any> {
     const positionFields = getPositionFields(model);
     if (positionFields) {
       await Promise.all(
@@ -224,7 +224,7 @@ export default class KnexContent implements ContentAdapter {
 
           criteria[`data.${f}`] = { gte: value };
           const opts = { offset: 0, limit: 2, orderBy: f, order: "asc" };
-          const items = await this.find(model, opts, criteria);
+          const items = await this.list(model, models, opts, criteria);
           if (items.items[0]) {
             const sameOrGreater = (f
               .split(".")
@@ -262,7 +262,7 @@ export default class KnexContent implements ContentAdapter {
     data: object,
     models: Cotype.Model[]
   ) {
-    data = await this.testPositionFields(model, data);
+    data = await this.testPositionFields(model, models, data);
 
     await this.testUniqueFields(model, models, data, id);
 
@@ -736,20 +736,6 @@ export default class KnexContent implements ContentAdapter {
       });
   }
 
-  async list(
-    model: Cotype.Model,
-    models: Cotype.Model[],
-    listOpts: Cotype.ListOpts,
-    criteria?: Cotype.Criteria
-  ) {
-    const { search, ...opts } = listOpts;
-    let where: Cotype.Criteria | undefined = criteria || {};
-    const { title } = model;
-    if (search && title) where[title] = { like: `%${search.term}%` };
-    if (Object.keys(where).length < 1) where = undefined;
-    return this.find(model, opts, models, where);
-  }
-
   async search(
     term: string,
     exact: boolean,
@@ -757,9 +743,11 @@ export default class KnexContent implements ContentAdapter {
     previewOpts: Cotype.PreviewOpts = {}
   ) {
     let k: knex.QueryBuilder;
-    let text = "";
+    let text = term || "";
 
-    if (term) {
+    const searchTable = text ? "content_search" : "contents";
+
+    if (text) {
       text = term.toLowerCase().trim();
       k = this.knex("content_search");
 
@@ -809,8 +797,17 @@ export default class KnexContent implements ContentAdapter {
     }
 
     k.join("content_revisions", join => {
-      join.on("content_search.id", "content_revisions.id");
-      join.on("content_search.rev", "content_revisions.rev");
+      join.on(`${searchTable}.id`, "content_revisions.id");
+      if (term) {
+        join.on("content_search.rev", "content_revisions.rev");
+      } else {
+        join.on(
+          `contents.${
+            previewOpts.publishedOnly ? "published_rev" : "latest_rev"
+          }`,
+          "content_revisions.rev"
+        );
+      }
     });
 
     k.whereNot("contents.deleted", true);
@@ -820,20 +817,15 @@ export default class KnexContent implements ContentAdapter {
       k.andWhere("contents.type", "in", models.map(m => m));
     }
 
-    const [count] = await k
-      .clone()
-      .countDistinct(`${term ? "content_search.id" : "contents.id"} as total`);
+    const [count] = await k.clone().countDistinct(`${searchTable}.id as total`);
     const total = Number(count.total);
 
-    k.select([
-      `${term ? "content_search.id" : "contents.id"}`,
-      "contents.type",
-      "content_revisions.data"
-    ]);
+    k.select([`${searchTable}.id`, "contents.type", "content_revisions.data"]);
 
     k.offset(Number(offset)).limit(Number(limit));
 
     const items = await k;
+
     return {
       total,
       items: items.map(this.parseData)
@@ -861,14 +853,21 @@ export default class KnexContent implements ContentAdapter {
     return contents.map(this.parseData);
   }
 
-  async find(
+  async list(
     model: Cotype.Model,
-    listOpts: Cotype.ListOpts,
     models: Cotype.Model[],
-    criteria?: Cotype.Criteria,
+    listOpts: Cotype.ListOpts = {},
+    criteria: Cotype.Criteria = {},
     previewOpts: Cotype.PreviewOpts = {}
   ): Promise<Cotype.ListChunk<Cotype.Content>> {
-    const { limit = 50, offset = 0, order = "desc", orderBy } = listOpts;
+    const {
+      limit = 50,
+      offset = 0,
+      order = "desc",
+      orderBy,
+      search
+    } = listOpts;
+
     // only order by comparable fields
     const orderByFieldExists = orderBy
       ? getRecursiveOrderField(orderBy, model)
@@ -901,6 +900,34 @@ export default class KnexContent implements ContentAdapter {
         "content_revisions.rev"
       );
     });
+
+    if (search && search.term) {
+      if (search.scope === "title") {
+        if (model.title) criteria[model.title] = { like: `%${search.term}%` };
+      } else {
+        k.join("content_search", join => {
+          join.on("contents.id", "content_search.id");
+          join.on(
+            previewOpts.publishedOnly
+              ? "contents.published_rev"
+              : "contents.latest_rev",
+            "content_search.rev"
+          );
+        });
+
+        if (this.knex.client.config.client === "pg") {
+          k.whereRaw(
+            "content_search.text @@ plainto_tsquery(?)",
+            `${search.term}:*`
+          );
+        } else if (this.knex.client.config.client === "mysql") {
+          k.whereRaw("match(text) against(?)", search.term);
+        } else {
+          k.where("content_search.text", "like", `%${search.term}%`);
+        }
+      }
+    }
+
     if (criteria) {
       Object.entries(criteria).forEach(([dataPath, criterion], j) => {
         if (model.customQuery && model.customQuery[dataPath]) {

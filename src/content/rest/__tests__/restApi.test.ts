@@ -173,13 +173,13 @@ describe("rest api", () => {
 
     const list = async (
       type: string,
-      join: object = {},
+      params: object = {},
       published: boolean = true
     ) => {
       const { body } = await server
         .get(
           `/rest/${published ? "published" : "drafts"}/${type}?${stringify(
-            join
+            params
           )}`
         )
         .expect(200);
@@ -293,6 +293,55 @@ describe("rest api", () => {
       it("should list news", async () => {
         const news = await list("news", {}, true);
         await expect(news.total).toBe(1);
+      });
+
+      it("should list news with search criteria", async () => {
+        await create("news", {
+          slug: "lololorem-ipipipsum",
+          title: "foo-new-title"
+        });
+
+        await expect(
+          (await list(
+            "news",
+            { search: { term: "foo-new-t", scope: "title" } },
+            false
+          )).total
+        ).toBe(1);
+
+        await expect(
+          (await list(
+            "news",
+            { search: { term: "lololor", scope: "global" } },
+            false
+          )).total
+        ).toBe(1);
+      });
+
+      it("should not list news with wrong search criteria", async () => {
+        await expect(
+          (await list(
+            "news",
+            { search: { term: "lololor", scope: "title" } },
+            false
+          )).total
+        ).toBe(0);
+
+        await expect(
+          (await list(
+            "news",
+            { search: { term: "foo-new-txx", scope: "title" } },
+            false
+          )).total
+        ).toBe(0);
+
+        await expect(
+          (await list(
+            "news",
+            { search: { term: "lololor-xx", scope: "global" } },
+            false
+          )).total
+        ).toBe(0);
       });
 
       it("should get published news by id", async () => {

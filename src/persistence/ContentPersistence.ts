@@ -428,10 +428,10 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     criteria?: Cotype.Criteria,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunkWithRefs<Cotype.Content>> {
-    const items = await this.adapter.find(
+    const items = await this.adapter.list(
       model,
-      opts,
       this.models,
+      opts,
       criteria,
       previewOpts
     );
@@ -468,7 +468,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     criteria?: Cotype.Criteria,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.Content>> {
-    return this.adapter.find(model, opts, this.models, criteria, previewOpts);
+    return this.adapter.list(model, this.models, opts, criteria, previewOpts);
   }
 
   async search(
