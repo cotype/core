@@ -44,7 +44,7 @@ export default class ObjectOutput extends Component<Props> {
               const f = fields[key];
               if ("hidden" in f) return null;
               const { type, label = titleCase(key), ...props } = f;
-              if (type === "position") {
+              if (type === "position" || type === "references") {
                 return null;
               }
               const FieldComponent = outputs.get(f);
