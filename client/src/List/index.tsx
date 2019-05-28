@@ -9,6 +9,7 @@ import View from "./List";
 import api from "../api";
 import { isAllowed, Permission } from "../auth/acl";
 import { withUser } from "../auth/UserContext";
+import ErrorBoundary from "../ErrorBoundary";
 
 enum Collection {
   Singleton = "singleton",
@@ -134,28 +135,37 @@ class List extends Component<Props, State> {
 
     if (model.collection === Collection.Singleton) {
       return (
-        <Switch>
-          <Route exact path={match.url} render={this.renderSingletonEdit} />
-          <Redirect to={match.url} />
-        </Switch>
+        <ErrorBoundary>
+          <Switch>
+            <Route exact path={match.url} render={this.renderSingletonEdit} />
+            <Redirect to={match.url} />
+          </Switch>
+        </ErrorBoundary>
       );
     }
 
     return (
-      <SplitPane width={320}>
-        <Background>
-          <View edit={edit} model={model} match={match} ref={this.listView} />
-        </Background>
-        <Fragment>
-          <Switch>
-            <Route path={`${match.url}/edit/:id?`} render={this.renderEdit} />
-            <Route
-              path={`${match.url}/clone/:clone`}
-              render={this.renderEdit}
-            />
-          </Switch>
-        </Fragment>
-      </SplitPane>
+      <ErrorBoundary>
+        <SplitPane width={320}>
+          <Background>
+            <View edit={edit} model={model} match={match} ref={this.listView} />
+          </Background>
+          <Fragment>
+            <ErrorBoundary>
+              <Switch>
+                <Route
+                  path={`${match.url}/edit/:id?`}
+                  render={this.renderEdit}
+                />
+                <Route
+                  path={`${match.url}/clone/:clone`}
+                  render={this.renderEdit}
+                />
+              </Switch>
+            </ErrorBoundary>
+          </Fragment>
+        </SplitPane>
+      </ErrorBoundary>
     );
   }
 }
