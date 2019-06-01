@@ -171,7 +171,6 @@ export async function init(opts: Opts) {
   const content = Content(p, models, externalDataSources, baseUrls);
   const settings = Settings(p, models);
   const media = Media(p, models, opts.storage, opts.thumbnailProvider);
-  const adminPath = resolveUrl(basePath, "admin");
 
   const app = express();
 
@@ -247,7 +246,9 @@ export async function init(opts: Opts) {
     opts.customSetup(app, p.content);
   }
 
-  app.get(basePath, (_, res) => res.redirect(adminPath));
+  app.get(basePath, (_, res) =>
+    res.redirect(resolveUrl(baseUrls.cms, "admin"))
+  );
 
   app.use((err: Error, req: Request, res: Response, _: () => void) => {
     if (err instanceof HttpError) {
