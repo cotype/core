@@ -69,7 +69,7 @@ export type Opts = {
   models: ModelOpts[];
   navigation?: NavigationOpts[];
   storage: Storage;
-  baseUrls?: BaseUrls;
+  baseUrls?: Partial<BaseUrls>;
   basePath?: string;
   persistenceAdapter: Promise<PersistenceAdapter>;
   externalDataSources?: ExternalDataSourceWithOptionalHelper[];
@@ -230,12 +230,12 @@ export async function init(opts: Opts) {
   router.use(
     "/admin/rest/docs",
     swaggerUi(
-      resolveUrl(baseUrls.cms || "/", "admin/rest/docs/"),
-      resolveUrl(baseUrls.cms || "/", "admin/rest/swagger.json")
+      resolveUrl(baseUrls.cms, "admin/rest/docs/"),
+      resolveUrl(baseUrls.cms, "admin/rest/swagger.json")
     )
   );
   router.get("/admin/rest", (req, res) =>
-    res.redirect(resolveUrl(baseUrls.cms || "/", "admin/rest/docs"))
+    res.redirect(resolveUrl(baseUrls.cms, "admin/rest/docs"))
   );
 
   content.routes(router);

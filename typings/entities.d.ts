@@ -357,7 +357,7 @@ export interface ThumbnailProvider {
 }
 
 export type BaseUrls = {
-  cms?: string;
+  cms: string;
   media?: string;
   preview?: string;
 };

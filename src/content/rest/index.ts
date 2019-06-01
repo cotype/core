@@ -28,7 +28,7 @@ export default function rest(
 ) {
   const apiBuilder = getApiBuilder(models, baseUrls);
   router.get("/rest", (req, res) =>
-    res.redirect(resolve(baseUrls.cms || "/", "docs/"))
+    res.redirect(resolve(baseUrls.cms, "docs/"))
   );
   router.get("/rest/swagger.json", (req, res) => {
     res.json(apiBuilder.getSpec());
@@ -38,8 +38,8 @@ export default function rest(
   router.use(
     "/docs",
     swaggerUi(
-      resolve(baseUrls.cms || "/", "docs/"),
-      resolve(baseUrls.cms || "/", "rest/swagger.json")
+      resolve(baseUrls.cms, "docs/"),
+      resolve(baseUrls.cms, "rest/swagger.json")
     )
   );
 }
