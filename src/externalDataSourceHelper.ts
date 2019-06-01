@@ -14,7 +14,7 @@ export type ExternalDataSourceWithOptionalHelper =
   | ((helper: ExternalDataSourceHelper) => ExternalDataSource);
 
 type Opts = {
-  baseUrls: BaseUrls;
+  baseUrls: Partial<BaseUrls>;
 };
 
 type GenericDict = { [key: string]: any };
