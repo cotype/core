@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import _ from "lodash";
-import { Router } from "express";
+import { Router, Request } from "express";
 import { Persistence } from "../persistence";
 import { Permissions, User } from "../../typings";
 
