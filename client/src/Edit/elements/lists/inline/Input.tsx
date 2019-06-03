@@ -7,13 +7,9 @@ import Button from "../../../../common/Button";
 import ListButton from "../../../../common/ListButton";
 import SortableList from "./SortableList";
 import outputs from "../../outputs";
+import { dragClass } from "../block/Input";
 
 export const ITEM_VALUE_KEY = "value";
-
-const dragClass = css`
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  z-index: 3;
-`;
 
 const NewItemActions = styled("div")`
   & > *:not(:last-child) {

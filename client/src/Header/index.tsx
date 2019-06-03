@@ -8,11 +8,13 @@ import Profile from "./Profile";
 import Search from "./Search";
 import { testable } from "../utils/helper";
 
+export const HEIGHT = "55px";
+
 const Bar = styled("div")`
   display: flex;
   background-color: #28292e;
   color: #fff;
-  height: 55px;
+  height: ${HEIGHT};
   justify-content: space-between;
 `;
 

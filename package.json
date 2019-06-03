@@ -122,8 +122,10 @@
         "tsConfig": "<rootDir>/tsconfig.test.json"
       }
     },
+    "clearMocks": true,
     "testMatch": [
-      "**/__tests__/**/*.test.ts"
+      "**/__tests__/**/*.test.ts",
+      "**/__tests__/**/*.test.tsx"
     ],
     "collectCoverageFrom": [
       "**/*.{ts,tsx}",

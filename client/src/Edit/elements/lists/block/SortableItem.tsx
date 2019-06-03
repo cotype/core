@@ -50,7 +50,6 @@ function color(schedule: Cotype.Schedule) {
 
 export const Item = styled("div")<Item>`
   user-select: ${p => (p.isSorting ? "none" : "auto")};
-  z-index: 4;
   background-color: var(--transparent-grey);
   display: flex;
   margin-bottom: 10px;

@@ -12,9 +12,9 @@ import SortableList from "./SortableList";
 
 export const ITEM_VALUE_KEY = "value";
 
-const dragClass = css`
+export const dragClass = css`
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  z-index: 3;
+  z-index: 4;
 `;
 
 const Root = styled("div")`

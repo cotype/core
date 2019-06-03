@@ -13,7 +13,6 @@ type Item = {
 export const Item = styled("div")`
   box-sizing: border-box;
   user-select: ${(p: Item) => (p.isSorting ? "none" : "auto")};
-  z-index: 4;
   color: rgba(0, 0, 0, 0.87);
   border: none;
   cursor: ${(p: Item) => (p.sortable ? "move" : "auto")};
