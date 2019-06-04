@@ -356,37 +356,38 @@ export default (api: OpenApiBuilder, models: Models) => {
     })
   } as ParameterObject;
 
+  const searchParams: ParameterObject[] = [
+    {
+      name: "term",
+      in: "query",
+      required: true,
+      schema: {
+        type: "string"
+      }
+    },
+    includeModels,
+    {
+      ...includeModels,
+      name: "excludeModels",
+      description: "Select models to be excluded from search."
+    },
+    {
+      name: "linkableOnly",
+      in: "query",
+      schema: {
+        type: "boolean",
+        default: true
+      }
+    }
+  ];
+
   api.addPath(`/search/content`, {
     /** List contents */
     get: {
       summary: `Search contents`,
       operationId: `listContentBySearch`,
       tags: ["Suche"],
-      parameters: [
-        {
-          name: "term",
-          in: "query",
-          required: true,
-          schema: {
-            type: "string"
-          }
-        },
-        ...defaultQueryParams,
-        includeModels,
-        {
-          ...includeModels,
-          name: "excludeModels",
-          description: "Select models to be excluded from search."
-        },
-        {
-          name: "linkableOnly",
-          in: "query",
-          schema: {
-            type: "boolean",
-            default: true
-          }
-        }
-      ],
+      parameters: [...searchParams, ...defaultQueryParams],
       responses: {
         "200": {
           description: "Content List",
@@ -410,6 +411,26 @@ export default (api: OpenApiBuilder, models: Models) => {
                   })
                 }
               }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  /** List search suggestions */
+  api.addPath(`/search/suggest`, {
+    get: {
+      summary: `Suggest search terms`,
+      operationId: `listSearchSuggestions`,
+      tags: ["Suchvorschläge"],
+      parameters: searchParams,
+      responses: {
+        "200": {
+          description: "Content List",
+          content: {
+            "application/json": {
+              schema: array(string)
             }
           }
         }
