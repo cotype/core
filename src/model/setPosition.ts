@@ -18,7 +18,10 @@ export default function setPosition(
   visit(obj, model, {
     position(pos: string) {
       if (!pos || forcePositionSet) {
-        return middleString(lastPos, nextPos);
+        return middleString(
+          lastPos,
+          nextPos === lastPos ? nextPos + "z" : nextPos
+        );
       }
     }
   });
