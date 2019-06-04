@@ -6,6 +6,7 @@ import Textarea from "react-textarea-autosize";
 
 type Props = FieldProps<any> & {
   required?: boolean;
+  readOnly?: boolean;
   maxLength?: number;
   minRows?: number;
   maxRows?: number;
@@ -28,14 +29,16 @@ export default class TextInput extends Component<Props> {
   }
 
   render() {
-    const { field, form, required, minRows = 4, ...props } = this.props;
-    const { value, ...fieldProps } = field;
+    const { field, maxLength, minRows = 4, maxRows, readOnly } = this.props;
+    const { value, ...props } = field;
     return (
       <Textarea
+        readOnly={readOnly}
+        maxLength={maxLength}
+        maxRows={maxRows}
         minRows={minRows}
         className={inputClass}
         value={value || ""}
-        {...fieldProps}
         {...props}
       />
     );

@@ -3,7 +3,11 @@ import { FieldProps } from "formik";
 import { inputClass } from "../../common/styles";
 import { required as validateRequired } from "./validation";
 
-type Props = FieldProps<any> & { required?: boolean; maxLenght?: number };
+type Props = FieldProps<any> & {
+  required?: boolean;
+  readOnly?: boolean;
+  maxLength?: number;
+};
 export default class TextInput extends Component<Props> {
   static getDefaultValue(props: Props) {
     return "";
@@ -22,14 +26,14 @@ export default class TextInput extends Component<Props> {
   }
 
   render() {
-    const { field, form, required, maxLenght, ...props } = this.props;
-    const { value, ...fieldProps } = field;
+    const { field, maxLength, readOnly } = this.props;
+    const { value, ...props } = field;
     return (
       <input
+        readOnly={readOnly}
         className={inputClass}
         value={value || ""}
-        maxLength={maxLenght}
-        {...fieldProps}
+        maxLength={maxLength}
         {...props}
       />
     );
