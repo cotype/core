@@ -430,11 +430,7 @@ export default (api: OpenApiBuilder, models: Models) => {
           description: "Content List",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                required: ["total", "items"],
-                properties: array(string)
-              }
+              schema: array(string)
             }
           }
         }
