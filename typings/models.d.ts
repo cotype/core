@@ -46,6 +46,8 @@ type TextArea = {
   placeholder?: string;
   readOnly?: boolean;
   maxLength?: number;
+  minRows?: number;
+  maxRows?: number;
   index?: boolean;
   search?: boolean;
   hidden?: boolean;

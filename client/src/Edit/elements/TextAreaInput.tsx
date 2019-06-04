@@ -4,7 +4,12 @@ import { inputClass } from "../../common/styles";
 import { required as validateRequired } from "./validation";
 import Textarea from "react-textarea-autosize";
 
-type Props = FieldProps<any> & { required?: boolean; maxLength?: number };
+type Props = FieldProps<any> & {
+  required?: boolean;
+  maxLength?: number;
+  minRows?: number;
+  maxRows?: number;
+};
 export default class TextInput extends Component<Props> {
   static getDefaultValue(props: Props) {
     return "";
@@ -23,14 +28,13 @@ export default class TextInput extends Component<Props> {
   }
 
   render() {
-    const { field, form, required, maxLength, ...props } = this.props;
+    const { field, form, required, minRows = 4, ...props } = this.props;
     const { value, ...fieldProps } = field;
     return (
       <Textarea
-        minRows={4}
+        minRows={minRows}
         className={inputClass}
         value={value || ""}
-        maxLength={maxLength}
         {...fieldProps}
         {...props}
       />
