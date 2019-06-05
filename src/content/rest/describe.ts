@@ -38,6 +38,19 @@ export const listSearchParams: ParameterObject = {
   }
 };
 
+const refsSchema = (mediaType: ReferenceObject) => ({
+  type: "object",
+  properties: {
+    media: {
+      type: "object",
+      additionalProperties: mediaType
+    },
+    content: {
+      type: "object",
+      properties: {}
+    }
+  }
+});
 const describeModel = (
   model: Cotype.Model | Cotype.ObjectType,
   prefix = "",
@@ -344,6 +357,9 @@ function createJoinParams(model: Model, { content: models }: Models) {
 
 export default (api: OpenApiBuilder, models: Models) => {
   const searchableModels = searchableModelNames(models.content);
+
+  const mediaType = addExternalModel(api, models.media);
+
   const includeModels = {
     name: "includeModels",
     in: "query",
@@ -395,7 +411,7 @@ export default (api: OpenApiBuilder, models: Models) => {
             "application/json": {
               schema: {
                 type: "object",
-                required: ["total", "items"],
+                required: ["total", "items", "_refs"],
                 properties: {
                   total: integer,
                   items: array({
@@ -408,7 +424,8 @@ export default (api: OpenApiBuilder, models: Models) => {
                       url: string
                     },
                     required: ["id", "title"]
-                  })
+                  }),
+                  _refs: refsSchema(mediaType)
                 }
               }
             }
@@ -437,8 +454,6 @@ export default (api: OpenApiBuilder, models: Models) => {
       }
     }
   });
-
-  const mediaType = addExternalModel(api, models.media);
 
   // Add models schemas
   const refs: { [key: string]: ReferenceObject } = {};
@@ -475,19 +490,8 @@ export default (api: OpenApiBuilder, models: Models) => {
 
     const Type = refs[`${model.name}`];
 
-    const RefsSchema: any = {
-      type: "object",
-      properties: {
-        media: {
-          type: "object",
-          additionalProperties: mediaType
-        },
-        content: {
-          type: "object",
-          properties: {}
-        }
-      }
-    };
+    const RefsSchema = refsSchema(mediaType) as any;
+
     joinRefs.forEach(modelName => {
       RefsSchema.properties.content.properties[modelName] = {
         type: "object",
