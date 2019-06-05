@@ -1,4 +1,3 @@
-declare module "@navjobs/upload";
 declare module "color-hash";
 declare module "javascript-time-ago";
 declare module "javascript-time-ago/locale/en";
