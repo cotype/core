@@ -108,7 +108,7 @@ export default (
         return res.json({
           total: 0,
           items: [],
-          _ref: {
+          _refs: {
             media: {},
             content: {}
           }
@@ -138,7 +138,7 @@ export default (
       res.json({
         total: results.total,
         items: preparedResults.items,
-        _ref: {
+        _refs: {
           media: mediaObj,
           content: {}
         }
