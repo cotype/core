@@ -1,8 +1,8 @@
-import React, { Component, InputHTMLAttributes } from "react";
-import { Uploader } from "@navjobs/upload";
-import Dropzone from "react-dropzone";
-import api from "../api";
-import { matchMime, testable } from "../utils/helper";
+import React, { useMemo, useEffect, memo } from "react";
+import { useDropzone } from "react-dropzone";
+import { useUpload } from "react-use-upload";
+import createValidator, { MediaFilter } from "./createValidator";
+import useValidation from "./useValidation";
 
 export type Props = {
   render: any;
@@ -11,145 +11,66 @@ export type Props = {
   activeClass: string;
   multiple?: boolean;
   mediaType?: string;
-  mediaFilter?: {
-    mimeType?: string;
-    maxSize?: number;
-    minWidth?: number;
-    minHeight?: number;
-    maxWidth?: number;
-    maxHeight?: number;
-  };
+  mediaFilter?: MediaFilter;
 };
 
-FileList.prototype.every = Array.prototype.every; // Inject Every ArrayMethod to FileList ES6+Polyfill
-FileList.prototype.map = Array.prototype.map; // Inject Map ArrayMethod to FileList ES6+Polyfill
+const noop = () => {
+  /* noop */
+};
 
-declare global {
-  interface FileList {
-    every(
-      callbackfn: (value: File, index: number, array: File[]) => boolean,
-      thisArg?: any
-    ): boolean;
-    map<U>(
-      callbackfn: (value: File, index: number, array: File[]) => U,
-      thisArg?: any
-    ): U[];
-  }
-}
+export default function UploadZone({
+  render,
+  onUpload,
+  className,
+  activeClass,
+  multiple,
+  mediaType,
+  mediaFilter
+}: Props) {
+  const Render = useMemo(() => memo(props => render(props)), [render]);
+  const validator = useMemo(() => createValidator(mediaType, mediaFilter), [
+    mediaType,
+    mediaFilter
+  ]);
+  const [files, onFiles, reset] = useValidation(validator);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    multiple,
+    noKeyboard: true,
+    noClick: true,
+    onDrop: onFiles
+  });
+  const { done, response, progress, error } = useUpload(files as any, {
+    path: "/upload",
+    name: "file",
+    withCredentials: true
+  });
+  useEffect(() => {
+    if (!done) return;
+    reset();
+    onUpload(response.response);
+  }, [done, response]);
 
-export default class Upload extends Component<Props> {
-  render() {
-    const {
-      render,
-      onUpload,
-      className,
-      activeClass,
-      multiple,
-      mediaType,
-      mediaFilter
-    } = this.props;
-    const uploadProps: InputHTMLAttributes<HTMLInputElement> = {};
-    return (
-      <Uploader
-        request={{
-          fileName: "file",
-          url: `${api.baseURI}/upload`,
-          method: "POST",
-          withCredentials: true
+  return (
+    <div
+      {...getRootProps()}
+      onClick={
+        noop /* Even though we told dropzone to not care for clicks, it prevents default.
+                (https://github.com/react-dropzone/react-dropzone/blob/93bded79f01641aaf5c4d29642a881cdc0e77bcf/src/index.js#L461)
+                We need to overwrite in order to work with nested file inputs */
+      }
+      className={`${className} ${isDragActive ? activeClass : ""}`}
+    >
+      <input {...getInputProps()} />
+      <Render
+        {...{
+          ...response,
+          complete: done,
+          onFiles,
+          progress,
+          error,
+          files
         }}
-        onComplete={({ response, status }: any) => {
-          onUpload(response);
-        }}
-        uploadOnSelection={true}
-        uploadProps={uploadProps}
-      >
-        {(upload: any) => {
-          const onFiles = async files => {
-            let allowed = true;
-            if (mediaType && mediaType !== "all") {
-              allowed =
-                allowed && files.every(file => file.type.includes(mediaType));
-            }
-            if (mediaFilter) {
-              if (mediaFilter.mimeType) {
-                allowed =
-                  allowed &&
-                  files.every(file =>
-                    matchMime(file.type, mediaFilter.mimeType)
-                  );
-              }
-              if (mediaFilter.maxSize) {
-                allowed =
-                  allowed &&
-                  files.every(
-                    file =>
-                      mediaFilter && file.size < (mediaFilter as any).maxSize
-                  );
-              }
-              if (
-                mediaFilter.minHeight ||
-                mediaFilter.minWidth ||
-                mediaFilter.maxWidth ||
-                mediaFilter.maxHeight
-              ) {
-                const checkedImageSizes = await Promise.all(
-                  files.map(
-                    file =>
-                      new Promise(resolve => {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(file);
-                        reader.onload = (e: any) => {
-                          const image = new Image();
-                          image.src = e.target.result;
-                          image.onload = () => {
-                            const height = image.naturalHeight;
-                            const width = image.naturalWidth;
-                            resolve(
-                              !(
-                                (mediaFilter.maxWidth &&
-                                  mediaFilter.maxWidth < width) ||
-                                (mediaFilter.minWidth &&
-                                  mediaFilter.minWidth > width) ||
-                                (mediaFilter.maxHeight &&
-                                  mediaFilter.maxHeight < height) ||
-                                (mediaFilter.minHeight &&
-                                  mediaFilter.minHeight > height)
-                              )
-                            );
-                          };
-                        };
-                      })
-                  )
-                );
-                allowed = checkedImageSizes.reduce(
-                  (acc, a) => acc && a,
-                  allowed
-                ) as boolean;
-              }
-            }
-
-            if (allowed) {
-              upload.onFiles(files);
-            } else {
-              alert("File doesn't match requirements");
-            }
-          };
-
-          return (
-            <Dropzone
-              disableClick
-              disablePreview
-              className={className}
-              activeClassName={activeClass}
-              onDrop={onFiles}
-              multiple={multiple}
-              inputProps={uploadProps}
-            >
-              {render({ ...upload, onFiles })}
-            </Dropzone>
-          );
-        }}
-      </Uploader>
-    );
-  }
+      />
+    </div>
+  );
 }

@@ -1,6 +1,13 @@
 import mock from "xhr-mock";
 import React from "react";
-import { render, fireEvent, waitForDomChange } from "@testing-library/react";
+import {
+  render,
+  fireEvent,
+  waitForDomChange,
+  act
+} from "@testing-library/react";
+import api from "../../api";
+import { UploadProvider, createXhrClient } from "react-use-upload";
 import UploadZone, { Props as UploadZoneProps } from "../UploadZone";
 import { testable } from "../../utils/helper";
 
@@ -29,7 +36,11 @@ function renderUploadZone(customProps: Partial<UploadZoneProps> = {}) {
     ...customProps
   };
 
-  const queries = render(<UploadZone {...props} />);
+  const queries = render(
+    <UploadProvider client={createXhrClient({ baseUrl: api.baseURI })}>
+      <UploadZone {...props} />
+    </UploadProvider>
+  );
 
   return { ...queries, props };
 }
@@ -61,6 +72,9 @@ function onAlert() {
 describe("UploadZone", () => {
   let files: File[];
   beforeEach(() => {
+    jest.spyOn(console, "error").mockImplementation(() => {
+      /* https://github.com/facebook/react/issues/14769 */
+    });
     files = [createFile("file1.pdf", 1111, "application/pdf")];
     mock.setup();
   });
@@ -101,7 +115,7 @@ describe("UploadZone", () => {
     const thirdCall = renderChild.mock.calls[2][0];
     expect(thirdCall).toEqual(
       expect.objectContaining({
-        progress: expect.any(Number)
+        progress: expect.anything()
       })
     );
     expect(thirdCall.complete).toBeFalsy();
