@@ -75,10 +75,10 @@ jobs:
             - v1-repo-{{ .Revision }}
       - restore_cache:
           keys:
-            - v1-cypress-3.2.0
+            - v1-cypress-3.3.1
       - run:
           name: Install cypress
-          command: CYPRESS_INSTALL_BINARY=3.2.0 $(npm bin)/cypress install
+          command: CYPRESS_INSTALL_BINARY=3.3.1 $(npm bin)/cypress install
       - run:
           name: Build Test-Client
           command: export NODE_ENV=test; npm run build:client
@@ -92,7 +92,7 @@ jobs:
       - save_cache:
           paths:
             - /root/.cache/Cypress
-          key: v1-cypress-3.2.0
+          key: v1-cypress-3.3.1
   build:
     <<: *defaults
     steps:
