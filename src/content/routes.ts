@@ -96,7 +96,6 @@ export default (
     const { modelName } = params;
     const model = getModel(modelName);
     const dataSource = getDataSource(modelName) as Cotype.WritableDataSource;
-
     if (typeof dataSource.create === "undefined") {
       res.status(404).end();
       return;
@@ -247,6 +246,10 @@ export default (
     if (err instanceof ContentEventError) {
       res.statusMessage = err.message;
       return res.status(418).end();
+    }
+    if(err){
+      console.error(err);
+      return res.status(500).end();
     }
     next();
   });

@@ -162,11 +162,12 @@ export default class KnexContent implements ContentAdapter {
     id?: string
   ): Promise<void> {
     let nonUniqueFields: NonUniqueField[] = [];
-    const uniqueFields = getAlwaysUniqueFields(model);
+    const uniqueFields = getAlwaysUniqueFields(model, true);
     if (uniqueFields) {
       const resp = await Promise.all(
         uniqueFields.map(async f => {
           const criteria: any = {};
+
 
           const value = (f
             .split(".")
@@ -206,7 +207,8 @@ export default class KnexContent implements ContentAdapter {
   async testPositionFields(
     model: Cotype.Model,
     models: Cotype.Model[],
-    data: any
+    data: any,
+    id:string
   ): Promise<any> {
     const positionFields = getPositionFields(model);
     if (positionFields) {
@@ -223,8 +225,9 @@ export default class KnexContent implements ContentAdapter {
             ) as unknown) as string;
 
           criteria[`data.${f}`] = { gte: value };
-          const opts = { offset: 0, limit: 2, orderBy: f, order: "asc" };
+          const opts = { offset: 0, limit: 3, orderBy: f, order: "asc" };
           const items = await this.list(model, models, opts, criteria);
+          items.items = items.items.filter((item)=>item.id === id)
           if (items.items[0]) {
             const sameOrGreater = (f
               .split(".")
@@ -233,7 +236,6 @@ export default class KnexContent implements ContentAdapter {
                   obj && obj[key] !== "undefined" ? obj[key] : undefined,
                 items.items[0].data
               ) as unknown) as string;
-
             if (value === sameOrGreater) {
               if (items.items[1]) {
                 const nextValue = (f
@@ -262,7 +264,7 @@ export default class KnexContent implements ContentAdapter {
     data: object,
     models: Cotype.Model[]
   ) {
-    data = await this.testPositionFields(model, models, data);
+    data = await this.testPositionFields(model, models, data, id);
 
     await this.testUniqueFields(model, models, data, id);
 
