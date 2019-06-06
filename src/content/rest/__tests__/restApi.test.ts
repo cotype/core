@@ -8,18 +8,41 @@ import models from "./models";
 import { login } from "../../../__tests__/util";
 import FsStorage from "../../../media/storage/FsStorage";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
+import faker from 'faker';
+import { Meta } from "../../../../typings";
 
 const uploadDir = path.join(__dirname, ".uploads");
+
+
+const buildProduct = () => ({
+  title: faker.lorem.slug(4),
+  ean: faker.lorem.words(),
+  description: {
+    ops: [{ insert: faker.lorem.paragraph(5) }]
+  },
+})
+
+const buildNews = (p: { productId?: string, mediaId?: string }, overrides?: object) => ({
+  title: faker.lorem.lines(1),
+  slug: faker.lorem.slug(4),
+  date: faker.date.recent,
+  text: {
+    ops: [{ insert: faker.lorem.paragraph(4) }]
+  },
+  ref: p.productId ? { id: p.productId, model: "products" } : undefined,
+  image: p.mediaId,
+  ...overrides
+})
 
 describe("rest api", () => {
   let app: any;
   let persistence: Persistence;
   let server: request.SuperTest<request.Test>;
   let headers: object;
-  let imageId: string;
-  let productId: string;
-  let newsId: string;
-  const newsSlug = "foo-bar-baz";
+  let mediaFile: Meta;
+  let product: { id: string, data: ReturnType<typeof buildProduct> };
+  let news: { id: string, data: ReturnType<typeof buildNews> };
+  let updatedNews: { id: string, data: ReturnType<typeof buildNews> };
 
   const create = async (type: string, data: object) => {
     const { body } = await server
@@ -28,7 +51,7 @@ describe("rest api", () => {
       .send({ data })
       .expect(200);
 
-    return body.id;
+    return body;
   };
   const update = async (type: string, id: string, data: object) => {
     const { body } = await server
@@ -62,53 +85,39 @@ describe("rest api", () => {
       "admin"
     ));
 
-    const imageBuffer = Buffer.from("Lorem Ipsum", "utf8");
+    const mediaBuffer = Buffer.from(faker.lorem.paragraphs(), "utf8");
 
     ({
       body: {
-        files: [{ id: imageId }]
+        files: [mediaFile]
       }
     } = await server
       .post(`/admin/rest/upload`)
       .set(headers)
-      .attach("file", imageBuffer, "lorem.test")
-      .expect(200));
+      .attach("file", mediaBuffer, faker.system.commonFileName("txt"))
+      .expect(200))
 
-    productId = await create("products", {
-      title: "product-title",
-      ean: "fooBar"
-    });
+    product = await create("products", buildProduct());
 
-    newsId = await create("news", {
-      slug: newsSlug,
-      title: "initial-news",
-      ref: { id: productId, model: "products" },
-      image: imageId
-    });
+    news = await create("news", buildNews({ productId: product.id, mediaId: mediaFile.id }));
 
     await server
-      .post(`/admin/rest/content/products/${productId}/publish`)
+      .post(`/admin/rest/content/products/${product.id}/publish`)
       .set(headers)
       .send({ rev: 1 })
       .expect(204);
 
-    const res = await server
-      .get(`/admin/rest/content/news/${newsId}/versions`)
-      .set(headers);
-
-    const [latest] = res.body;
 
     await server
-      .post(`/admin/rest/content/news/${newsId}/publish`)
+      .post(`/admin/rest/content/news/${news.id}/publish`)
       .set(headers)
-      .send({ rev: latest.rev })
+      .send({ rev: 1 })
       .expect(204);
 
-    await update("news", newsId, {
-      title: "updated-news",
-      image: imageId,
-      slug: newsSlug
-    });
+    updatedNews = await update("news", news.id,
+      buildNews({ productId: product.id, mediaId: mediaFile.id })
+    );
+
   });
 
   afterAll(async () => {
@@ -123,51 +132,42 @@ describe("rest api", () => {
 
     beforeAll(async () => {
       expectedMedia = {
-        [imageId]: {
+        [mediaFile.id]: {
           created_at: expect.any(String),
           alt: null,
           credit: null,
           focusX: null,
           focusY: null,
-          hash: expect.any(String),
           height: null,
-          id: imageId,
-          imagetype: null,
-          mimetype: "application/octet-stream",
-          originalname: "lorem.test",
-          search: " lorem.test",
-          size: 11,
+          search: ` ${mediaFile.originalname}`,
           tags: null,
-          width: null
+          width: null,
+          ...mediaFile
         }
       };
 
       expectedPublishedContent = {
         image: {
-          _id: imageId,
+          _id: mediaFile.id,
           _ref: "media",
-          _src: `/media/${imageId}`
+          _src: `/media/${mediaFile.id}`
         },
         ref: {
           _content: "products",
-          _id: productId,
+          _id: product.id,
           _ref: "content",
-          _url: "path/to/product-title"
+          _url: `path/to/${product.data.title}`
         },
-        text: "",
-        title: "initial-news",
-        slug: newsSlug
+        text: `<p>${news.data.text.ops[0].insert}</p>`,
+        title: news.data.title,
+        slug: news.data.slug
       };
 
       expectedDraftsContent = {
-        image: {
-          _id: imageId,
-          _ref: "media",
-          _src: `/media/${imageId}`
-        },
-        text: "",
-        title: "updated-news",
-        slug: newsSlug
+        ...expectedPublishedContent,
+        text: `<p>${updatedNews.data.text.ops[0].insert}</p>`,
+        title: updatedNews.data.title,
+        slug: updatedNews.data.slug
       };
     });
 
@@ -195,7 +195,7 @@ describe("rest api", () => {
       const { body } = await server
         .get(
           `/rest/${
-            published ? "published" : "drafts"
+          published ? "published" : "drafts"
           }/${type}/${id}?${stringify(join)}`
         )
         .expect(200);
@@ -225,7 +225,7 @@ describe("rest api", () => {
       const { body } = await server
         .get(
           `/rest/${
-            published ? "published" : "drafts"
+          published ? "published" : "drafts"
           }/search/content?${stringify({
             term,
             limit,
@@ -258,7 +258,7 @@ describe("rest api", () => {
       const { body } = await server
         .get(
           `/rest/${
-            published ? "published" : "drafts"
+          published ? "published" : "drafts"
           }/search/suggest?${stringify({
             term,
             linkableOnly,
@@ -281,7 +281,7 @@ describe("rest api", () => {
       const { body } = await server
         .get(
           `/rest/${
-            published ? "published" : "drafts"
+          published ? "published" : "drafts"
           }/${type}/${field}/${value}?${stringify(join)}`
         )
         .expect(200);
@@ -291,8 +291,8 @@ describe("rest api", () => {
 
     describe("list contents", () => {
       it("should list news", async () => {
-        const news = await list("news", {}, true);
-        await expect(news.total).toBe(1);
+        const newsList = await list("news", {}, true);
+        await expect(newsList.total).toBe(1);
       });
 
       it("should list news with search criteria", async () => {
@@ -345,9 +345,9 @@ describe("rest api", () => {
       });
 
       it("should get published news by id", async () => {
-        await expect(await find("news", newsId, {}, true)).toEqual({
+        await expect(await find("news", news.id, {}, true)).toEqual({
           ...expectedPublishedContent,
-          _id: newsId.toString(),
+          _id: news.id.toString(),
           _refs: {
             content: {},
             media: expectedMedia
@@ -356,9 +356,9 @@ describe("rest api", () => {
       });
 
       it("should get drafts news id", async () => {
-        await expect(await find("news", newsId, {}, false)).toEqual({
+        await expect(await find("news", news.id, {}, false)).toEqual({
           ...expectedDraftsContent,
-          _id: newsId.toString(),
+          _id: news.id.toString(),
           _refs: {
             content: {},
             media: expectedMedia
@@ -368,10 +368,10 @@ describe("rest api", () => {
 
       it("should get published news by unique field", async () => {
         await expect(
-          await findByField("news", "slug", newsSlug, {}, true)
+          await findByField("news", "slug", news.data.slug, {}, true)
         ).toEqual({
           ...expectedPublishedContent,
-          _id: newsId.toString(),
+          _id: news.id.toString(),
           _refs: {
             content: {},
             media: expectedMedia
@@ -379,10 +379,10 @@ describe("rest api", () => {
         });
 
         await expect(
-          await findByField("news", "title", "initial-news", {}, true)
+          await findByField("news", "title", news.data.title, {}, true)
         ).toEqual({
           ...expectedPublishedContent,
-          _id: newsId.toString(),
+          _id: news.id.toString(),
           _refs: {
             content: {},
             media: expectedMedia
@@ -390,12 +390,12 @@ describe("rest api", () => {
         });
       });
 
-      it("should get published news by unique field", async () => {
+      it("should get drafts news by unique field", async () => {
         await expect(
-          await findByField("news", "slug", newsSlug, {}, false)
+          await findByField("news", "slug", updatedNews.data.slug, {}, false)
         ).toEqual({
           ...expectedDraftsContent,
-          _id: newsId.toString(),
+          _id: news.id.toString(),
           _refs: {
             content: {},
             media: expectedMedia
@@ -403,10 +403,10 @@ describe("rest api", () => {
         });
 
         await expect(
-          await findByField("news", "title", "updated-news", {}, false)
+          await findByField("news", "title", updatedNews.data.title, {}, false)
         ).toEqual({
           ...expectedDraftsContent,
-          _id: newsId.toString(),
+          _id: news.id.toString(),
           _refs: {
             content: {},
             media: expectedMedia
@@ -416,42 +416,39 @@ describe("rest api", () => {
     });
 
     describe("search contents", () => {
-      const searchForAllContent = "Search Me";
-      const searchForProduct = "Search Me Product";
-      const searchForNews = "News Search Slug";
-      const searchForArticleNews = "ArticleNews Search Slug";
-      const description = "description-test";
+      const searchForAllContent = faker.lorem.slug(5)
+      const searchForProduct = faker.lorem.words(5);
+      const searchForNews = faker.lorem.words(5);
+      const searchForArticleNews = `${searchForNews} ${faker.lorem.word()}`;
+      const description = faker.lorem.slug(5);
 
       beforeAll(async () => {
         await create("products", {
-          title: searchForProduct
+          title: searchForProduct,
+          ean: `${searchForAllContent} ${faker.random.word()}`
         });
 
         await create("news", {
           slug: searchForNews,
-          title: "Search Me News"
+          title: `${searchForAllContent} ${faker.hacker.adjective()}`
         });
 
         await create("articleNews", {
           slug: searchForArticleNews,
-          title: "Search Me ArticleNews"
+          title: `${searchForAllContent} ${faker.phone.phoneNumber()}`
         });
 
-        await create("news", {
-          slug: "foo-bar",
-          title: description,
+        await create("news", buildNews({}, {
           text: {
             ops: [{ insert: description }]
           }
-        });
+        }));
 
-        await create("articleNews", {
-          slug: "foo-bar",
-          title: description,
+        await create("articleNews", buildNews({}, {
           text: {
             ops: [{ insert: description }]
           }
-        });
+        }));
       });
 
       it("should find all content by search", async () => {
@@ -459,14 +456,14 @@ describe("rest api", () => {
           published: false,
           linkableOnly: false
         };
-        expect((await search(searchForAllContent, opts)).total).toBe(3);
-        expect((await search(searchForArticleNews, opts)).total).toBe(1);
-        expect((await search(searchForNews, opts)).total).toBe(2);
-        expect((await search(searchForProduct, opts)).total).toBe(1);
+        await expect((await search(searchForAllContent, opts)).total).toBe(3);
+        await expect((await search(searchForArticleNews, opts)).total).toBe(1);
+        await expect((await search(searchForNews, opts)).total).toBe(2);
+        await expect((await search(searchForProduct, opts)).total).toBe(1);
       });
 
       it("results should contain description", async () => {
-        expect(
+        await expect(
           (await search(description, {
             published: false,
             linkableOnly: false,
@@ -476,7 +473,7 @@ describe("rest api", () => {
       });
 
       it("should find only linkable content by search", async () => {
-        expect(
+        await expect(
           (await search(searchForAllContent, {
             published: false,
             linkableOnly: true
@@ -485,35 +482,35 @@ describe("rest api", () => {
       });
 
       it("should find limited content by search", async () => {
-        expect(
+        await expect(
           (await search(searchForAllContent, {
             published: false,
             linkableOnly: true,
             includeModels: ["products"]
           })).total
         ).toBe(1);
-        expect(
+        await expect(
           (await search(searchForAllContent, {
             published: false,
             linkableOnly: true,
             includeModels: ["news"]
           })).total
         ).toBe(1);
-        expect(
+        await expect(
           (await search(searchForAllContent, {
             published: false,
             linkableOnly: true,
             excludeModels: ["news", "products"]
           })).total
         ).toBe(0);
-        expect(
+        await expect(
           (await search(searchForProduct, {
             published: false,
             linkableOnly: true,
             excludeModels: ["products"]
           })).total
         ).toBe(0);
-        expect(
+        await expect(
           (await search(searchForNews, {
             published: false,
             linkableOnly: true,
@@ -530,8 +527,8 @@ describe("rest api", () => {
           offset: 0,
           limit: 10
         });
-        expect(res1.total).toBe(3);
-        expect(res1.items.length).toBe(3);
+        await expect(res1.total).toBe(3);
+        await expect(res1.items.length).toBe(3);
 
         const res2 = await search(searchForAllContent, {
           published: false,
@@ -539,8 +536,8 @@ describe("rest api", () => {
           offset: 0,
           limit: 1
         });
-        expect(res2.total).toBe(3);
-        expect(res2.items.length).toBe(1);
+        await expect(res2.total).toBe(3);
+        await expect(res2.items.length).toBe(1);
 
         const res3 = await search(searchForAllContent, {
           published: false,
@@ -548,8 +545,8 @@ describe("rest api", () => {
           offset: 10,
           limit: 10
         });
-        expect(res3.total).toBe(3);
-        expect(res3.items.length).toBe(0);
+        await expect(res3.total).toBe(3);
+        await expect(res3.items.length).toBe(0);
 
         const res4 = await search(searchForAllContent, {
           published: false,
@@ -558,16 +555,16 @@ describe("rest api", () => {
           limit: 10
         });
 
-        expect(res4.total).toBe(3);
-        expect(res4.items.length).toBe(1);
+        await expect(res4.total).toBe(3);
+        await expect(res4.items.length).toBe(1);
       });
 
       it("shoud suggest terms", async () => {
-        const res = await suggest("search", {
+        const res = await suggest(`${searchForNews.split(" ").slice(0, 3).join(" ")}`, {
           published: false,
           includeModels: ["news"]
         });
-        expect(res).toMatchObject(["Search Me", "Search Slug"]);
+        await expect(res).toMatchObject([searchForNews.split(" ").slice(0, 4).join(" ")]);
       });
     });
     describe("joins", () => {
@@ -577,7 +574,7 @@ describe("rest api", () => {
             "news",
             {
               join: { products: ["ean"] },
-              ["data.title"]: { eq: "initial-news" }
+              ["data.title"]: { eq: news.data.title }
             },
             true
           )
@@ -585,27 +582,27 @@ describe("rest api", () => {
           _refs: {
             content: {
               products: {
-                [productId]: {
-                  _id: productId,
+                [product.id]: {
+                  _id: product.id,
                   _type: "products",
-                  ean: "fooBar"
+                  ean: product.data.ean
                 }
               }
             },
             media: expectedMedia
           },
-          items: [{ _id: newsId.toString(), ...expectedPublishedContent }],
+          items: [{ _id: news.id.toString(), ...expectedPublishedContent }],
           total: 1
         });
       });
 
-      it("should not include not existing references", async () => {
+      it("should only include existing references", async () => {
         await expect(
           await list(
             "news",
             {
               join: { products: ["ean"] },
-              ["data.title"]: { eq: "updated-news" }
+              ["data.title"]: { eq: updatedNews.data.title }
             },
             false
           )
@@ -615,7 +612,7 @@ describe("rest api", () => {
             media: expectedMedia
           },
           items: [
-            { _id: newsId.toString().toString(), ...expectedDraftsContent }
+            { _id: news.id.toString().toString(), ...expectedDraftsContent }
           ],
           total: 1
         });
