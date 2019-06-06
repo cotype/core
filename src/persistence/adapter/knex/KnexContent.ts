@@ -16,6 +16,7 @@ import setPosition from "../../../model/setPosition";
 import getAlwaysUniqueFields from "../../../model/getAlwaysUniqueFields";
 import getPositionFields from "../../../model/getPositionFields";
 import getInverseReferenceFields from "../../../model/getInverseReferenceFields";
+import log from "../../../log";
 
 const ops: any = {
   eq: "=",
@@ -322,9 +323,9 @@ export default class KnexContent implements ContentAdapter {
               ...ref
             });
           } catch (error) {
-            console.error("createRev: " + error.code);
-            console.error(error.sqlMessage);
-            console.error("SQL: " + error.sql);
+            log.error("createRev: " + error.code);
+            log.error(error.sqlMessage);
+            log.error("SQL: " + error.sql);
           }
         }
       }
