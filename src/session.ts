@@ -1,5 +1,6 @@
 import randomString from "crypto-random-string";
 import cookieSession from "cookie-session";
+import log from "./log";
 
 function secret(
   opts: CookieSessionInterfaces.CookieSessionOptions = {}
@@ -18,7 +19,7 @@ function secret(
   }
 
   if (process.env.NODE_ENV === "development") {
-    console.info(
+    log.info(
       `SESSION_SECRET env not set - using default secret for development.`
     );
     return {
@@ -27,10 +28,10 @@ function secret(
     };
   }
 
-  console.info(
+  log.info(
     `SESSION_SECRET env not set - generating a random secret for production.`
   );
-  console.info(
+  log.info(
     `NOTE: Set a secret to keep sessions across server restarts and to allow horizontal scaling.`
   );
   return {

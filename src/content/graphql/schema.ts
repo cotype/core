@@ -1,5 +1,6 @@
 import { Models, Type, ObjectType } from "../../../typings";
 import _ from "lodash";
+import log from "../../log";
 import {
   GraphQLSchema,
   GraphQLString,
@@ -65,7 +66,7 @@ export function buildSchema(models: Models) {
       return new GraphQLList(createType(def.item, name));
     }
 
-    console.warn(`Unsupported type ${JSON.stringify(def)} at ${name}`);
+    log.warn(`Unsupported type ${JSON.stringify(def)} at ${name}`);
     throw new Error(`Unknown type ${JSON.stringify(def)} at ${name}`);
   }
 

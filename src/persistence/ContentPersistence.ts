@@ -17,6 +17,7 @@ import { getDeepJoins } from "../content/rest/filterRefData";
 import { ContentFormat } from "../../typings";
 import extractMatch from "../model/extractMatch";
 import extractText from "../model/extractText";
+import log from "../log";
 
 function findValueByPath(path: string | undefined, data: Cotype.Data) {
   if (!path) return;
@@ -74,12 +75,12 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       const hookData = await preHook(model, data);
       return Promise.all([action(hookData), hookData]);
     } catch (error) {
-      console.error(
+      log.error(
         `💥  An error occurred in the content preHook "${event}" for a "${
           model.name
         }" content`
       );
-      console.error(error);
+      log.error(error);
       return Promise.all([action(data), data]);
     }
   }
@@ -97,12 +98,12 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     try {
       await postHook(model, dataRecord);
     } catch (error) {
-      console.error(
+      log.error(
         `💥  An error occurred in the content content postHook "${event}" for a "${
           model.name
         }" content`
       );
-      console.error(error);
+      log.error(error);
     }
   }
 

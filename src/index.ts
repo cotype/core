@@ -19,6 +19,7 @@ import promiseRouter from "express-promise-router";
 import * as path from "path";
 import { resolve as resolveUrl } from "url";
 import * as fs from "fs-extra";
+import log from "./log";
 import session from "./session";
 
 import buildModels from "./model";
@@ -62,7 +63,8 @@ export {
   SessionOpts,
   RequestHandler,
   AnonymousPermissions,
-  ContentPersistence
+  ContentPersistence,
+  log
 };
 
 export type Opts = {
@@ -254,7 +256,7 @@ export async function init(opts: Opts) {
     if (err instanceof HttpError) {
       res.status(err.status);
     } else {
-      console.error(req.method, req.path, err);
+      log.error(req.method, req.path, err);
       res.status(500);
     }
     res.end(err.message);

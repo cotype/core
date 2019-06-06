@@ -8,6 +8,7 @@ import ReferenceConflictError from "../persistence/errors/ReferenceConflictError
 import Storage from "./storage/Storage";
 import upload from "./upload";
 import inspect from "./inspect";
+import log from "../log";
 
 export default function routes(
   router: Router,
@@ -109,7 +110,7 @@ export default function routes(
       if (err instanceof ReferenceConflictError) {
         res.status(400).json(err.refs);
       } else {
-        console.error(err);
+        log.error(err);
         res.status(500).end();
       }
     }

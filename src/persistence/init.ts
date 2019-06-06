@@ -1,6 +1,7 @@
 import { Permission } from "../auth/acl";
 const { view, edit, publish } = Permission;
 
+import log from '../log';
 import bcrypt from "bcryptjs";
 import SettingsPersistence from "./SettingsPersistence";
 import ContentPersistence from "./ContentPersistence";
@@ -16,7 +17,7 @@ export default async function(
   const Users = settings.getModel("users")!;
   const adminRole = await settings.adapter.find(Roles, "name", "admin");
   if (!adminRole) {
-    console.info("Creating admin role");
+    log.info("Creating admin role");
     const role = await settings.adapter.create(Roles, {
       name: "admin",
       permissions: {

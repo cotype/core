@@ -7,6 +7,7 @@ import { PersistenceAdapter } from "..";
 import KnexSettings from "./KnexSettings";
 import KnexContent from "./KnexContent";
 import KnexMedia from "./KnexMedia";
+import logger from "../../../log";
 
 type KnexSeedsConfig = SeedsConfig & {
   directory: string;
@@ -33,8 +34,8 @@ export default async function(
     deprecate() {
       /* noop */
     },
-    debug: console.debug,
-    error: console.error
+    debug: logger.debug,
+    error: logger.error
   };
 
   async function seedMedia({ directory, uploads }: KnexSeedsConfig) {
