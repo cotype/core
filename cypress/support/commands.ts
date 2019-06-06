@@ -1,4 +1,4 @@
-import { ReinitOpts } from "../../demo/server/reInitMiddleware";
+import { ReinitOpts } from "../../demo/server/reinit";
 import { resolve } from "path";
 import { KnexConfig } from "../../src/persistence/adapter/knex";
 import loginPage from "../pages/login";
