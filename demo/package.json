@@ -4,9 +4,9 @@
   "scripts": {
     "clean": "rm -f dev_db",
     "start": "ts-node --files server/server.ts",
-    "testserver": "NODE_ENV=test PORT=`get-port` npm start",
+    "testserver": "NODE_ENV=test PORT=`get-port` npm dev",
     "testserver:ci": "export CLIENT_MIDDLEWARE=production; export NODE_ENV=test; PORT=`get-port` npm start",
-    "dev": "echo $NODE_ENV && nodemon --watch ../typings --watch ./ --watch ../src --ext ts,json --exec npx ts-node --files server/server.ts"
+    "dev": "nodemon --watch ../typings --watch ./ --watch ../src --ext ts,json --exec npx ts-node --files server/server.ts"
   },
   "dependencies": {
     "@cotype/local-thumbnail-provider": "0.0.2",
