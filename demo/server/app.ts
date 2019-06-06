@@ -45,8 +45,8 @@ const defaultConfig: Opts = {
   navigation: navigation as Cotype.NavigationOpts[],
   thumbnailProvider: new LocalThumbnailProvider(storage),
   persistenceAdapter: knexAdapter(getKnexConfig()),
-  customSetup: (app: Express, persitence: ContentPersistence) => {
-    app.use("/crazyCustomRoute", async (req, res) => {
+  customSetup: (a: Express, persitence: ContentPersistence) => {
+    a.use("/crazyCustomRoute", async (req, res) => {
       res.json({ hello: "world" });
     });
   },
