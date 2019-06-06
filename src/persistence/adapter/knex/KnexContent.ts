@@ -168,7 +168,6 @@ export default class KnexContent implements ContentAdapter {
         uniqueFields.map(async f => {
           const criteria: any = {};
 
-
           const value = (f
             .split(".")
             .reduce(
@@ -208,7 +207,7 @@ export default class KnexContent implements ContentAdapter {
     model: Cotype.Model,
     models: Cotype.Model[],
     data: any,
-    id:string
+    id: string
   ): Promise<any> {
     const positionFields = getPositionFields(model);
     if (positionFields) {
@@ -227,7 +226,7 @@ export default class KnexContent implements ContentAdapter {
           criteria[`data.${f}`] = { gte: value };
           const opts = { offset: 0, limit: 3, orderBy: f, order: "asc" };
           const items = await this.list(model, models, opts, criteria);
-          items.items = items.items.filter((item)=>item.id === id)
+          items.items = items.items.filter(item => item.id === id);
           if (items.items[0]) {
             const sameOrGreater = (f
               .split(".")
@@ -822,7 +821,11 @@ export default class KnexContent implements ContentAdapter {
     const [count] = await k.clone().countDistinct(`${searchTable}.id as total`);
     const total = Number(count.total);
 
-    k.select([`${searchTable}.id`, "contents.type", "content_revisions.data"]);
+    k.distinct([
+      `${searchTable}.id`,
+      "contents.type",
+      "content_revisions.data"
+    ]);
 
     k.offset(Number(offset)).limit(Number(limit));
 
