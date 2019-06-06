@@ -33,16 +33,17 @@ export default function ImageCircle({
   size = 24,
   ...rest
 }: Props) {
+  const validImageSrc = src && /\.(jpg|jpeg|svg|png)$/i.test(src);
   return (
     <Circle
       {...rest}
       style={{
-        backgroundColor: src ? "transparent" : colorHash.hex(alt),
-        backgroundImage: src ? `url(${src})` : "none",
+        backgroundColor: validImageSrc ? "transparent" : colorHash.hex(alt),
+        backgroundImage: validImageSrc ? `url(${src})` : "none",
         fontSize: size
       }}
     >
-      {!src && alt.toString().slice(0, 2)}
+      {!validImageSrc && alt.toString().slice(0, 2)}
     </Circle>
   );
 }
