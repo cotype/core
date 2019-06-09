@@ -12,7 +12,7 @@
     "color-hash": "^1.0.3",
     "date.js": "^0.3.3",
     "downshift": "^3.2.7",
-    "emotion": "^9.2.12",
+    "emotion": "^10.0.9",
     "formik": "^1.5.6",
     "javascript-time-ago": "^2.0.1",
     "moment": "^2.24.0",
