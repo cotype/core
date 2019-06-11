@@ -77,7 +77,7 @@ export function testable(id) {
   }
 
   return {
-    "data-test-id": id
+    "data-testid": id
   };
 }
 

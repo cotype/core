@@ -11,7 +11,7 @@ type User = {
 };
 
 export function testableSelector(id) {
-  return `[data-test-id="${id}"]`;
+  return `[data-testid="${id}"]`;
 }
 
 function random() {
