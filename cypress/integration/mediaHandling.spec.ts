@@ -1,6 +1,7 @@
 import "cypress-file-upload";
 import frame from "../pages/frame";
 import content from "../pages/content";
+import media from "../pages/media";
 
 import mockedModels from "../mocks/models";
 const models = mockedModels(10);
@@ -11,7 +12,6 @@ context("Media", () => {
   let session: string;
 
   before(() => {
-    cy.reinit({ models, navigation: [] }, "reset");
     cy.login().then(s => (session = s));
     cy.fixture(image1Name, "base64").then(
       fileContent => (image1Content = fileContent)
@@ -19,141 +19,107 @@ context("Media", () => {
   });
 
   beforeEach(() => {
+    cy.reinit({ models, navigation: [] }, "reset");
     cy.restoreSession(session);
     frame.navigation("Media").click();
   });
 
-  it("upload single file", () => {
-    cy.testable("upload-zone").upload(
-      {
-        fileContent: image1Content,
-        fileName: image1Name,
-        mimeType: "image/png"
-      },
-      { subjectType: "drag-n-drop" }
-    );
+  it("uploads single file", () => {
+    media.upload({
+      fileContent: image1Content,
+      fileName: image1Name,
+      mimeType: "image/png"
+    });
 
-    cy.testable("media-tile").contains(image1Name);
+    media.tile(image1Name).should("have.length", 1);
   });
 
   it("uploads multiple files", () => {
-    const text1 = "aGVsbG8gd29ybGQ=";
-    const text2 = "d29ybGQgaGVsbG8=";
-
     const files = [
-      { fileName: "text1.txt", fileContent: text1, mimeType: "text/plain" },
+      {
+        fileName: "text1.txt",
+        fileContent: "aGVsbG8gd29ybGQ=",
+        mimeType: "text/plain"
+      },
       {
         fileName: "text2.txt",
-        fileContent: text2,
+        fileContent: "d29ybGQgaGVsbG8=",
         mimeType: "text/plain"
       }
     ];
+    media.upload(files);
 
-    cy.testable("upload-zone").upload(files, {
-      subjectType: "drag-n-drop"
+    media.tile(files[0].fileName).should("have.length", 1);
+    media.tile(files[1].fileName).should("have.length", 1);
+  });
+
+  it("shows duplicate error", () => {
+    media.upload({
+      fileContent: image1Content,
+      fileName: image1Name,
+      mimeType: "image/png"
     });
-  });
-  /*
-  it("should show duplicate alter", () => {
-    cy.testable("upload-zone").upload(
-      {
-        fileContent: image1Content,
-        fileName: image1Name,
-        mimeType: "image/png"
-      },
-      { subjectType: "drag-n-drop" }
-    );
-    cy.testableContains("overlay", image1Name);
-  });
+    media.tile(image1Name).should("have.length", 1);
 
-  it("should delete files", () => {
-    cy.testable("media-delete").each(el => {
-      el.click();
+    media.upload({
+      fileContent: image1Content,
+      fileName: image1Name,
+      mimeType: "image/png"
     });
+    cy.testableContains("overlay", image1Name).should("have.length", 1);
   });
 
-  it("show media details", () => {
-    cy.testable("upload-zone").upload(
-      {
-        fileContent: image1Content,
-        fileName: image1Name,
-        mimeType: "image/png"
-      },
-      { subjectType: "drag-n-drop" }
-    );
+  it("deletes files", () => {
+    media.upload({
+      fileContent: image1Content,
+      fileName: image1Name,
+      mimeType: "image/png"
+    });
+    media.tile(image1Name).should("have.length", 1);
 
-    cy.testable("media-details")
-      .first()
-      .as("media-tile")
-      .click();
+    media.delete(image1Name);
+    media.tile(image1Name).should("have.length", 0);
   });
 
-  it("update meta data", () => {
-    frame.navigation("Media").click();
-
-    cy.testable("media-details")
-      .first()
-      .click();
-
+  it("displays and saves media details", () => {
+    const tags = ["tag", "that"];
     const altText = "foo baz bar";
-    cy.testable("meta-data-alt")
-      .as("alt-input")
-      .type(altText);
 
-    const tagText = "tag that";
-    cy.testable("chip-list-input")
-      .as("tag-input")
-      .type(tagText)
-      .siblings("button")
-      .first()
-      .click();
+    media.upload({
+      fileContent: image1Content,
+      fileName: image1Name,
+      mimeType: "image/png"
+    });
 
-    cy.testable("chip-list-input")
-      .as("tag-input")
-      .type(tagText)
-      .siblings("button")
-      .first()
-      .click();
-
-    cy.contains("div", tagText)
-      .children("button")
-      .click();
-    cy.contains("button", "Save").click();
+    const details = media.details(image1Name);
+    details.should("have.length", 1);
+    details.setAlt(altText);
+    details.addTag(tags[0]);
+    details.addTag(tags[1]);
+    details.deleteTag(tags[0]);
+    details.save();
 
     cy.reload();
 
-    cy.testable("media-details")
-      .first()
-      .click();
-
-    cy.testable("meta-data-alt").should("have.value", altText);
-    cy.contains("div", tagText);
+    const details2 = media.details(image1Name);
+    details2.alt().should("have.value", altText);
+    details2.tag(tags[0]).should("have.length", 0);
+    details2.tag(tags[1]).should("have.length", 1);
   });
- */
-  it("create new content with media", () => {
-    frame.navigation("Content").click();
-    frame.sidebarItem("Media").should("have.length", 1);
 
+  it("creates new content with media", () => {
+    frame.navigation("Content").click();
     frame.sidebarItem("Media").click();
 
     content.add();
-
-    const fileName = "cy2.png";
-    cy.fixture(fileName, "base64").then(fileContent => {
-      cy.testable("upload-zone").upload(
-        { fileContent, fileName, mimeType: "image/png" },
-        { subjectType: "drag-n-drop" }
-      );
-      cy.testable("media-caption").contains(fileName);
-      cy.testable("media-preview").should("have.attr", "src");
+    content.upload({
+      fileContent: image1Content,
+      fileName: image1Name,
+      mimeType: "image/png"
     });
-
     content.save();
 
     frame.navigation("Media").click();
-    cy.testable("media-caption").contains(fileName);
-
-    cy.go("back");
-    content.delete();
+    media.tile(image1Name).should("have.length", 1);
   });
 });
