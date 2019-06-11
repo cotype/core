@@ -1,3 +1,3 @@
-import List from "./lists/List";
+import Content from "./lists/Content";
 
-export default new List();
+export default new Content();

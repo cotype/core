@@ -10,7 +10,7 @@ type User = {
   name: string;
 };
 
-function testableSelector(id) {
+export function testableSelector(id) {
   return `[data-test-id="${id}"]`;
 }
 
