@@ -4,7 +4,7 @@
   "scripts": {
     "clean": "rm -f dev_db",
     "start": "ts-node --files server/server.ts",
-    "testserver": "NODE_ENV=test PORT=`get-port` npm dev",
+    "testserver": "NODE_ENV=test PORT=`get-port` npm run dev",
     "testserver:ci": "export CLIENT_MIDDLEWARE=production; export NODE_ENV=test; PORT=`get-port` npm start",
     "dev": "nodemon --watch ../typings --watch ./ --watch ../src --ext ts,json --exec npx ts-node --files server/server.ts"
   },
