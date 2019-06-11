@@ -1,6 +1,9 @@
 import chalk from "chalk";
 
 function logo(background: string = "#FB249D", color: string = "#ffffff") {
+  if (!chalk.supportsColor) {
+    return "{ cotype:";
+  }
   return (
     chalk.hex(background)("▐") +
     chalk.bgHex(background)(chalk.hex(color)(chalk.bold("{"))) +
