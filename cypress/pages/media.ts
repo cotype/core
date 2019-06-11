@@ -39,10 +39,11 @@ export default {
   upload(files: Cypress.FileData | Cypress.FileData[]) {
     cy.testable("upload-zone").upload(files, { subjectType: "drag-n-drop" });
   },
+  caption(fileName: string) {
+    return cy.testableContains("media-caption", fileName, { timeout: 20000 });
+  },
   tile(fileName: string) {
-    return cy
-      .testableContains("media-caption", fileName, { timeout: 20000 })
-      .closest(testableSelector("media-tile"));
+    return this.caption(fileName).closest(testableSelector("media-tile"));
   },
   delete(fileName: string) {
     this.tile(fileName)
