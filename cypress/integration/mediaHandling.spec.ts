@@ -78,7 +78,7 @@ context("Media", () => {
     media.tile(image1Name).should("have.length", 1);
 
     media.delete(image1Name);
-    media.tile(image1Name).should("have.length", 0);
+    media.caption(image1Name).should("have.length", 0);
   });
 
   it("displays and saves media details", () => {
