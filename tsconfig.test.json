@@ -1,5 +1,6 @@
 {
   "include": [
+    "./jest.setup.ts",
     "./src/**/*",
     "./client/src/**/*",
     "./typings/**/*",
@@ -17,6 +18,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "skipLibCheck": true,
+    "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
