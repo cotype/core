@@ -1,7 +1,6 @@
 jest.mock("../Header", () => ({
   HEIGHT: 50
 }));
-jest.mock("../basePath", () => "");
 
 import React from "react";
 import { render } from "@testing-library/react";
