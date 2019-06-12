@@ -49,6 +49,7 @@
     "@types/react-virtualized": "^9.18.12",
     "jest-dom": "^3.5.0",
     "parcel-bundler": "^1.11.0",
-    "typescript": "^3.3.4000"
+    "typescript": "^3.3.4000",
+    "xhr-mock": "^2.4.1"
   }
 }
