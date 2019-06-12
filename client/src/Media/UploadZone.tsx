@@ -4,7 +4,7 @@ import Dropzone from "react-dropzone";
 import api from "../api";
 import { matchMime, testable } from "../utils/helper";
 
-type Props = {
+export type Props = {
   render: any;
   onUpload: any;
   className: string;
