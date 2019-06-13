@@ -147,6 +147,8 @@ NOTE: THe content API is read-only. Modifying content is only possible via the m
 
 The content model is defined using only primitives, so it can be serialized into JSON. It describes what content types exist, which fields they have and how they are edited.
 
+For a list of available content models check out the [typings file](typings/models.d.ts).
+
 Currently the content model is part of the server and changes require a re-deployment/restart in order to take effect. But since the model is plain JSON it would be pretty easy to manage content types directly in the CMS and store is alongside the data.
 
 ### Data Storage
