@@ -263,7 +263,7 @@ export type WritableDataSource = ReadOnlyDataSource & {
     model: Model,
     data: object,
     models: Model[]
-  ): Promise<string>;
+  ): Promise<{ id: string; data: object }>;
   delete(principal: Principal, model: Model, id: string): Promise<void>;
   update(
     principal: Principal,

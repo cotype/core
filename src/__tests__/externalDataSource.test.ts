@@ -187,8 +187,8 @@ describe("external data source support", () => {
   describe("with WritableDataSource", () => {
     it("creates an item", async () => {
       const id = createId();
-      pagesSource.create = jest.fn(() => Promise.resolve(id));
       const data = { title: "bar" };
+      pagesSource.create = jest.fn(() => Promise.resolve({ id, data }));
       const res = await server
         .post(`/admin/rest/content/pages`)
         .set(headers)

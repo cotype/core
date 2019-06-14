@@ -174,7 +174,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     this.applyPostHooks("onCreate", model, { id, data: hookData });
 
-    return id;
+    return { id, data: hookData };
   }
 
   async createRevision(

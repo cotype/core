@@ -101,8 +101,13 @@ export default (
       return;
     }
     const data = _.pick(body.data, [...Object.keys(model.fields)]);
-    const id = await dataSource.create(principal, model, data, models.content);
-    return res.json({ id, data });
+    const { id, data: responseData } = await dataSource.create(
+      principal,
+      model,
+      data,
+      models.content
+    );
+    return res.json({ id, data: responseData });
   });
 
   router.delete("/admin/rest/content/:modelName/:id", async (req, res) => {
@@ -247,7 +252,7 @@ export default (
       res.statusMessage = err.message;
       return res.status(418).end();
     }
-    if(err){
+    if (err) {
       console.error(err);
       return res.status(500).end();
     }
