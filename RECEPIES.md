@@ -74,13 +74,13 @@ export default function createUnion<S extends Model[]>(
   return function Union({ children }: { children: S }) {
     return (
       <>
-        {children.map(({ _type, ...props }) => {
+        {children.map(({ _type, ...props }, i) => {
           const Comp = comps[_type];
           /* We need to use any since `props` is still a union of all possible
              models because we have not explicitly discriminated the model.
              But since comps is securely typed, we know that `Comp` can handle
              this exact props. */
-          return <Comp {...props as any} />;
+          return <Comp key={i} {...props as any} />;
         })}
       </>
     );
