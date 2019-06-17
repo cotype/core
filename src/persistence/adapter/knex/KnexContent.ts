@@ -911,6 +911,7 @@ export default class KnexContent implements ContentAdapter {
       if (search.scope === "title") {
         if (model.title) criteria[model.title] = { like: `%${search.term}%` };
       } else {
+        const searchTerm = search.term.toLowerCase().trim();
         k.join("content_search", join => {
           join.on("contents.id", "content_search.id");
           join.on(
@@ -924,12 +925,12 @@ export default class KnexContent implements ContentAdapter {
         if (this.knex.client.config.client === "pg") {
           k.whereRaw(
             "content_search.text @@ plainto_tsquery(?)",
-            `${search.term}:*`
+            `${searchTerm}:*`
           );
         } else if (this.knex.client.config.client === "mysql") {
-          k.whereRaw("match(text) against(?)", search.term);
+          k.whereRaw("match(text) against(?)", searchTerm);
         } else {
-          k.where("content_search.text", "like", `%${search.term}%`);
+          k.where("content_search.text", "like", `%${searchTerm}%`);
         }
       }
     }
