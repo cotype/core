@@ -133,24 +133,21 @@ describe("external data source support", () => {
       };
       newsSource.list = jest.fn(() => Promise.resolve(response));
 
+      const query = {
+        offset: "2",
+        limit: "500",
+        search: { term: "foo", scope: "title" }
+      };
       const res = await server
         .get(`/admin/rest/content/news`)
         .set(headers)
-        .query({
-          offset: "2",
-          limit: "500",
-          search: { term: "foo", scope: "title" }
-        })
+        .query(query)
         .expect(200);
 
       await expect(newsSource.list).toHaveBeenCalledWith(
         expect.objectContaining(adminUser),
         expect.objectContaining(newsModel),
-        expect.objectContaining({
-          offset: "2",
-          limit: "500",
-          search: { term: "foo", scope: "title" }
-        }),
+        expect.objectContaining(query),
         undefined
       );
       await expect(res.body).toEqual(response);
