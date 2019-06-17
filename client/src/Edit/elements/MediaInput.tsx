@@ -186,11 +186,8 @@ export default class MediaInput extends Component<Props, State> {
     );
   };
 
-  onUpload = (res: {
-    files: MediaType[] | string[];
-    duplicates: MediaType[];
-  }) => {
-    this.chooseMedia(res.files);
+  onUpload = (files: MediaType[] | string[]) => {
+    this.chooseMedia(files);
   };
 
   externalRefDialog = () => {

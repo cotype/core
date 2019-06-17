@@ -18,12 +18,6 @@ const Root = styled("div")`
   display: flex;
   flex-direction: column;
 `;
-const DuplicateDialog = styled("div")`
-  width: 50vw;
-  height: 50vh;
-  max-height: 50vw;
-`;
-
 const Main = styled("div")`
   flex: 1;
   user-select: none;
@@ -59,7 +53,6 @@ type State = {
   lastRequestedIndex: number;
   editable: boolean;
   conflictingItems: object[] | any;
-  duplicates: Cotype.MediaType[] | null;
   fileType?: string;
   orderBy?: string;
   order?: string;
@@ -88,7 +81,6 @@ export default class Media extends Component<Props, State> {
     lastRequestedIndex: 0,
     details: null,
     conflictingItems: null,
-    duplicates: null,
     editable: false,
     orderBy: "created_at",
     order: "desc",
@@ -171,10 +163,9 @@ export default class Media extends Component<Props, State> {
       });
   };
 
-  onUpload = (res: { files: MediaType[]; duplicates: MediaType[] }) => {
-    this.fetchData(0);
-    if (res.duplicates.length) {
-      this.setState({ duplicates: res.duplicates });
+  onUpload = (files: MediaType[]) => {
+    if (files.length) {
+      this.fetchData(0);
     }
   };
 
@@ -222,28 +213,6 @@ export default class Media extends Component<Props, State> {
     this.setState({ conflictingItems: null });
   };
 
-  renderDuplicatesDialog() {
-    const { duplicates } = this.state;
-    if (duplicates === null) return null;
-    return (
-      <ModalDialog
-        title={"One or more files you tried to upload already exist."}
-        onClose={() => this.setState({ duplicates: null })}
-      >
-        <DuplicateDialog>
-          <Gallery
-            count={duplicates.length}
-            data={duplicates}
-            editable={false}
-            onSelect={undefined}
-            onDelete={undefined}
-            onRowsRendered={() => undefined}
-          />
-        </DuplicateDialog>
-      </ModalDialog>
-    );
-  }
-
   render() {
     const {
       total,
@@ -265,7 +234,6 @@ export default class Media extends Component<Props, State> {
             replace the file in following locations:"
           />
         )}
-        {this.renderDuplicatesDialog()}
         {details && (
           <Details
             onClose={this.closeDetails}

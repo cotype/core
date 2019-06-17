@@ -5,7 +5,7 @@ import request, { SuperTest, Test } from "supertest";
 import { init, Persistence, knexAdapter } from "..";
 import models from "./models";
 import { login } from "./util";
-import FsStorage from "../media/storage/FsStorage";
+import FsStorage from "../media/FsStorage";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 
 const uploadDir = path.join(__dirname, ".uploads");

@@ -5,7 +5,8 @@ import {
   NavigationItem,
   ModelItem,
   ModelItemOpts,
-  GroupItemOpts
+  GroupItemOpts,
+  Info
 } from "../../typings";
 
 type ModelFilter = (model: Model) => boolean;
@@ -34,18 +35,11 @@ function modelToItem(m: Model): ModelItem {
   };
 }
 
-type Info = {
-  modelPaths: {
-    content: ModelPaths;
-  };
-  navigation: NavigationItem[];
-};
-
 export function buildInfo(
   navigation: NavigationOpts[],
   models: Models,
   isAllowed: ModelFilter
-): Info {
+): Pick<Info, "modelPaths" | "navigation"> {
   const contentModels = models.content;
   const contentModelPaths: ModelPaths = {};
   const usedModels: Model[] = [];

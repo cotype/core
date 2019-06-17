@@ -6,7 +6,7 @@ import request from "supertest";
 import { init, Persistence, knexAdapter } from "../../..";
 import models from "./models";
 import { login } from "../../../__tests__/util";
-import FsStorage from "../../../media/storage/FsStorage";
+import FsStorage from "../../../media/FsStorage";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 import faker from "faker";
 import { Meta } from "../../../../typings";

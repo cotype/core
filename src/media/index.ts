@@ -4,8 +4,8 @@ import { OpenApiBuilder } from "openapi3-ts";
 import { Persistence } from "../persistence";
 import routes from "./routes";
 import describe from "./describe";
-import Storage from "./storage/Storage";
-import FsStorage from "./storage/FsStorage";
+import Storage from "./Storage";
+import FsStorage from "./FsStorage";
 
 export default function media(
   persistence: Persistence,

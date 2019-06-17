@@ -6,7 +6,7 @@ import { init, Persistence, knexAdapter } from "..";
 import models from "./models";
 import { login, withTempRole } from "./util";
 import { Permission } from "../auth/acl";
-import FsStorage from "../media/storage/FsStorage";
+import FsStorage from "../media/FsStorage";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 
 const { view, edit, publish } = Permission;

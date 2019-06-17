@@ -1,12 +1,4 @@
-import {
-  Model,
-  NavigationItem,
-  User,
-  Principal,
-  Data,
-  ModelPaths,
-  BaseUrls
-} from "../../typings";
+import { Model, NavigationItem, Data, Info } from "../../typings";
 import * as React from "react";
 import {
   BrowserRouter as Router,
@@ -28,6 +20,7 @@ import IconGallery from "./IconGallery";
 import List from "./List";
 import SplitPane from "./common/SplitPane";
 import ErrorBoundary from "./ErrorBoundary";
+import MediaInfoContext from "./MediaInfoContext";
 
 const Root = styled("div")`
   height: 100%;
@@ -41,17 +34,7 @@ const Main = styled("div")`
   display: flex;
 `;
 
-type State = {
-  models?: {
-    settings: Model[];
-    content: Model[];
-    media: Model[];
-  };
-  user?: User & Principal;
-  navigation?: NavigationItem[];
-  modelPaths?: ModelPaths;
-  baseUrls?: BaseUrls;
-};
+type State = Partial<Info>;
 class App extends React.Component<{}, State> {
   state: State = {};
 
@@ -78,6 +61,7 @@ class App extends React.Component<{}, State> {
     const {
       models,
       user,
+      media,
       navigation = [],
       modelPaths = null,
       baseUrls = null
@@ -93,84 +77,86 @@ class App extends React.Component<{}, State> {
         <UploadProvider client={createXhrClient({ baseUrl: api.baseURI })}>
           <UserContext.Provider value={user}>
             <ModelPathsContext.Provider value={{ modelPaths, baseUrls }}>
-              <Router>
-                <Root>
-                  <Header navigation={navigation} />
-                  <ErrorBoundary>
-                    <Main>
-                      <Switch>
-                        {navigation.map(item => (
-                          <Route
-                            key={item.path}
-                            path={`${basePath}${item.path}`}
-                            render={routeProps => {
-                              switch (item.type) {
-                                case "model":
-                                  return (
-                                    <SplitPane>
-                                      <List
+              <MediaInfoContext.Provider value={media}>
+                <Router>
+                  <Root>
+                    <Header navigation={navigation} />
+                    <ErrorBoundary>
+                      <Main>
+                        <Switch>
+                          {navigation.map(item => (
+                            <Route
+                              key={item.path}
+                              path={`${basePath}${item.path}`}
+                              render={routeProps => {
+                                switch (item.type) {
+                                  case "model":
+                                    return (
+                                      <SplitPane>
+                                        <List
+                                          {...routeProps}
+                                          model={
+                                            models.content.find(
+                                              ({ name }) => name === item.model
+                                            ) as Model
+                                          }
+                                        />
+                                      </SplitPane>
+                                    );
+                                  default:
+                                    return (
+                                      <Models
                                         {...routeProps}
-                                        model={
-                                          models.content.find(
-                                            ({ name }) => name === item.model
-                                          ) as Model
-                                        }
+                                        models={models.content}
+                                        navigation={item.items}
                                       />
-                                    </SplitPane>
-                                  );
-                                default:
-                                  return (
-                                    <Models
-                                      {...routeProps}
-                                      models={models.content}
-                                      navigation={item.items}
-                                    />
-                                  );
-                              }
-                            }}
-                          />
-                        ))}
-                        <Route
-                          path={`${basePath}/media`}
-                          render={props => (
-                            <Media {...props} model={models.media} />
-                          )}
-                        />
-                        <Route
-                          path={`${basePath}/settings`}
-                          render={props => (
-                            <Models
-                              {...props}
-                              models={models.settings}
-                              navigation={models.settings.map(
-                                ({ name, plural }) =>
-                                  ({
-                                    type: "model",
-                                    model: name,
-                                    path: `/settings/${name}`,
-                                    name: plural
-                                  } as NavigationItem)
-                              )}
-                              onChange={this.settingsChanged}
+                                    );
+                                }
+                              }}
                             />
-                          )}
-                        />
-                        <Route
-                          path={`${basePath}/icons`}
-                          component={IconGallery}
-                        />
-                        <Route exact path={basePath}>
-                          <Redirect
-                            to={`${basePath}${
-                              navigation[0] ? navigation[0].path! : "/media"
-                            }`}
+                          ))}
+                          <Route
+                            path={`${basePath}/media`}
+                            render={props => (
+                              <Media {...props} model={models.media} />
+                            )}
                           />
-                        </Route>
-                      </Switch>
-                    </Main>
-                  </ErrorBoundary>
-                </Root>
-              </Router>
+                          <Route
+                            path={`${basePath}/settings`}
+                            render={props => (
+                              <Models
+                                {...props}
+                                models={models.settings}
+                                navigation={models.settings.map(
+                                  ({ name, plural }) =>
+                                    ({
+                                      type: "model",
+                                      model: name,
+                                      path: `/settings/${name}`,
+                                      name: plural
+                                    } as NavigationItem)
+                                )}
+                                onChange={this.settingsChanged}
+                              />
+                            )}
+                          />
+                          <Route
+                            path={`${basePath}/icons`}
+                            component={IconGallery}
+                          />
+                          <Route exact path={basePath}>
+                            <Redirect
+                              to={`${basePath}${
+                                navigation[0] ? navigation[0].path! : "/media"
+                              }`}
+                            />
+                          </Route>
+                        </Switch>
+                      </Main>
+                    </ErrorBoundary>
+                  </Root>
+                </Router>
+              </MediaInfoContext.Provider>
             </ModelPathsContext.Provider>
           </UserContext.Provider>
         </UploadProvider>

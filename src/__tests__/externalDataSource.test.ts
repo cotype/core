@@ -10,7 +10,7 @@ import request, { SuperTest, Test } from "supertest";
 import models from "./models";
 import { login } from "./util";
 import { init, Persistence, knexAdapter } from "..";
-import FsStorage from "../media/storage/FsStorage";
+import FsStorage from "../media/FsStorage";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 
 let base = 0;

@@ -6,7 +6,8 @@ import {
   NavigationOpts,
   ThumbnailProvider,
   BaseUrls,
-  ContentHooks
+  ContentHooks,
+  Info
 } from "../typings";
 import express, {
   Request,
@@ -46,14 +47,14 @@ import {
   ExternalDataSourceWithOptionalHelper
 } from "./externalDataSourceHelper";
 import ContentPersistence from "./persistence/ContentPersistence";
-import Storage from "./media/storage/Storage";
+import Storage from "./media/Storage";
 
 type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
 
 export { Persistence } from "./persistence";
 export { default as knexAdapter } from "./persistence/adapter/knex";
 export * from "../typings";
-export { default as FsStorage } from "./media/storage/FsStorage";
+export { default as FsStorage } from "./media/FsStorage/FsStorage";
 
 export * from "./utils";
 export {
@@ -202,13 +203,17 @@ export async function init(opts: Opts) {
     const filteredModels = filterModels(models, req.principal);
     const filter = createModelFilter(req.principal);
     const filteredInfo = buildInfo(opts.navigation || [], models, filter);
-
-    res.json({
+    const info: Info = {
       ...filteredInfo,
+      media: {
+        dynamicUploads: opts.storage.upload.dynamic
+      },
       models: filteredModels,
       baseUrls,
       user: req.principal
-    });
+    };
+
+    res.json(info);
   });
 
   router.get("/admin/rest/info/content", (req, res) => {

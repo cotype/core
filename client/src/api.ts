@@ -163,6 +163,10 @@ class Api {
     return this.get(`/media`, listOpts);
   }
 
+  putMedia(media: Cotype.Media[]): Promise<Cotype.Media> {
+    return this.put(`/media`, media);
+  }
+
   loadMedia(id: string): Promise<Cotype.Media> {
     return this.get(`/media/${prepareMediaId(id)}`);
   }

@@ -1,8 +1,6 @@
 import * as Cotype from "../../../typings";
 import React from "react";
-const UserContext = React.createContext<Cotype.User & Cotype.Principal | null>(
-  null
-);
+const UserContext = React.createContext<Cotype.Principal | null>(null);
 export default UserContext;
 
 /**
@@ -24,7 +22,7 @@ export function withUser<P extends WithUser>(
   ) {
     return (
       <UserContext.Consumer>
-        {user => <Component {...props as any} user={user} />}
+        {user => <Component {...(props as any)} user={user} />}
       </UserContext.Consumer>
     );
   };

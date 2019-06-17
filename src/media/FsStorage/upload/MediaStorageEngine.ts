@@ -1,7 +1,7 @@
 import path from "path";
 import { StorageEngine } from "multer";
 import rs from "crypto-random-string";
-import Storage from "../storage/Storage";
+import Storage from "../../Storage";
 
 export default class MediaStorageEngine implements StorageEngine {
   storage: Storage;

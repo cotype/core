@@ -1,14 +1,16 @@
 /**
  * Media routes (/api/media/*)
  */
-import tempWrite from "temp-write";
 import { Router } from "express";
 import { Persistence } from "../persistence";
 import ReferenceConflictError from "../persistence/errors/ReferenceConflictError";
-import Storage from "./storage/Storage";
-import upload from "./upload";
-import inspect from "./inspect";
+import Storage from "./Storage";
 import log from "../log";
+import { Meta } from "../../typings";
+
+type Media = Meta & {
+  hash: string;
+};
 
 export default function routes(
   router: Router,
@@ -16,49 +18,44 @@ export default function routes(
   storage: Storage
 ) {
   const { media } = persistence;
-  const uploadHandler = upload(storage);
+  const upload = storage.upload;
 
-  router.post("/admin/rest/upload", uploadHandler, async (req, res) => {
-    const { principal, files: filesUpload } = req;
-    const files: object[] = [];
-    const duplicates: object[] = [];
+  const uploadHandler = upload.getHandler();
+  if (uploadHandler) {
+    router.use("/admin/rest/upload", uploadHandler);
+  }
 
-    if (!Array.isArray(filesUpload)) return res.status(500).end();
+  if (upload.dynamic === true) {
+    router.get("/admin/rest/upload-url", async (req, res) => {
+      try {
+        const url = await upload.getUploadUrl();
+        res.status(200).json({ url });
+      } catch (e) {
+        res.status(500);
+      }
+    });
+  }
 
-    for (const fileKey in filesUpload) {
-      if (filesUpload.hasOwnProperty(fileKey)) {
-        const { filename: id, originalname, mimetype, size } = filesUpload[
-          fileKey
-        ];
+  router.put("/admin/rest/media", async (req, res) => {
+    const { principal, body } = req;
 
-        const tmpFile = await tempWrite(storage.retrieve(id));
-        const { width, height, type, hash } = await inspect(tmpFile);
-
-        const file = {
-          id,
-          size,
-          originalname,
-          mimetype,
-          imagetype: type,
-          width,
-          height,
-          hash
-        };
-
+    const files = await Promise.all(
+      body.map(async (file: Media) => {
         try {
           await media.create(principal, file);
-          files.push(file);
+          return file;
         } catch (error) {
-          // Find the already existing file(s)
-          const [data] = await media.findByHash([hash]);
-          duplicates.push(data);
-          files.push(data);
-          // remove previously uploaded duplicate
-          storage.remove(id);
+          if (error.message.includes("UNIQUE constraint failed: media.hash")) {
+            const [data] = await media.findByHash([file.hash]);
+            storage.remove(file.id);
+            return data;
+          }
+          throw error;
         }
-      }
-    }
-    res.json({ files, duplicates });
+      })
+    );
+
+    res.json(files.filter(Boolean));
   });
 
   router.get("/admin/rest/media", async (req, res) => {

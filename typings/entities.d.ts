@@ -382,3 +382,18 @@ export type ContentHooks = {
   preHooks?: PreHooks;
   postHooks?: PostHooks;
 };
+
+export type Info = {
+  models: {
+    settings: Model[];
+    content: Model[];
+    media: Model;
+  };
+  media: {
+    dynamicUploads: boolean;
+  };
+  user: Principal;
+  navigation: NavigationItem[];
+  modelPaths: ModelPaths;
+  baseUrls: BaseUrls;
+};

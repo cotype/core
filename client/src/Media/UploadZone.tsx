@@ -1,12 +1,17 @@
-import React, { useMemo, useEffect, memo } from "react";
+import React, { useMemo, useEffect, memo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useUpload } from "react-use-upload";
 import createValidator, { MediaFilter } from "./createValidator";
 import useValidation from "./useValidation";
+import { withMediaInfo } from "../MediaInfoContext";
+import { Info, Media } from "../../../typings";
+import { XHROptions } from "react-use-upload/cjs/clients/xhr";
+import api from "../api";
 
 export type Props = {
+  media?: Info["media"];
   render: any;
-  onUpload: any;
+  onUpload?: (media: Media) => void;
   className: string;
   activeClass: string;
   multiple?: boolean;
@@ -18,7 +23,38 @@ const noop = () => {
   /* noop */
 };
 
-export default function UploadZone({
+function getUploadConfig(media?: Info["media"]): Partial<XHROptions> {
+  if (!media || !media.dynamicUploads) {
+    return {
+      path: "/upload"
+    };
+  }
+
+  throw new Error("Implement me");
+  // return { getUrl };
+}
+
+function usePutFile(done: boolean | undefined, response: any) {
+  const [putResponse, setPutResponse] = useState<null | Media>(null);
+  useEffect(() => {
+    let abort = false;
+    if (!done) return;
+    api.putMedia(response.response.files).then(files => {
+      if (!abort) {
+        setPutResponse(files);
+      }
+    });
+
+    return () => {
+      abort = true;
+    };
+  }, [done, response]);
+
+  return putResponse;
+}
+
+function UploadZone({
+  media,
   render,
   onUpload,
   className,
@@ -40,15 +76,19 @@ export default function UploadZone({
     onDrop: onFiles
   });
   const { done, response, progress, error } = useUpload(files as any, {
-    path: "/upload",
+    ...getUploadConfig(media),
     name: "file",
     withCredentials: true
   });
+  const newFiles = usePutFile(done, response);
   useEffect(() => {
-    if (!done) return;
-    reset();
-    onUpload(response.response);
-  }, [done, response]);
+    if (newFiles) {
+      if (onUpload) {
+        onUpload(newFiles);
+      }
+      reset();
+    }
+  }, [newFiles, reset]);
 
   return (
     <div
@@ -66,7 +106,7 @@ export default function UploadZone({
           ...response,
           complete: done,
           onFiles,
-          progress,
+          progress: (progress || 0) * 0.9 + (newFiles ? 0.1 : 0) || undefined,
           error,
           files
         }}
@@ -74,3 +114,5 @@ export default function UploadZone({
     </div>
   );
 }
+
+export default withMediaInfo(UploadZone);
