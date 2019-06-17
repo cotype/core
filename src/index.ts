@@ -176,7 +176,7 @@ export async function init(opts: Opts) {
 
   const app = express();
 
-  app.use(express.json());
+  app.use(express.json({ limit: "1mb" }));
   app.use(session(opts.sessionOpts));
 
   app.all("/status", (req, res) => {
