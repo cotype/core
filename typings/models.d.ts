@@ -73,12 +73,14 @@ type DateString = {
   hidden?: boolean;
 };
 
+type SelectValue = { label: string; value: string | number } | string;
+
 type Select = {
   type: "string";
   input: "select";
   nullLabel?: string;
   fetch?: string;
-  values?: string[];
+  values?: SelectValue[];
   required?: boolean;
   index?: boolean;
   search?: boolean;
