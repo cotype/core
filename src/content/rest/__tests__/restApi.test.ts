@@ -8,21 +8,23 @@ import models from "./models";
 import { login } from "../../../__tests__/util";
 import FsStorage from "../../../media/storage/FsStorage";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
-import faker from 'faker';
+import faker from "faker";
 import { Meta } from "../../../../typings";
 
 const uploadDir = path.join(__dirname, ".uploads");
-
 
 const buildProduct = () => ({
   title: faker.lorem.slug(4),
   ean: faker.lorem.words(),
   description: {
     ops: [{ insert: faker.lorem.paragraph(5) }]
-  },
-})
+  }
+});
 
-const buildNews = (p: { productId?: string, mediaId?: string }, overrides?: object) => ({
+const buildNews = (
+  p: { productId?: string; mediaId?: string },
+  overrides?: object
+) => ({
   title: faker.lorem.lines(1),
   slug: faker.lorem.slug(4),
   date: faker.date.recent,
@@ -32,7 +34,7 @@ const buildNews = (p: { productId?: string, mediaId?: string }, overrides?: obje
   ref: p.productId ? { id: p.productId, model: "products" } : undefined,
   image: p.mediaId,
   ...overrides
-})
+});
 
 describe("rest api", () => {
   let app: any;
@@ -40,9 +42,9 @@ describe("rest api", () => {
   let server: request.SuperTest<request.Test>;
   let headers: object;
   let mediaFile: Meta;
-  let product: { id: string, data: ReturnType<typeof buildProduct> };
-  let news: { id: string, data: ReturnType<typeof buildNews> };
-  let updatedNews: { id: string, data: ReturnType<typeof buildNews> };
+  let product: { id: string; data: ReturnType<typeof buildProduct> };
+  let news: { id: string; data: ReturnType<typeof buildNews> };
+  let updatedNews: { id: string; data: ReturnType<typeof buildNews> };
 
   const create = async (type: string, data: object) => {
     const { body } = await server
@@ -95,11 +97,14 @@ describe("rest api", () => {
       .post(`/admin/rest/upload`)
       .set(headers)
       .attach("file", mediaBuffer, faker.system.commonFileName("txt"))
-      .expect(200))
+      .expect(200));
 
     product = await create("products", buildProduct());
 
-    news = await create("news", buildNews({ productId: product.id, mediaId: mediaFile.id }));
+    news = await create(
+      "news",
+      buildNews({ productId: product.id, mediaId: mediaFile.id })
+    );
 
     await server
       .post(`/admin/rest/content/products/${product.id}/publish`)
@@ -107,17 +112,17 @@ describe("rest api", () => {
       .send({ rev: 1 })
       .expect(204);
 
-
     await server
       .post(`/admin/rest/content/news/${news.id}/publish`)
       .set(headers)
       .send({ rev: 1 })
       .expect(204);
 
-    updatedNews = await update("news", news.id,
+    updatedNews = await update(
+      "news",
+      news.id,
       buildNews({ productId: product.id, mediaId: mediaFile.id })
     );
-
   });
 
   afterAll(async () => {
@@ -195,7 +200,7 @@ describe("rest api", () => {
       const { body } = await server
         .get(
           `/rest/${
-          published ? "published" : "drafts"
+            published ? "published" : "drafts"
           }/${type}/${id}?${stringify(join)}`
         )
         .expect(200);
@@ -225,7 +230,7 @@ describe("rest api", () => {
       const { body } = await server
         .get(
           `/rest/${
-          published ? "published" : "drafts"
+            published ? "published" : "drafts"
           }/search/content?${stringify({
             term,
             limit,
@@ -258,7 +263,7 @@ describe("rest api", () => {
       const { body } = await server
         .get(
           `/rest/${
-          published ? "published" : "drafts"
+            published ? "published" : "drafts"
           }/search/suggest?${stringify({
             term,
             linkableOnly,
@@ -281,7 +286,7 @@ describe("rest api", () => {
       const { body } = await server
         .get(
           `/rest/${
-          published ? "published" : "drafts"
+            published ? "published" : "drafts"
           }/${type}/${field}/${value}?${stringify(join)}`
         )
         .expect(200);
@@ -416,7 +421,7 @@ describe("rest api", () => {
     });
 
     describe("search contents", () => {
-      const searchForAllContent = faker.lorem.slug(5)
+      const searchForAllContent = faker.lorem.slug(5);
       const searchForProduct = faker.lorem.words(5);
       const searchForNews = faker.lorem.words(5);
       const searchForArticleNews = `${searchForNews} ${faker.lorem.word()}`;
@@ -438,17 +443,29 @@ describe("rest api", () => {
           title: `${searchForAllContent} ${faker.phone.phoneNumber()}`
         });
 
-        await create("news", buildNews({}, {
-          text: {
-            ops: [{ insert: description }]
-          }
-        }));
+        await create(
+          "news",
+          buildNews(
+            {},
+            {
+              text: {
+                ops: [{ insert: description }]
+              }
+            }
+          )
+        );
 
-        await create("articleNews", buildNews({}, {
-          text: {
-            ops: [{ insert: description }]
-          }
-        }));
+        await create(
+          "articleNews",
+          buildNews(
+            {},
+            {
+              text: {
+                ops: [{ insert: description }]
+              }
+            }
+          )
+        );
       });
 
       it("should find all content by search", async () => {
@@ -560,11 +577,22 @@ describe("rest api", () => {
       });
 
       it("shoud suggest terms", async () => {
-        const res = await suggest(`${searchForNews.split(" ").slice(0, 3).join(" ")}`, {
-          published: false,
-          includeModels: ["news"]
-        });
-        await expect(res).toMatchObject([searchForNews.split(" ").slice(0, 4).join(" ")]);
+        const res = await suggest(
+          `${searchForNews
+            .split(" ")
+            .slice(0, 3)
+            .join(" ")}`,
+          {
+            published: false,
+            includeModels: ["news"]
+          }
+        );
+        await expect(res).toMatchObject([
+          searchForNews
+            .split(" ")
+            .slice(0, 4)
+            .join(" ")
+        ]);
       });
     });
     describe("joins", () => {
