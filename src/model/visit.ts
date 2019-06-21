@@ -73,7 +73,7 @@ export default function visit(
             _.set(parent, key, undefined);
           }
         },
-        stringPath + key
+        Array.isArray(parent) ? stringPath.slice(0,-1) : stringPath + key // Remove Dot and ArrayKey when Parent is List
       );
       if (typeof ret !== "undefined") {
         if (parent && key) _.set(parent, key, ret);

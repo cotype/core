@@ -177,7 +177,17 @@ export const models: ModelOpts[] = [
             adventureStage
           }
         }
-      }
+      },
+      refListReverse:{
+        type: "references",
+        model: 'contentPages',
+        fieldName: 'refList'
+      },
+      refReverse:{
+        type: "references",
+        model: 'contentPages',
+        fieldName: 'ref'
+      },
     }
   },
   {
@@ -235,7 +245,7 @@ export const models: ModelOpts[] = [
         }
       },
       refList: {
-        label: "String List",
+        label: "Ref List",
         type: "list",
         sortable: true,
         item: {
@@ -243,6 +253,11 @@ export const models: ModelOpts[] = [
           models: [],
           allowAbsoluteRefs: true
         }
+      },
+      ref:{
+        type: "content",
+        models: [],
+        allowAbsoluteRefs: true
       },
       sections: {
         label: "Section",

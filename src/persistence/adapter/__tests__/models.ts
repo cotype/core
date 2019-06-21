@@ -10,7 +10,8 @@ const models: ModelOpts[] = [
       text: { type: "richtext" },
       inverseRef: {
         type:'references',
-        model:'pages'
+        model:'pages',
+        fieldName:'optionalNews'
       }
     }
   },

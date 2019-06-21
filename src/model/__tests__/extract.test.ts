@@ -20,7 +20,7 @@ describe("extractValues", () => {
       "test.field5.test": "hallo",
       test2: ["Hallo2", "Liste2"],
       empty: "null",
-      contentList: [456, 789]
+      contentList: [456, 789, 123]
     });
   });
   it("should extract all text", () => {
@@ -30,10 +30,10 @@ describe("extractValues", () => {
   });
   it("should extract all references", () => {
     expect(extractRefs(data, model, [model])).toEqual([
-      { content: 123, optional: true },
+      { content: 123, optional: true, fieldNames: "ref~contentList" },
       { content: 321, optional: false },
-      { content: 456, optional: true },
-      { content: 789, optional: true }
+      { content: 456, optional: true, fieldNames: "contentList" },
+      { content: 789, optional: true, fieldNames: "contentList" }
     ]);
   });
   it("should get All PositionFields", () => {

@@ -94,6 +94,7 @@ type PositionType = {
 type InverseReferenceType = {
   type: "references";
   model: string;
+  fieldName: string;
 };
 
 export type StringType = Text | Slug | Select | DateString | TextArea;
