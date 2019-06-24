@@ -101,7 +101,7 @@ export default class MediaInput extends Component<Props, State> {
   }
 
   static getHint(model) {
-    const { minHeight, minWidth, maxHeight, maxWidth, maxSize } = model;
+    const { minHeight, minWidth, maxHeight, maxWidth, maxSize, mimeType } = model;
     const str: string[] = [];
 
     if (minHeight) {
@@ -118,6 +118,9 @@ export default class MediaInput extends Component<Props, State> {
     }
     if (maxSize) {
       str.push("Max Größe: " + sizeFormat(maxSize, 2));
+    }
+    if (mimeType) {
+      str.push("Erlaubtes Dateiformat: "+mimeType);
     }
     if (str.length > 0) {
       return `(${str.join(", ")})`;
