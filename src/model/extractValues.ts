@@ -50,7 +50,7 @@ const extractValues = (obj: object, model: Model) => {
         } else if (field.item.type === "content") {
           setValue(
             stringPath,
-            arr.map((el: any) => el.value.id),
+            arr.map((el: any) => el.value && el.value.id).filter(Boolean),
             field.item.index
           );
         } else if (field.item.type === "object") {
