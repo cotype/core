@@ -223,8 +223,10 @@ export default class KnexContent implements ContentAdapter {
                 obj && obj[key] !== "undefined" ? obj[key] : undefined,
               data
             ) as unknown) as string;
+          if (value !== undefined) {
+            criteria[`data.${f}`] = { gte: value };
+          }
 
-          criteria[`data.${f}`] = { gte: value };
           const opts = { offset: 0, limit: 3, orderBy: f, order: "asc" };
           const items = await this.list(model, models, opts, criteria);
           items.items = items.items.filter(item => item.id === id);
