@@ -92,7 +92,7 @@
     "codecov": "3.5.0",
     "concurrently": "^4.0.0",
     "cypress": "^3.3.2",
-    "cypress-file-upload": "^3.1.2",
+    "cypress-file-upload": "^3.2.0",
     "faker": "^4.1.0",
     "get-port-cli": "^2.0.0",
     "install": "^0.12.2",
