@@ -44,7 +44,7 @@
     "@types/cookie-session": "^2.0.36",
     "@types/crypto-random-string": "^2.0.0",
     "@types/fs-extra": "^8.0.0",
-    "@types/got": "^9.4.1",
+    "@types/got": "^9.6.0",
     "@types/graphql": "^14.0.7",
     "@types/image-size": "^0.7.0",
     "@types/knex": "^0.16.1",
