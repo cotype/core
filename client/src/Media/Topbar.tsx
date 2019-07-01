@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import styled from "react-emotion";
 import ButtonImport from "../common/Button";
-import { UploadField } from "@navjobs/upload";
 import Icon from "../common/icons";
 import MoreButton from "../common/MoreButton";
+import UploadField from "./UploadField";
 
 const Root = styled("div")`
   padding: 0 20px;
@@ -214,7 +214,7 @@ export default class Topbar extends Component<Props, State> {
               // onFiles is not called when trying to upload the same file twice
               this.setState({ uploadFieldKey: new Date().getTime() });
             }}
-            uploadProps={{ multiple: true }}
+            multiple
           >
             <UploadButton>Upload New</UploadButton>
           </UploadField>

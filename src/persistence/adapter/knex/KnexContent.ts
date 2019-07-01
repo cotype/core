@@ -307,7 +307,6 @@ export default class KnexContent implements ContentAdapter {
     await this.extractText(data, model, id, rev, false);
 
     const refs = extractRefs(data, model, models);
-
     if (refs.length) {
       // insert refs one by one in case a foreign key constraint violation occurs.
       // In a perfect world there shouldn't be any dead references in the first place, but...
@@ -498,7 +497,7 @@ export default class KnexContent implements ContentAdapter {
     const inverseReferences = getInverseReferenceFields(model);
     if (inverseReferences.length > 0) {
       const inverseRefs = this.knex("content_references as iRef")
-        .select(this.aggregateRefs("iCont.id", "iCont.type"))
+        .select(this.aggregateRefs("iCont.id", "iCont.type", "iRef.fieldnames"))
         .leftJoin("contents as iCont", join => {
           join.on("iRef.id", "iCont.id");
           join.andOn(
@@ -911,6 +910,7 @@ export default class KnexContent implements ContentAdapter {
       if (search.scope === "title") {
         if (model.title) criteria[model.title] = { like: `%${search.term}%` };
       } else {
+        const searchTerm = search.term.toLowerCase().trim();
         k.join("content_search", join => {
           join.on("contents.id", "content_search.id");
           join.on(
@@ -924,12 +924,12 @@ export default class KnexContent implements ContentAdapter {
         if (this.knex.client.config.client === "pg") {
           k.whereRaw(
             "content_search.text @@ plainto_tsquery(?)",
-            `${search.term}:*`
+            `${searchTerm}:*`
           );
         } else if (this.knex.client.config.client === "mysql") {
-          k.whereRaw("match(text) against(?)", search.term);
+          k.whereRaw("match(text) against(?)", searchTerm);
         } else {
-          k.where("content_search.text", "like", `%${search.term}%`);
+          k.where("content_search.text", "like", `%${searchTerm}%`);
         }
       }
     }
@@ -1110,7 +1110,7 @@ export default class KnexContent implements ContentAdapter {
     const inverseReferences = getInverseReferenceFields(model);
     if (inverseReferences.length > 0) {
       const inverseRefs = this.knex("content_references as iRef")
-        .select(this.aggregateRefs("iCont.id", "iCont.type"))
+        .select(this.aggregateRefs("iCont.id", "iCont.type", "iRef.fieldNames"))
         .leftJoin("contents as iCont", join => {
           join.on("iRef.id", "iCont.id");
           join.andOn(
@@ -1163,15 +1163,15 @@ export default class KnexContent implements ContentAdapter {
     };
   }
 
-  private aggregateRefs(idCol: string, typeCol: string) {
+  private aggregateRefs(idCol: string, typeCol: string, fieldNamesCol: string) {
     const concatString =
       this.knex.client.config.client !== "pg"
         ? this.knex.client.config.client === "sqlite3"
-          ? `GROUP_CONCAT(?? || ':' || ??)`
-          : `GROUP_CONCAT(??, ':', ??)`
-        : `ARRAY_AGG(?? || ':' || ??)`;
+          ? `GROUP_CONCAT(?? || ':' || ?? || ':' || ??)`
+          : `GROUP_CONCAT(??, ':', ??, ':', ??)`
+        : `ARRAY_AGG(?? || ':' || ?? || ':' || ??)`;
 
-    return this.knex.raw(concatString, [typeCol, idCol]);
+    return this.knex.raw(concatString, [fieldNamesCol, typeCol, idCol]);
   }
 
   private parseData(
@@ -1193,17 +1193,19 @@ export default class KnexContent implements ContentAdapter {
       });
 
       refs.forEach(ref => {
-        const [, _content, _id] = /(.+?):(.+)/.exec(ref)!;
-        const field = fields.find(f => f.model === _content);
-        if (field) {
-          _update(parsedData, field.path, val =>
-            (val || []).concat({
-              _ref: "content",
-              _content,
-              _id
-            })
-          );
-        }
+        const [, _fieldNames, _content, _id] = /(.+?):(.+?):(.+)/.exec(ref)!;
+        const fieldNames = _fieldNames.split("~");
+        fields.forEach(f => {
+          if (f.model === _content && fieldNames.includes(f.fieldName)) {
+            _update(parsedData, f.path, val =>
+              (val || []).concat({
+                _ref: "content",
+                _content,
+                _id
+              })
+            );
+          }
+        });
       });
     }
     return { data: parsedData, ...rest } as any;
