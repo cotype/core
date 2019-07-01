@@ -410,14 +410,9 @@ export default class KnexContent implements ContentAdapter {
         .where("c.deleted", false)
 
         .andWhere(k => {
-          ids.forEach(itemId => {
-            k.orWhere("cr.id", itemId);
-          });
-          ids.forEach(itemId => {
-            k.orWhere("cr.content", itemId);
-          });
+          k.orWhereIn("cr.id", ids);
+          k.orWhereIn("cr.content", ids);
         })
-        .groupBy("crv.data")
         .groupBy("c.id");
       if (!first) {
         refs.whereIn(
