@@ -4,11 +4,7 @@ function logo(background: string = "#FB249D", color: string = "#ffffff") {
   if (!chalk.supportsColor) {
     return "{ cotype:";
   }
-  return (
-    chalk.hex(background)("▐") +
-    chalk.bgHex(background)(chalk.hex(color)(chalk.bold("{"))) +
-    chalk.hex(background)("▊")
-  );
+  return chalk.bgHex(background)(chalk.hex(color)(chalk.bold(" { ")));
 }
 
 export default {
