@@ -216,17 +216,14 @@ export default class KnexContent implements ContentAdapter {
         positionFields.map(async f => {
           const criteria: any = {};
 
-          const value = (f.split(".").reduce(
-            (obj, key) => {
-              if (obj && obj[key] !== "undefined") {
-                return obj[key];
-              } else {
-                obj[key] = "";
-                return obj[key];
-              }
-            },
-            data
-          ) as unknown) as string;
+          const value = (f.split(".").reduce((obj, key) => {
+            if (obj && obj[key] !== "undefined") {
+              return obj[key];
+            } else {
+              obj[key] = "";
+              return obj[key];
+            }
+          }, data) as unknown) as string;
           if (value !== undefined) {
             criteria[`data.${f}`] = { gte: value };
           }
@@ -412,8 +409,8 @@ export default class KnexContent implements ContentAdapter {
         .andWhere(k => {
           k.orWhereIn("cr.id", ids);
           k.orWhereIn("cr.content", ids);
-        })
-        .groupBy("c.id");
+        });
+
       if (!first) {
         refs.whereIn(
           "c.type",
