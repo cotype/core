@@ -14,7 +14,8 @@ type State = {
 };
 export default class OptionsInput extends Component<Props, State> {
   static getDefaultValue(props: Props) {
-    return null;
+    if (props.nullLabel) return null;
+    return props.values ? props.values[0] : null;
   }
 
   static validate(value: any, props: Props) {
