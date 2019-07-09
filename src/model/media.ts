@@ -15,7 +15,10 @@ const models: Cotype.ModelOpts[] = [
       height: { type: "number" },
       created_at: { type: "string" },
       title: { type: "string" },
-      alt: { type: "string" }
+      alt: { type: "string" },
+      credit: { type: "string" },
+      focusX: { type: "number" },
+      focusY: { type: "number" }
     }
   }
 ];
