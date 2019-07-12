@@ -113,7 +113,7 @@ const OrderButton = styled("div")`
   }
 `;
 
-type Props = {
+export type Props = {
   onFilterChange: (filter: string) => void;
   onSearch: (query: string) => void;
   filters: Array<{ label: string; value: string }>;
