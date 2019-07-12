@@ -65,6 +65,7 @@ type State = {
   order?: string;
   search?: string;
   filters: Array<{ label: string; value: string }>;
+  topbarProgress: number | undefined;
 };
 type Props = {
   model?: object;
@@ -92,7 +93,8 @@ export default class Media extends Component<Props, State> {
     editable: false,
     orderBy: "created_at",
     order: "desc",
-    filters: FilterTypes
+    filters: FilterTypes,
+    topbarProgress: undefined
   };
 
   constructor(props: Props) {
@@ -251,7 +253,8 @@ export default class Media extends Component<Props, State> {
       details,
       editable,
       conflictingItems,
-      filters
+      filters,
+      topbarProgress
     } = this.state;
     return (
       <Root {...testable("upload-zone")}>
@@ -273,25 +276,31 @@ export default class Media extends Component<Props, State> {
             fetchMediaItem={this.fetchMediaItem}
           />
         )}
+        <Topbar
+          onUpload={this.onUpload}
+          onUploadProgress={progress =>
+            this.setState({ topbarProgress: progress })
+          }
+          filters={filters}
+          onFilterChange={this.onFilterChange}
+          onOrderByChange={this.onOrderByChange}
+          onSearch={this.onSearch}
+          orderBys={OrderByTypes}
+          onOrderChange={this.onOrderChange}
+        />
         <UploadZone
           className={className}
           activeClass={activeClass}
           onUpload={this.onUpload}
-          render={({ progress, complete, onFiles }: any) => {
-            const itemCount = progress && !complete ? total + 1 : total;
+          render={({ progress, onFiles }: any) => {
+            const itemCount =
+              !!progress || !!topbarProgress ? total + 1 : total;
             const data =
-              progress && !complete ? [{ progress }, ...items] : items;
+              !!progress || !!topbarProgress
+                ? [{ progress: progress || topbarProgress }, ...items]
+                : items;
             return (
               <Fragment>
-                <Topbar
-                  onAdd={onFiles}
-                  filters={filters}
-                  onFilterChange={this.onFilterChange}
-                  onOrderByChange={this.onOrderByChange}
-                  onSearch={this.onSearch}
-                  orderBys={OrderByTypes}
-                  onOrderChange={this.onOrderChange}
-                />
                 <Main>
                   <Gallery
                     count={itemCount}
