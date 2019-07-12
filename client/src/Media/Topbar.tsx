@@ -1,9 +1,10 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import styled from "react-emotion";
 import ButtonImport from "../common/Button";
 import Icon from "../common/icons";
 import MoreButton from "../common/MoreButton";
 import UploadField from "./UploadField";
+import { useUpload } from "react-use-upload";
 
 const Root = styled("div")`
   padding: 0 20px;
@@ -115,111 +116,105 @@ const OrderButton = styled("div")`
 type Props = {
   onFilterChange: (filter: string) => void;
   onSearch: (query: string) => void;
-  onAdd: (files: any) => void;
   filters: Array<{ label: string; value: string }>;
   orderBys: Array<{ label: string; value: string }>;
   onOrderByChange: (orderBy: string) => void;
   onOrderChange: (order: string) => void;
+  onUpload: any;
+  onUploadProgress: (progress: number) => void;
 };
 
-type State = {
-  filter: string;
-  orderBy: string;
-  descending: boolean;
-  uploadFieldKey: number;
-};
-export default class Topbar extends Component<Props, State> {
-  state: State = {
-    filter: "",
-    orderBy: "Date",
-    descending: true,
-    uploadFieldKey: 0
-  };
+export default function Topbar(props: Props) {
+  const [filter, setFilter] = useState(props.filters[0].label);
+  const [orderBy, setOrderBy] = useState("Date");
+  const [descending, setDescending] = useState(true);
+  const [uploadFieldKey, setUploadFieldKey] = useState(0);
+  const [files, setFiles] = useState<FileList>();
 
-  constructor(props: Props) {
-    super(props);
-    if (props.filters && props.filters[0]) {
-      this.state.filter = props.filters[0].label;
-    }
-  }
+  const { done, response, progress, error } = useUpload(files as any, {
+    path: "/upload",
+    name: "file",
+    withCredentials: true
+  });
 
-  render() {
-    const {
-      filters,
-      onFilterChange,
-      onSearch,
-      onAdd,
-      orderBys,
-      onOrderByChange,
-      onOrderChange
-    } = this.props;
-    const { filter, orderBy, descending, uploadFieldKey } = this.state;
-    return (
-      <Root>
-        <Filters>
-          {filters &&
-            filters.map((f, idx) => (
-              <Button
-                active={f.label === filter}
-                key={idx}
-                onClick={() => {
-                  this.setState({ filter: f.label });
-                  onFilterChange(f.value);
-                }}
-              >
-                {f.label}
-              </Button>
-            ))}
-        </Filters>
-        <Order>
-          Orderd by: <span style={{ paddingLeft: "8px" }}>{orderBy}</span>
-          <MoreButton
-            actions={orderBys.map(o => ({
-              label: o.label,
-              onClick: () => {
-                this.setState({ orderBy: o.label });
-                onOrderByChange(o.value);
-              }
-            }))}
-            icon={<Icon.Down />}
-          />
-          <OrderButton
-            ascending={!descending}
-            onClick={() => {
-              onOrderChange(!descending ? "desc" : "asc");
-              this.setState((prevState: State) => ({
-                descending: !prevState.descending
-              }));
-            }}
-          >
-            <Icon.Descending />
-          </OrderButton>
-        </Order>
-        <Search>
-          <Icon.Search />
-          <SearchInput
-            onChange={e => {
-              onSearch(e.target.value);
-            }}
-            placeholder="Filter results..."
-          />
-        </Search>
-        <div style={{ flex: 1 }} />
-        <Add>
-          <UploadField
-            key={uploadFieldKey}
-            onFiles={e => {
-              onAdd(e);
-              // set new key in order to render new input field, otherwise
-              // onFiles is not called when trying to upload the same file twice
-              this.setState({ uploadFieldKey: new Date().getTime() });
-            }}
-            multiple
-          >
-            <UploadButton>Upload New</UploadButton>
-          </UploadField>
-        </Add>
-      </Root>
-    );
-  }
+  useEffect(() => {
+    if (!done) return;
+    props.onUpload(response.response);
+  }, [done, response]);
+
+  const {
+    filters,
+    onFilterChange,
+    onSearch,
+    orderBys,
+    onOrderByChange,
+    onOrderChange
+  } = props;
+
+  return (
+    <Root>
+      <Filters>
+        {filters &&
+          filters.map((f, idx) => (
+            <Button
+              active={f.label === filter}
+              key={idx}
+              onClick={() => {
+                setFilter(f.label);
+                onFilterChange(f.value);
+              }}
+            >
+              {f.label}
+            </Button>
+          ))}
+      </Filters>
+      <Order>
+        Orderd by: <span style={{ paddingLeft: "8px" }}>{orderBy}</span>
+        <MoreButton
+          actions={orderBys.map(o => ({
+            label: o.label,
+            onClick: () => {
+              setOrderBy(o.label);
+              onOrderByChange(o.value);
+            }
+          }))}
+          icon={<Icon.Down />}
+        />
+        <OrderButton
+          ascending={!descending}
+          onClick={() => {
+            onOrderChange(!descending ? "desc" : "asc");
+            setDescending(!descending);
+          }}
+        >
+          <Icon.Descending />
+        </OrderButton>
+      </Order>
+      <Search>
+        <Icon.Search />
+        <SearchInput
+          onChange={e => {
+            onSearch(e.target.value);
+          }}
+          placeholder="Filter results..."
+        />
+      </Search>
+      <div style={{ flex: 1 }} />
+      <Add>
+        <UploadField
+          key={uploadFieldKey}
+          onFiles={e => {
+            setFiles(e);
+            props.onUploadProgress(e.length);
+            // set new key in order to render new input field, otherwise
+            // onFiles is not called when trying to upload the same file twice
+            setUploadFieldKey(Date.now());
+          }}
+          multiple
+        >
+          <UploadButton>Upload New</UploadButton>
+        </UploadField>
+      </Add>
+    </Root>
+  );
 }
