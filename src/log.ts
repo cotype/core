@@ -1,10 +1,19 @@
 import chalk from "chalk";
 
-function logo(background: string = "#FB249D", color: string = "#ffffff") {
+function highlight(
+  text: any,
+  fallbackText: any,
+  background: string = "#555555",
+  color: string = "#ffffff"
+) {
   if (!chalk.supportsColor) {
-    return "{ cotype:";
+    return text;
   }
-  return chalk.bgHex(background)(chalk.hex(color)(chalk.bold(" { ")));
+  return chalk.bgHex(background)(chalk.hex(color)(chalk.bold(text.toString())));
+}
+
+function logo(background: string = "#FB249D", color: string = "#ffffff") {
+  return highlight(" { ", "{ cotype:", background, color);
 }
 
 export default {
@@ -28,5 +37,6 @@ export default {
     // tslint:disable-next-line:no-console
     return (...args: any[]) => console.log(logo(background, color), ...args);
   },
+  highlight,
   logo
 };

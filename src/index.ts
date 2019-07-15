@@ -48,6 +48,7 @@ import {
 } from "./externalDataSourceHelper";
 import ContentPersistence from "./persistence/ContentPersistence";
 import Storage from "./media/storage/Storage";
+import logResponseTime from "./responseTimeLogger";
 
 type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
 
@@ -186,7 +187,9 @@ export async function init(opts: Opts) {
 
   app.use(express.json({ limit: "1mb" }));
   app.use(session(opts.sessionOpts));
-
+  if (process.env.PERFORMANCE_LOGGING_ENABLED === "true") {
+    app.use(logResponseTime);
+  }
   app.all("/status", (req, res) => {
     res.json({
       uptime: process.uptime(),
