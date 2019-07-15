@@ -7,6 +7,8 @@ type Props = FieldProps<any> & {
   required?: boolean;
   readOnly?: boolean;
   maxLength?: number;
+  validationRegex?: string;
+  regexError?: string;
 };
 export default class TextInput extends Component<Props> {
   static getDefaultValue(props: Props) {
@@ -23,6 +25,12 @@ export default class TextInput extends Component<Props> {
   static validate(value: any, props: Props) {
     const isRequired = validateRequired(value, props);
     if (isRequired) return isRequired;
+    if (props.validationRegex) {
+      const check = value.match(props.validationRegex);
+      if (!check) {
+        return props.regexError ? props.regexError : "not valid";
+      }
+    }
   }
 
   render() {

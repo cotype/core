@@ -38,6 +38,8 @@ type Text = {
   index?: boolean;
   search?: boolean;
   hidden?: boolean;
+  validationRegex?: string;
+  regexError?: string;
 };
 type TextArea = {
   type: "string";
