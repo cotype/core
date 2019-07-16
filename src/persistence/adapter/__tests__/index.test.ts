@@ -776,7 +776,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         });
 
         await expect(
-          await content.loadContentReferences([pageId])
+          await content.loadContentReferences([pageId], pages, models.content)
         ).toMatchObject([expect.any(Object), expect.any(Object)]);
       });
 
@@ -788,7 +788,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         await content.delete(news, newsId);
 
         await expect(
-          await content.loadContentReferences([pageId])
+          await content.loadContentReferences([pageId], pages, models.content)
         ).toMatchObject([expect.any(Object)]);
       });
 

@@ -17,6 +17,7 @@ import getAlwaysUniqueFields from "../../../model/getAlwaysUniqueFields";
 import getPositionFields from "../../../model/getPositionFields";
 import getInverseReferenceFields from "../../../model/getInverseReferenceFields";
 import log from "../../../log";
+import visitModel from "../../../model/visitModel";
 
 const ops: any = {
   eq: "=",
@@ -384,11 +385,42 @@ export default class KnexContent implements ContentAdapter {
 
   async loadContentReferences(
     id: string[],
+    model: Cotype.Model,
+    models: Cotype.Model[],
     published?: boolean,
     join: Cotype.Join[] = [{}]
   ) {
     let fullData: Cotype.Data[] = [];
+
     const fetch = async (ids: string[], types: string[], first: boolean) => {
+      // Only get references when needed
+      // since this can be a expensive db operation
+      let modelHasReverseReferences = false;
+      let modelHasReferences = false;
+
+      (first ? [model.name] : types).forEach(typeName => {
+        const typeModel = first
+          ? model
+          : models.find(m => m.name.toLowerCase() === typeName.toLowerCase());
+
+        if (!typeModel) return;
+
+        visitModel(typeModel, (key, value) => {
+          if (!("type" in value)) return;
+
+          if (value.type === "references") {
+            modelHasReverseReferences = true;
+          }
+          if (value.type === "content") {
+            modelHasReferences = true;
+          }
+        });
+      });
+
+      // we don't need to load anything if a model has no refs and it is a first level fetch
+      // otherwise we still need to load the main data of that join
+      if (first && !modelHasReverseReferences && !modelHasReferences) return [];
+
       const refs = this.knex
         .distinct(["crv.data", "c.id", "c.type"])
         .from("contents as c")
@@ -404,12 +436,18 @@ export default class KnexContent implements ContentAdapter {
         .leftJoin("content_references as cr2", j => {
           j.orOn("cr.id", "cr2.content");
         })
-        .where("c.deleted", false)
+        .where("c.deleted", false);
 
-        .andWhere(k => {
+      // Only get references when needed
+      // since this can be a expensive db operation
+      refs.andWhere(k => {
+        if (modelHasReferences) {
           k.orWhereIn("cr.id", ids);
+        }
+        if (modelHasReverseReferences) {
           k.orWhereIn("cr.content", ids);
-        });
+        }
+      });
 
       if (!first) {
         refs.whereIn(
@@ -446,14 +484,8 @@ export default class KnexContent implements ContentAdapter {
       .join("media", j => {
         j.on("content_references.media", "media.id");
       })
-      .where(k => {
-        ids.forEach(itemId => {
-          k.orWhere({
-            "contents.id": itemId,
-            "contents.deleted": false
-          });
-        });
-      })) as Cotype.Meta[];
+      .whereIn("contents.id", ids)
+      .andWhere("contents.deleted", false)) as Cotype.Meta[];
   }
 
   async load(
