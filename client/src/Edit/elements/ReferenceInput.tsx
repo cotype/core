@@ -82,8 +82,14 @@ type State = {
 
 export default class ReferenceInput extends Component<Props, State> {
   static validate(value, props) {
-    const isRequired = required(value, props);
+    const validationRegex = "W*(http:|https:)W*|^/.*$";
+    const isRequired = required(value ? value.id : null, props);
     if (isRequired) return isRequired;
+
+    const check = value.id.match(validationRegex);
+    if (!check) {
+      return 'This url is not valid. Links to the same domain need to start with "/" or to other domains with a valid protocol (http/https).';
+    }
   }
 
   state: State = {

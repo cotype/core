@@ -9,6 +9,7 @@ type Props = FieldProps<any> & {
   maxLength?: number;
   validationRegex?: string;
   regexError?: string;
+  placeholder?: string;
 };
 export default class TextInput extends Component<Props> {
   static getDefaultValue(props: Props) {
@@ -34,7 +35,7 @@ export default class TextInput extends Component<Props> {
   }
 
   render() {
-    const { field, maxLength, readOnly } = this.props;
+    const { field, maxLength, readOnly, placeholder } = this.props;
     const { value, ...props } = field;
     return (
       <input
@@ -42,6 +43,7 @@ export default class TextInput extends Component<Props> {
         className={inputClass}
         value={value || ""}
         maxLength={maxLength}
+        placeholder={placeholder}
         {...props}
       />
     );
