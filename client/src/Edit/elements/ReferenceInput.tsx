@@ -11,6 +11,7 @@ import ColorHash from "color-hash";
 import { Item, ReferenceType } from "../../../../typings";
 
 const colorHash = new ColorHash({ saturation: 0.7, lightness: 0.6 });
+const validationRegex = "W*(http:|https:)W*|^/.*$";
 
 const Root = styled("div")`
   ${inputClass} padding: 0;
@@ -82,11 +83,10 @@ type State = {
 
 export default class ReferenceInput extends Component<Props, State> {
   static validate(value, props) {
-    const validationRegex = "W*(http:|https:)W*|^/.*$";
     const isRequired = required(value ? value.id : null, props);
     if (isRequired) return isRequired;
-
-    const check = value.id.match(validationRegex);
+    if (value.model) return;
+    const check = value.id.toString().match(validationRegex);
     if (!check) {
       return 'This url is not valid. Links to the same domain need to start with "/" or to other domains with a valid protocol (http/https).';
     }
