@@ -13,6 +13,9 @@ export default class PositionInput extends Component<Props, { show: boolean }> {
   static validate(value: any, props: Props) {
     return false;
   }
+  static getDefaultValue(props: Props) {
+    return "";
+  }
 
   state = {
     show: false

@@ -216,41 +216,44 @@ export default class KnexContent implements ContentAdapter {
         positionFields.map(async f => {
           const criteria: any = {};
 
-          const value = (f
-            .split(".")
-            .reduce(
-              (obj, key) =>
-                obj && obj[key] !== "undefined" ? obj[key] : undefined,
-              data
-            ) as unknown) as string;
+          const value = (f.split(".").reduce(
+            (obj, key) => {
+              if (obj && obj[key] !== "undefined") {
+                return obj[key];
+              } else {
+                obj[key] = "";
+                return obj[key];
+              }
+            },
+            data
+          ) as unknown) as string;
+          if (value !== undefined) {
+            criteria[`data.${f}`] = { gte: value };
+          }
 
-          criteria[`data.${f}`] = { gte: value };
           const opts = { offset: 0, limit: 3, orderBy: f, order: "asc" };
           const items = await this.list(model, models, opts, criteria);
           items.items = items.items.filter(item => item.id === id);
+          let nextPos;
           if (items.items[0]) {
-            const sameOrGreater = (f
+            nextPos = (f
               .split(".")
               .reduce(
                 (obj: any, key) =>
                   obj && obj[key] !== "undefined" ? obj[key] : undefined,
                 items.items[0].data
               ) as unknown) as string;
-            if (value === sameOrGreater) {
-              if (items.items[1]) {
-                const nextValue = (f
-                  .split(".")
-                  .reduce(
-                    (obj: any, key) =>
-                      obj && obj[key] !== "undefined" ? obj[key] : undefined,
-                    items.items[1].data
-                  ) as unknown) as string;
-                data = setPosition(data, model, value, nextValue, true);
-              } else {
-                data = setPosition(data, model, value, undefined, true);
-              }
+            if (value === nextPos && items.items[1]) {
+              nextPos = (f
+                .split(".")
+                .reduce(
+                  (obj: any, key) =>
+                    obj && obj[key] !== "undefined" ? obj[key] : undefined,
+                  items.items[1].data
+                ) as unknown) as string;
             }
           }
+          data = setPosition(data, model, value, nextPos, true);
         })
       );
     }
