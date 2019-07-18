@@ -7,7 +7,10 @@ import {
   BaseUrls,
   Principal,
   Join,
-  ListOpts
+  ListOpts,
+  ListChunkWithRefs,
+  Content,
+  ContentWithRefs
 } from "../../../typings";
 
 import { Router } from "express";
@@ -18,6 +21,7 @@ import prepareSearchResults from "./prepareSearchResults";
 import filterRefData, { createJoin } from "./filterRefData";
 import { checkPermissions, Permission } from "../../auth/acl";
 import { linkableModelNames, searchableModelNames } from "./utils";
+import pickFieldsFromResultData from "./pickFieldsFromResultData";
 
 const modes = ["published", "drafts"];
 
@@ -171,6 +175,7 @@ export default (
           join,
           order,
           orderBy,
+          fields,
           ...rest
         } = query;
 
@@ -183,8 +188,9 @@ export default (
 
         const dataSource = getDataSource(type);
 
+        // If collection is singleton, return the first item in the list
         if (model.collection === "singleton") {
-          const { items, total, _refs } = await dataSource.find(
+          let result = await dataSource.find(
             principal,
             model,
             opts,
@@ -194,8 +200,18 @@ export default (
             req.previewOpts
           );
 
-          if (total > 0) {
+          if (result.total > 0) {
+            // Pick the selected fields
+            if (fields) {
+              result = pickFieldsFromResultData(
+                result,
+                fields,
+                model
+              ) as ListChunkWithRefs<Content>;
+            }
+            const { items, _refs } = result;
             const [item] = items;
+
             return res.json({
               ...item.data,
               _id: item.id.toString(),
@@ -205,7 +221,7 @@ export default (
 
           res.status(404).end();
         } else {
-          const { total, items, _refs } = await dataSource.find(
+          let results = await dataSource.find(
             principal,
             model,
             opts,
@@ -214,6 +230,15 @@ export default (
             criteria,
             req.previewOpts
           );
+
+          if (fields) {
+            results = pickFieldsFromResultData(
+              results,
+              fields,
+              model
+            ) as ListChunkWithRefs<Content>;
+          }
+          const { total, items, _refs } = results;
 
           res.json({
             total,
@@ -226,14 +251,14 @@ export default (
       // load
       router.get(`/rest/${mode}/${type}/:id`, async (req, res) => {
         const { principal, params, query } = req;
-        const { join } = query;
+        const { join, fields } = query;
 
         checkPermissionToJoin(req.principal, join);
         const dataSource = getDataSource(type);
 
         const format = req.get("x-richtext-format");
 
-        const c = await dataSource.load(
+        let result = await dataSource.load(
           principal,
           model,
           params.id,
@@ -242,13 +267,21 @@ export default (
           req.previewOpts
         );
 
-        if (!c) return res.status(404).end();
-        res.setHeader("last-modified", new Date(c.date).toUTCString());
+        if (!result) return res.status(404).end();
+        res.setHeader("last-modified", new Date(result.date).toUTCString());
+
+        if (fields) {
+          result = pickFieldsFromResultData(
+            result,
+            fields,
+            model
+          ) as ContentWithRefs;
+        }
 
         res.json({
-          ...c.data,
-          _id: c.id.toString(),
-          _refs: filterRefData([c], c._refs, join, models)
+          ...result.data,
+          _id: result.id.toString(),
+          _refs: filterRefData([result], result._refs, join, models)
         });
       });
 
@@ -259,7 +292,7 @@ export default (
             `/rest/${mode}/${type}/${uniqueField}/:uniqueValue`,
             async (req, res) => {
               const { principal, query, params } = req;
-              const { join } = query;
+              const { join, fields } = query;
 
               checkPermissionToJoin(req.principal, join);
 
@@ -272,7 +305,7 @@ export default (
 
               const dataSource = getDataSource(type);
 
-              const { total, items, _refs } = await dataSource.find(
+              let result = await dataSource.find(
                 principal,
                 model,
                 { limit: 1, offset: 0 },
@@ -282,8 +315,17 @@ export default (
                 req.previewOpts
               );
 
-              if (!total) return res.status(404).end();
+              if (!result.total) return res.status(404).end();
 
+              if (fields) {
+                result = pickFieldsFromResultData(
+                  result,
+                  fields,
+                  model
+                ) as ListChunkWithRefs<Content>;
+              }
+
+              const { items, _refs } = result;
               res.json({
                 ...items[0].data,
                 _id: items[0].id.toString(),

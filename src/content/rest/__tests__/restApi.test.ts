@@ -131,12 +131,13 @@ describe("rest api", () => {
   });
 
   describe("with content", () => {
-    let expectedMedia: object;
-    let expectedPublishedContent: object;
-    let expectedDraftsContent: object;
+    let mediaRefs: any;
+    let contentRefs: any;
+    let expectedPublishedContent: any;
+    let expectedDraftsContent: any;
 
     beforeAll(async () => {
-      expectedMedia = {
+      mediaRefs = {
         [mediaFile.id]: {
           created_at: expect.any(String),
           alt: null,
@@ -148,6 +149,16 @@ describe("rest api", () => {
           tags: null,
           width: null,
           ...mediaFile
+        }
+      };
+
+      contentRefs = {
+        products: {
+          [product.id]: {
+            _id: product.id,
+            _type: "products",
+            ean: product.data.ean
+          }
         }
       };
 
@@ -194,14 +205,14 @@ describe("rest api", () => {
     const find = async (
       type: string,
       id: string,
-      join: object = {},
+      params: object = {},
       published: boolean = true
     ) => {
       const { body } = await server
         .get(
           `/rest/${
             published ? "published" : "drafts"
-          }/${type}/${id}?${stringify(join)}`
+          }/${type}/${id}?${stringify(params)}`
         )
         .expect(200);
 
@@ -280,14 +291,14 @@ describe("rest api", () => {
       type: string,
       field: string,
       value: string,
-      join: object = {},
+      params: object = {},
       published: boolean = true
     ) => {
       const { body } = await server
         .get(
           `/rest/${
             published ? "published" : "drafts"
-          }/${type}/${field}/${value}?${stringify(join)}`
+          }/${type}/${field}/${value}?${stringify(params)}`
         )
         .expect(200);
 
@@ -355,7 +366,7 @@ describe("rest api", () => {
           _id: news.id.toString(),
           _refs: {
             content: {},
-            media: expectedMedia
+            media: mediaRefs
           }
         });
       });
@@ -366,7 +377,7 @@ describe("rest api", () => {
           _id: news.id.toString(),
           _refs: {
             content: {},
-            media: expectedMedia
+            media: mediaRefs
           }
         });
       });
@@ -379,7 +390,7 @@ describe("rest api", () => {
           _id: news.id.toString(),
           _refs: {
             content: {},
-            media: expectedMedia
+            media: mediaRefs
           }
         });
 
@@ -390,7 +401,7 @@ describe("rest api", () => {
           _id: news.id.toString(),
           _refs: {
             content: {},
-            media: expectedMedia
+            media: mediaRefs
           }
         });
       });
@@ -403,7 +414,7 @@ describe("rest api", () => {
           _id: news.id.toString(),
           _refs: {
             content: {},
-            media: expectedMedia
+            media: mediaRefs
           }
         });
 
@@ -414,7 +425,152 @@ describe("rest api", () => {
           _id: news.id.toString(),
           _refs: {
             content: {},
-            media: expectedMedia
+            media: mediaRefs
+          }
+        });
+      });
+    });
+
+    describe("select fields", () => {
+      it("should only return selected fields when loading content", async () => {
+        await expect(
+          await find("news", news.id, { fields: ["title"] }, true)
+        ).toEqual({
+          title: expectedPublishedContent.title,
+          _id: news.id.toString(),
+          _refs: {
+            content: {},
+            media: {}
+          }
+        });
+        await expect(
+          await find("news", news.id, { fields: ["title", "image"] }, true)
+        ).toEqual({
+          title: expectedPublishedContent.title,
+          image: expectedPublishedContent.image,
+          _id: news.id.toString(),
+          _refs: {
+            content: {},
+            media: mediaRefs
+          }
+        });
+        await expect(
+          await find(
+            "news",
+            news.id,
+            { fields: ["title", "image", "ref"], join: { products: ["ean"] } },
+            true
+          )
+        ).toEqual({
+          title: expectedPublishedContent.title,
+          image: expectedPublishedContent.image,
+          ref: expectedPublishedContent.ref,
+          _id: news.id.toString(),
+          _refs: {
+            content: contentRefs,
+            media: mediaRefs
+          }
+        });
+      });
+      it("should only return selected fields when listing content", async () => {
+        await expect(await list("news", { fields: ["title"] }, true)).toEqual({
+          total: 1,
+          items: [
+            { title: expectedPublishedContent.title, _id: news.id.toString() }
+          ],
+          _refs: {
+            content: {},
+            media: {}
+          }
+        });
+        await expect(
+          await list(
+            "news",
+            { fields: ["title"], slug: { eq: news.data.slug } },
+            true
+          )
+        ).toEqual({
+          total: 1,
+          items: [
+            { title: expectedPublishedContent.title, _id: news.id.toString() }
+          ],
+          _refs: {
+            content: {},
+            media: {}
+          }
+        });
+
+        await expect(
+          await list("news", { fields: ["title", "image"] }, true)
+        ).toEqual({
+          total: 1,
+          items: [
+            {
+              title: expectedPublishedContent.title,
+              image: expectedPublishedContent.image,
+              _id: news.id.toString()
+            }
+          ],
+          _refs: {
+            content: {},
+            media: mediaRefs
+          }
+        });
+        await expect(
+          await list(
+            "news",
+            { fields: ["title", "image", "ref"], join: { products: ["ean"] } },
+            true
+          )
+        ).toEqual({
+          total: 1,
+          items: [
+            {
+              title: expectedPublishedContent.title,
+              image: expectedPublishedContent.image,
+              ref: expectedPublishedContent.ref,
+              _id: news.id.toString()
+            }
+          ],
+          _refs: {
+            content: contentRefs,
+            media: mediaRefs
+          }
+        });
+
+        await expect(
+          await list("news", { fields: ["title", "image"] }, true)
+        ).toEqual({
+          total: 1,
+          items: [
+            {
+              title: expectedPublishedContent.title,
+              image: expectedPublishedContent.image,
+              _id: news.id.toString()
+            }
+          ],
+          _refs: {
+            content: {},
+            media: mediaRefs
+          }
+        });
+      });
+
+      it("should only return selected fields when finding content by field", async () => {
+        await expect(
+          await findByField(
+            "news",
+            "slug",
+            news.data.slug,
+            { fields: ["title"] },
+            true
+          )
+        ).toEqual({
+          title: expectedPublishedContent.title,
+          _id: news.id.toString(),
+          _refs: {
+            content: {},
+            media: {}
           }
         });
       });
@@ -424,7 +580,7 @@ describe("rest api", () => {
       const searchForAllContent = faker.lorem.slug(5);
       const searchForProduct = faker.lorem.words(5);
       const searchForNews = faker.lorem.words(5);
-      const searchForArticleNews = `${searchForNews} ${faker.hacker.abbreviation()}`;
+      const searchForArticleNews = `${searchForNews} ${faker.lorem.slug(2)}`;
       const description = faker.lorem.slug(5);
 
       beforeAll(async () => {
@@ -608,16 +764,8 @@ describe("rest api", () => {
           )
         ).toEqual({
           _refs: {
-            content: {
-              products: {
-                [product.id]: {
-                  _id: product.id,
-                  _type: "products",
-                  ean: product.data.ean
-                }
-              }
-            },
-            media: expectedMedia
+            content: contentRefs,
+            media: mediaRefs
           },
           items: [{ _id: news.id.toString(), ...expectedPublishedContent }],
           total: 1
@@ -637,11 +785,9 @@ describe("rest api", () => {
         ).toMatchObject({
           _refs: {
             content: {},
-            media: expectedMedia
+            media: mediaRefs
           },
-          items: [
-            { _id: news.id.toString().toString(), ...expectedDraftsContent }
-          ],
+          items: [{ _id: news.id.toString(), ...expectedDraftsContent }],
           total: 1
         });
       });
