@@ -85,7 +85,7 @@ export default class ReferenceInput extends Component<Props, State> {
   static validate(value, props) {
     const isRequired = required(value ? value.id : null, props);
     if (isRequired) return isRequired;
-    if (value.model) return;
+    if (!value || value.model || !value.id) return;
     const check = value.id.toString().match(validationRegex);
     if (!check) {
       return 'This url is not valid. Links to the same domain need to start with "/" or to other domains with a valid protocol (http/https).';

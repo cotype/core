@@ -3,65 +3,62 @@ jest.mock("../../../common/Autocomplete", () => null);
 import ReferenceInput from "../ReferenceInput";
 import { FieldProps } from "formik";
 
-describe("TextInput", () => {
-  it("should be required with valid input", () => {
+describe("ReferenceInput", () => {
+  it("should be required with with no valid ref", () => {
     const props = { required: true };
+    const ref = { id: "", model: null };
     expect(
-      ReferenceInput.validate(
-        { id: "http://www.cellular.de" },
-        props as FieldProps<any> & {
-          required?: boolean;
-        }
-      )
-    ).toBe(undefined);
-  });
-
-  it("should be required with not valid input", () => {
-    const props = { required: true };
-    expect(
-      ReferenceInput.validate({ id: "" }, props as FieldProps<any> & {
+      ReferenceInput.validate(ref, props as FieldProps<any> & {
         required?: boolean;
       })
     ).toBe("This field is required");
   });
 
-  it("should validate input with regex", () => {
-    expect(ReferenceInput.validate({ id: "http://www.cellular.de" }, {})).toBe(
-      undefined
-    );
-  });
-
-  it("should validate required input with regex", () => {
-    const props = {
-      required: true
-    };
+  it("should be required with valid external ref", () => {
+    const props = { required: true };
+    const ref = { id: "http://www.cellular.de", model: null };
     expect(
-      ReferenceInput.validate(
-        { id: "http://www.cellular.de" },
-        props as FieldProps<any> & {
-          required?: boolean;
-        }
-      )
+      ReferenceInput.validate(ref, props as FieldProps<any> & {
+        required?: boolean;
+      })
     ).toBe(undefined);
   });
 
-  it("should validate required empty input with regex", () => {
-    const props = {
-      required: true
-    };
+  it("should be required with valid internal ref", () => {
+    const props = { required: true };
+    const ref = { id: "/path/to/something", model: "contact" };
     expect(
-      ReferenceInput.validate({ id: "" }, props as FieldProps<any> & {
+      ReferenceInput.validate(ref, props as FieldProps<any> & {
         required?: boolean;
       })
-    ).toBe("This field is required");
+    ).toBe(undefined);
   });
 
-  it("should validate required not valid input with regex", () => {
-    const props = {
-      required: true
-    };
+  it("should be not required with no input and no model", () => {
+    const props = { required: false };
+    const ref = { id: "", model: null };
     expect(
-      ReferenceInput.validate({ id: "ff/" }, props as FieldProps<any> & {
+      ReferenceInput.validate(ref, props as FieldProps<any> & {
+        required?: boolean;
+      })
+    ).toBe(undefined);
+  });
+
+  it("should be not required with valid external ref", () => {
+    const props = { required: false };
+    const ref = { id: "http://www.cellular.de", model: null };
+    expect(
+      ReferenceInput.validate(ref, props as FieldProps<any> & {
+        required?: boolean;
+      })
+    ).toBe(undefined);
+  });
+
+  it("should be not required with no valid external ref", () => {
+    const props = { required: false };
+    const ref = { id: "www.cellular.de", model: null };
+    expect(
+      ReferenceInput.validate(ref, props as FieldProps<any> & {
         required?: boolean;
       })
     ).toBe(
@@ -69,12 +66,11 @@ describe("TextInput", () => {
     );
   });
 
-  it("should validate internal input with regex", () => {
-    const props = {
-      required: true
-    };
+  it("should be not required with valid internal ref", () => {
+    const props = { required: false };
+    const ref = { id: "/path/to/something", model: "contact" };
     expect(
-      ReferenceInput.validate({ id: "/path/to" }, props as FieldProps<any> & {
+      ReferenceInput.validate(ref, props as FieldProps<any> & {
         required?: boolean;
       })
     ).toBe(undefined);
