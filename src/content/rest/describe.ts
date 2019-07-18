@@ -310,6 +310,20 @@ function createQueryParams(model: Model) {
 
   return params;
 }
+
+function createFieldsParams(model: Model): ParameterObject {
+  return {
+    name: "fields",
+    in: "query",
+    style: "deepObject",
+    description: "Select fields to be included in response.",
+    explode: true,
+    schema: array({
+      type: "string",
+      enum: Object.keys(model.fields)
+    })
+  };
+}
 function createJoinParams(model: Model, { content: models }: Models) {
   const params: ParameterObject[] = [];
 
@@ -507,6 +521,7 @@ export default (api: OpenApiBuilder, models: Models) => {
         tags,
         parameters: [
           ...createQueryParams(model),
+          createFieldsParams(model),
           ...commonParams,
           listSearchParams
         ],
@@ -560,7 +575,7 @@ export default (api: OpenApiBuilder, models: Models) => {
         summary: `Load ${singularName}`,
         operationId: `load_${singularName}`,
         tags,
-        parameters: [idParam].concat(commonParams),
+        parameters: [idParam, createFieldsParams(model)].concat(commonParams),
         responses: {
           "200": {
             description: `${singular} found`,
@@ -598,9 +613,10 @@ export default (api: OpenApiBuilder, models: Models) => {
             /** Find content by unique field value */
             get: {
               ...get,
-              parameters: [param("uniqueValue", { schema: string })].concat(
-                commonParams
-              ),
+              parameters: [
+                param("uniqueValue", { schema: string }),
+                createFieldsParams(model)
+              ].concat(commonParams),
               operationId: `load_${singularName}_by_${uniqueField}`
             }
           });
