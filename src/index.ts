@@ -6,7 +6,8 @@ import {
   NavigationOpts,
   ThumbnailProvider,
   BaseUrls,
-  ContentHooks
+  ContentHooks,
+  ResponseHeaders
 } from "../typings";
 import express, {
   Request,
@@ -76,6 +77,7 @@ export type Opts = {
   persistenceAdapter: Promise<PersistenceAdapter>;
   externalDataSources?: ExternalDataSourceWithOptionalHelper[];
   sessionOpts?: SessionOpts;
+  responseHeader?: ResponseHeaders;
   thumbnailProvider: ThumbnailProvider;
   clientMiddleware?: RequestHandler | RequestHandler[];
   anonymousPermissions?: AnonymousPermissions;
@@ -170,7 +172,13 @@ export async function init(opts: Opts) {
     contentHooks: opts.contentHooks
   });
   const auth = Auth(p, opts.anonymousPermissions);
-  const content = Content(p, models, externalDataSources, baseUrls);
+  const content = Content(
+    p,
+    models,
+    externalDataSources,
+    baseUrls,
+    opts.responseHeader
+  );
   const settings = Settings(p, models);
   const media = Media(p, models, opts.storage, opts.thumbnailProvider);
 

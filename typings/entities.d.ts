@@ -362,6 +362,16 @@ export type BaseUrls = {
   preview?: string;
 };
 
+type Headers = {
+  [name: string]: string;
+};
+export interface ResponseHeaders {
+  rest: {
+    drafts?: Headers;
+    published?: Headers;
+  };
+}
+
 type PostHook = (model: Model, data: Data) => Promise<void>;
 type PreHook = (model: Model, data: Data) => Promise<Data>;
 

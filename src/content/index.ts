@@ -1,4 +1,9 @@
-import { Models, ExternalDataSource, BaseUrls } from "../../typings";
+import {
+  Models,
+  ExternalDataSource,
+  BaseUrls,
+  ResponseHeaders
+} from "../../typings";
 import routes from "./routes";
 import describe from "./describe";
 import graphql from "./graphql";
@@ -13,13 +18,21 @@ export default (
   persistence: Persistence,
   models: Models,
   externalDataSources: ExternalDataSource[],
-  baseUrls: BaseUrls
+  baseUrls: BaseUrls,
+  responseHeaders?: ResponseHeaders
 ) => {
   return {
     describe,
     routes(router: Router) {
       routes(router, persistence, models, externalDataSources);
-      rest(router, persistence, models, externalDataSources, baseUrls);
+      rest(
+        router,
+        persistence,
+        models,
+        externalDataSources,
+        baseUrls,
+        responseHeaders ? responseHeaders.rest : undefined
+      );
       graphql(router, persistence, models);
     }
   };

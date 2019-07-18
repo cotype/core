@@ -10,7 +10,8 @@ import {
   ListOpts,
   ListChunkWithRefs,
   Content,
-  ContentWithRefs
+  ContentWithRefs,
+  ResponseHeaders
 } from "../../../typings";
 
 import { Router } from "express";
@@ -30,7 +31,8 @@ export default (
   persistence: Persistence,
   models: Model[],
   externalDataSources: ExternalDataSource[],
-  baseUrls: BaseUrls
+  baseUrls: BaseUrls,
+  responseHeader?: ResponseHeaders["rest"]
 ) => {
   const { content, media } = persistence;
 
@@ -88,6 +90,11 @@ export default (
     router.use(`/rest/${mode}`, (req, res, next) => {
       if (mode === "drafts") {
         res.setHeader("Cache-Control", "private");
+        if (responseHeader && responseHeader.drafts) {
+          Object.entries(responseHeader.drafts).forEach(([key, value]) =>
+            res.setHeader(key, value)
+          );
+        }
         req.previewOpts = { publishedOnly: false };
 
         if (!req.principal.permissions.preview) {
@@ -96,6 +103,11 @@ export default (
         }
       } else {
         res.setHeader("Cache-Control", "public, max-age=300");
+        if (responseHeader && responseHeader.published) {
+          Object.entries(responseHeader.published).forEach(([key, value]) =>
+            res.setHeader(key, value)
+          );
+        }
         req.previewOpts = { publishedOnly: true };
       }
       res.header("Vary", "X-Richtext-Format");

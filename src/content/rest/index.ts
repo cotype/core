@@ -1,4 +1,9 @@
-import { Models, ExternalDataSource, BaseUrls } from "../../../typings";
+import {
+  Models,
+  ExternalDataSource,
+  BaseUrls,
+  ResponseHeaders
+} from "../../../typings";
 import { OpenApiBuilder } from "openapi3-ts";
 import createApiBuilder from "./getApiBuilder";
 import routes from "./routes";
@@ -24,7 +29,8 @@ export default function rest(
   persistence: Persistence,
   models: Models,
   externalDataSources: ExternalDataSource[],
-  baseUrls: BaseUrls
+  baseUrls: BaseUrls,
+  responseHeaders?: ResponseHeaders["rest"]
 ) {
   const apiBuilder = getApiBuilder(models, baseUrls);
   router.get("/rest", (req, res) =>
@@ -33,7 +39,14 @@ export default function rest(
   router.get("/rest/swagger.json", (req, res) => {
     res.json(apiBuilder.getSpec());
   });
-  routes(router, persistence, models.content, externalDataSources, baseUrls);
+  routes(
+    router,
+    persistence,
+    models.content,
+    externalDataSources,
+    baseUrls,
+    responseHeaders
+  );
 
   router.use(
     "/docs",
