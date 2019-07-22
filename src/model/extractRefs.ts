@@ -44,6 +44,13 @@ export default function extractRefs(
               if (refModel && match[2]) {
                 refs.push({ content: parseInt(match[2], 10), optional: false });
               }
+            } else {
+              const mediaMatch = /\$media:([\w\/\.]*)\$/gm.exec(
+                el.attributes.link
+              );
+              if (mediaMatch) {
+                refs.push({ media: mediaMatch[1], optional: false });
+              }
             }
           }
         });
@@ -79,7 +86,6 @@ export default function extractRefs(
       }
     }
   });
-
   return refs.map(({ fieldNames, ...ref }) =>
     fieldNames ? { fieldNames: fieldNames.join("~"), ...ref } : ref
   );
