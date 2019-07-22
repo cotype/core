@@ -61,6 +61,15 @@ export default function convert({
               } else {
                 el.attributes.link = "";
               }
+            } else {
+              const mediaMatch = /\$media:([\w\/\.]*)\$/gm.exec(
+                el.attributes.link
+              );
+              if (mediaMatch) {
+                el.attributes.link =
+                  (baseUrls && baseUrls.media ? baseUrls.media : "/media/") +
+                  mediaMatch[1];
+              }
             }
           }
 
