@@ -44,7 +44,7 @@ const getFieldFromModelPath = (
       }
       return acc[el].item;
     }
-    if (acc[el].type === "immutabe") {
+    if (acc[el].type === "immutable") {
       if (acc[el].child.type === "object" && !last) {
         return acc[el].child.fields;
       }
@@ -965,7 +965,7 @@ export default class KnexContent implements ContentAdapter {
             field.type === "content" &&
             (field.model || (field.models && field.models.length === 1)) // Get Docs which referenced by document
           ) {
-            // TODO: Criterita works just with one Model
+            // TODO: Criteria works just with one Model
             const selectModel: string =
               field.model || (field.models && field.models[0]) || "";
             k.innerJoin("content_references as ref" + counter, join => {
