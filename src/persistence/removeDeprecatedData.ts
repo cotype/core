@@ -16,7 +16,7 @@ export default function removeDeprecatedData(obj: any, model: Model, internal?:b
       data: { _type: string },
       field: UnionType
     ) {
-      if (!Object.keys(field.types).includes(data._type)) return null;
+      if (data && !Object.keys(field.types).includes(data._type)) return null;
     }
   });
   return obj;

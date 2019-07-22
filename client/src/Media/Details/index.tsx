@@ -155,7 +155,8 @@ export default class Details extends Component<Props, State> {
       width,
       height,
       focusX,
-      focusY
+      focusY,
+      id
     } = media;
 
     const actions = [
@@ -206,6 +207,14 @@ export default class Details extends Component<Props, State> {
                     className={inputClass}
                     value={credit || ""}
                     onChange={e => this.setState({ credit: e.target.value })}
+                  />
+                </MetaInput>
+                <MetaInput>
+                  <MetaItemLabel>URL</MetaItemLabel>
+                  <input
+                    className={inputClass}
+                    value={window.location.origin + "/media/" + id}
+                    readOnly
                   />
                 </MetaInput>
                 <MetaItemLabel>Tags</MetaItemLabel>
