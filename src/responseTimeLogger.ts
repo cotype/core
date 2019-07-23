@@ -8,7 +8,7 @@ export default function logResponseTime(
   res: Response,
   next: NextFunction
 ) {
-  if (process.env.PERFORMANCE_LOGGING_ENABLED !== "true") return next();
+  if (process.env.PERFORMANCE_LOGGING !== "true") return next();
 
   const startTime = Date.now();
 

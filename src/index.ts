@@ -187,7 +187,7 @@ export async function init(opts: Opts) {
 
   app.use(express.json({ limit: "1mb" }));
   app.use(session(opts.sessionOpts));
-  if (process.env.PERFORMANCE_LOGGING_ENABLED === "true") {
+  if (process.env.PERFORMANCE_LOGGING === "true") {
     app.use(logResponseTime);
   }
   app.all("/status", (req, res) => {

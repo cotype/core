@@ -4,7 +4,7 @@ import logger from "../../../log";
 const speedLog = logger.color("#35feff");
 
 export default function measureDbPerformance(db: Knex) {
-  if (process.env.PERFORMANCE_LOGGING_ENABLED !== "true") return;
+  if (process.env.PERFORMANCE_LOGGING !== "true") return;
 
   // The map used to store the query times, where the query unique
   // identifier is the key.
