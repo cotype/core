@@ -95,7 +95,7 @@
     "cypress-file-upload": "^3.2.0",
     "faker": "^4.1.0",
     "get-port-cli": "^2.0.0",
-    "install": "^0.12.2",
+    "install": "^0.13.0",
     "jest": "^24.5.0",
     "mysql": "^2.16.0",
     "parcel-bundler": "^1.12.2",
