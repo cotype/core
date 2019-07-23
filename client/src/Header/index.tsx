@@ -61,9 +61,7 @@ class Header extends Component<Props> {
   render() {
     const { user, navigation } = this.props;
     if (!user) return null;
-    const { settings, content } = user.permissions;
-    const hasContent = !!Object.keys(content).length;
-
+    const { settings } = user.permissions;
     return (
       <Bar>
         <Items>
