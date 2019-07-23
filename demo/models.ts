@@ -197,6 +197,7 @@ export const models: ModelOpts[] = [
     title: "pagetitle",
     uniqueFields: ["slug"],
     urlPath: "/:slug",
+    notSearchAble: true,
     orderBy: "posit",
     fields: {
       posit: {
