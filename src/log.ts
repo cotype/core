@@ -1,8 +1,7 @@
 import chalk from "chalk";
 
 function highlight(
-  text: any,
-  fallbackText: any,
+  text: string | number | boolean,
   background: string = "#555555",
   color: string = "#ffffff"
 ) {
@@ -13,7 +12,10 @@ function highlight(
 }
 
 function logo(background: string = "#FB249D", color: string = "#ffffff") {
-  return highlight(" { ", "{ cotype:", background, color);
+  if (!chalk.supportsColor) {
+    return "[cotype] ";
+  }
+  return highlight(" { ", background, color);
 }
 
 export default {
