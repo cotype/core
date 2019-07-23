@@ -26,10 +26,9 @@ export default class TextInput extends Component<Props> {
     }
   }
 
-  static validate(value: any, props: Props) {
+  static validate(value: any = "", props: Props) {
     const isRequired = validateRequired(value, props);
     if (isRequired) return isRequired;
-
     if (props.minLength && value.length < props.minLength) {
       return "Text is to short";
     }
