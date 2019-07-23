@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
-import { css } from "react-emotion";
+import styled, { css } from "react-emotion";
 import ImageCircle from "../common/ImageCircle";
 import { testable } from "../utils/helper";
 
@@ -19,6 +19,15 @@ const itemClass = css`
     background-color: var(--primary-color);
     color: #fff;
   }
+`;
+
+const Title = styled("span")`
+  display: block;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const activeClass = css`
@@ -55,7 +64,7 @@ export default class Item extends Component<ItemProps> {
           alt={title}
           size={small ? 12 : 24}
         />
-        {title}
+        <Title>{title}</Title>
       </NavLink>
     );
   }
