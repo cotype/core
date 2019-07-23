@@ -505,18 +505,38 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     opts: Cotype.ListOpts,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.SearchResultItem>> {
-    const { total, items } = await this.adapter.search(
+    const extactSearch = await this.adapter.search(
+      term,
+      true,
+      opts,
+      previewOpts
+    );
+    const textSearch = await this.adapter.search(
       term,
       false,
       opts,
       previewOpts
     );
 
+    const exactItems = extactSearch.items
+      .map(c => {
+        return this.createSearchResultItem(c, term);
+      })
+      .filter(this.canView(principal));
+
+    const exactIDs: string[] = exactItems.map(c => c.id);
+
+    const items = textSearch.items
+      .map(c => this.createSearchResultItem(c, term))
+      .filter(
+        item =>
+          item && this.canView(principal)(item) && !exactIDs.includes(item.id)
+      );
+    const fullItems = [...exactItems, ...items];
+
     return {
-      total,
-      items: items
-        .map(c => this.createSearchResultItem(c, term))
-        .filter(this.canView(principal))
+      total: textSearch.total,
+      items: fullItems
     };
   }
 
@@ -526,7 +546,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     previewOpts?: Cotype.PreviewOpts
   ): Promise<string[]> {
     const { items } = await this.adapter.search(term, true, {}, previewOpts);
-    const pattern = `${_escapeRegExp(term)}(\\S+|\\s\\S+)`;
+    const pattern = `${_escapeRegExp(term)}(\\w*['|\\-|\\/|_|+]*\\w+|\\w*)`;
     const re = new RegExp(pattern, "ig");
     const terms: string[] = [];
     items.forEach(item => {
@@ -536,11 +556,16 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
         const m = text.match(re);
         if (m) {
           m.forEach(s => {
-            if (s && !terms.includes(s)) terms.push(s);
+            const cleaned = s.trim();
+            if (
+              cleaned &&
+              !terms.some(term => term.toLowerCase() === cleaned.toLowerCase())
+            )
+              terms.push(cleaned);
           });
         }
       }
     });
-    return terms;
+    return terms.sort((a, b) => a.length - b.length || a.localeCompare(b));
   }
 }
