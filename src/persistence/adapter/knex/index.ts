@@ -8,6 +8,7 @@ import KnexSettings from "./KnexSettings";
 import KnexContent from "./KnexContent";
 import KnexMedia from "./KnexMedia";
 import logger from "../../../log";
+import measureDbPerformance from "./measureDbPerformance";
 
 type KnexSeedsConfig = SeedsConfig & {
   directory: string;
@@ -88,6 +89,7 @@ export default async function(
   }
 
   const db = await init();
+  measureDbPerformance(db);
   return {
     settings: new KnexSettings(db),
     content: new KnexContent(db),

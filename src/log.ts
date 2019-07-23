@@ -1,10 +1,21 @@
 import chalk from "chalk";
 
+function highlight(
+  text: string | number | boolean,
+  background: string = "#555555",
+  color: string = "#ffffff"
+) {
+  if (!chalk.supportsColor) {
+    return text;
+  }
+  return chalk.bgHex(background)(chalk.hex(color)(chalk.bold(text.toString())));
+}
+
 function logo(background: string = "#FB249D", color: string = "#ffffff") {
   if (!chalk.supportsColor) {
-    return "{ cotype:";
+    return "[cotype] ";
   }
-  return chalk.bgHex(background)(chalk.hex(color)(chalk.bold(" { ")));
+  return highlight(" { ", background, color);
 }
 
 export default {
@@ -28,5 +39,6 @@ export default {
     // tslint:disable-next-line:no-console
     return (...args: any[]) => console.log(logo(background, color), ...args);
   },
+  highlight,
   logo
 };

@@ -68,9 +68,7 @@ export default class KnexSettings implements SettingsAdapter {
         .del();
     } catch (error) {
       throw new Error(
-        `Sorry! Cannot delete this ${
-          model.singular
-        } hence it seems it is still in use!`
+        `Sorry! Cannot delete this ${model.singular} hence it seems it is still in use!`
       );
     }
   }

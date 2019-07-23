@@ -76,9 +76,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       return Promise.all([action(hookData), hookData]);
     } catch (error) {
       log.error(
-        `💥  An error occurred in the content preHook "${event}" for a "${
-          model.name
-        }" content`
+        `💥  An error occurred in the content preHook "${event}" for a "${model.name}" content`
       );
       log.error(error);
       return Promise.all([action(data), data]);
@@ -99,9 +97,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       await postHook(model, dataRecord);
     } catch (error) {
       log.error(
-        `💥  An error occurred in the content content postHook "${event}" for a "${
-          model.name
-        }" content`
+        `💥  An error occurred in the content content postHook "${event}" for a "${model.name}" content`
       );
       log.error(error);
     }
@@ -192,12 +188,15 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     ids: string[],
     contentFormat: ContentFormat,
     previewOpts: Cotype.PreviewOpts = {},
-    join: Cotype.Join = {}
+    join: Cotype.Join = {},
+    model: Cotype.Model
   ): Promise<Cotype.Refs> {
     // load all content the loaded content is referencing
 
     const contentRefs = await this.adapter.loadContentReferences(
       ids,
+      model,
+      this.models,
       previewOpts.publishedOnly,
       getDeepJoins(join, this.models)
     );
@@ -256,7 +255,13 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     const content = await this.adapter.load(model, id, previewOpts);
     if (!content) return content;
 
-    const refs = await this.fetchRefs([id], contentFormat, previewOpts, join);
+    const refs = await this.fetchRefs(
+      [id],
+      contentFormat,
+      previewOpts,
+      join,
+      model
+    );
 
     const convertedContentData = convert({
       content: removeDeprecatedData(content.data, model),
@@ -437,12 +442,15 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       previewOpts
     );
     if (!items.total) return { ...items, _refs: { content: {}, media: {} } };
+
     const _refs = await this.fetchRefs(
       items.items.map(i => i.id),
       contentFormat,
       previewOpts,
-      join
+      join,
+      model
     );
+
     const convertedItems = {
       ...items,
       items: items.items.map(i => ({

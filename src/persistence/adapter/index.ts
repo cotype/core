@@ -48,6 +48,8 @@ export type ContentAdapter = {
   ): Promise<Cotype.Content | null>;
   loadContentReferences(
     ids: string[],
+    model: Cotype.Model,
+    models: Cotype.Model[],
     published?: boolean,
     join?: Cotype.Join[]
   ): Promise<Cotype.Data[]>;
