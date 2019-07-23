@@ -58,7 +58,7 @@ context("Settings", () => {
   it("creates a user that actually can log in", () => {
     cy.withContext(({ userEmail, password, userName }) => {
       cy.login({ email: userEmail, password, name: userName });
-      frame.navigation("Settings").should("have.length", 0);
+      frame.navigation("Settings").should("not.exist");
       frame.sidebarItems().should("have.length", 1);
       frame.sidebarItem("Foos").should("have.length", 1);
     });
