@@ -5,6 +5,7 @@ import { Input } from "./elements";
 import Button from "../common/Button";
 import ModalDialog from "../common/ModalDialog";
 import { paths } from "../common/icons";
+import { Fields } from "../../../typings";
 
 export const errorClass = "error-field-label";
 
@@ -24,23 +25,69 @@ class RichTextLinkModal extends Component<Props> {
     values: any,
     { setSubmitting, setFieldError }: FormikActions<any>
   ) => {
-    if (!values.link) {
+    if (!values.link || values.link.length === 0) {
       return this.props.onSave(values.text, false);
     }
-    let link = values.link.id;
-    if (values.link.model) {
-      link = "$intern:" + values.link.model + ":" + values.link.id + "$";
+
+    if (values.link[0].value._type === "link" && values.link[0].value.link) {
+      let link = values.link[0].value.link.id;
+      if (values.link[0].value.link.model) {
+        link =
+          "$intern:" +
+          values.link[0].value.link.model +
+          ":" +
+          values.link[0].value.link.id +
+          "$";
+      }
+      this.props.onSave(values.text.trim(), link);
     }
-    this.props.onSave(values.text.trim(), link);
+
+    if (
+      values.link[0].value._type === "media" &&
+      values.link[0].value.media &&
+      values.link[0].value.media
+    ) {
+      const link = "$media:" + values.link[0].value.media + "$";
+      this.props.onSave(values.text.trim(), link);
+    }
   };
 
   render() {
-    const model: any = {
+    const model: Fields = {
       link: {
-        label: "Link",
-        type: "content",
-        models: [],
-        allowAbsoluteRefs: true
+        label: "Verlinkung",
+        type: "list",
+        minLength: 0,
+        maxLength: 1,
+        item: {
+          type: "union",
+          types: {
+            link: {
+              type: "object",
+              label: "Link",
+              fields: {
+                link: {
+                  type: "content",
+                  models: [],
+                  label: "Link",
+                  allowAbsoluteRefs: true,
+                  required: true
+                }
+              }
+            },
+            media: {
+              type: "object",
+              label: "Media",
+              fields: {
+                media: {
+                  type: "media",
+                  label: "Media",
+                  required: true
+                }
+              }
+            }
+          }
+        }
       },
       text: {
         label: "Text",
@@ -48,20 +95,43 @@ class RichTextLinkModal extends Component<Props> {
       }
     };
     const { initial } = this.props;
-    const link: { model: string | undefined; id: string | number } = {
-      model: undefined,
-      id: initial.link
-    };
+    const link: any = initial.link
+      ? {
+          key: 0,
+          value: {
+            _type: "link",
+            link: {
+              model: undefined,
+              id: initial.link
+            }
+          }
+        }
+      : {};
+
     const match = /\$intern:([\w]*):([0-9]*)\$/gm.exec(initial.link);
 
     if (match) {
-      link.model = match[1];
-      link.id = match[2];
+      link.value = {
+        _type: "link",
+        link: {
+          model: match[1],
+          id: match[2]
+        }
+      };
+    }
+    const mediaMatch = /\$media:([\w\/\.]*)\$/gm.exec(initial.link);
+
+    if (mediaMatch) {
+      link.value = {
+        _type: "media",
+        media: mediaMatch[1],
+        link: undefined
+      };
     }
 
     const initalValues = {
       text: initial.text,
-      link
+      link: link.value ? [link] : []
     };
     return (
       <Formik
