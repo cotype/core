@@ -1,6 +1,5 @@
 import Knex from "knex";
 import logger from "../../../log";
-import now from "performance-now";
 
 const speedLog = logger.color("#35feff");
 
@@ -24,8 +23,8 @@ export default function measureDbPerformance(db: Knex) {
       ",",
       `[${query.bindings ? query.bindings.join(",") : ""}]`
     );
-    const time = ` ${elapsedTime.toFixed(3)} ms `;
-    speedLog(`Query response time: ${logger.highlight(time, time)}\n`);
+    const time = `${elapsedTime}ms`;
+    speedLog(`Query response time: ${logger.highlight(time)}\n`);
 
     // After I print out the query, I have no more use to it,
     // so I delete it from my map so it doesn't grow out of control.
@@ -67,7 +66,7 @@ export default function measureDbPerformance(db: Knex) {
     times[uid] = {
       position: count,
       query,
-      startTime: now(),
+      startTime: Date.now(),
       // I keep track of when a query is finished with a boolean instead of
       // presence of an end time. It makes the logic easier to read.
       finished: false
@@ -75,7 +74,7 @@ export default function measureDbPerformance(db: Knex) {
     count = count + 1;
   }).on("query-response", (response: any, query: any) => {
     const uid = query.__knexQueryUid;
-    times[uid].endTime = now();
+    times[uid].endTime = Date.now();
     times[uid].finished = true;
     const position = times[uid].position;
 
