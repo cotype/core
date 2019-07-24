@@ -559,7 +559,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
             const cleaned = s.trim();
             if (
               cleaned &&
-              !terms.some(term => term.toLowerCase() === cleaned.toLowerCase())
+              !terms.some(t => t.toLowerCase() === cleaned.toLowerCase())
             )
               terms.push(cleaned);
           });
