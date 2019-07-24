@@ -505,12 +505,6 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     opts: Cotype.ListOpts,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.SearchResultItem>> {
-    const extactSearch = await this.adapter.search(
-      term,
-      true,
-      opts,
-      previewOpts
-    );
     const textSearch = await this.adapter.search(
       term,
       false,
@@ -518,25 +512,13 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       previewOpts
     );
 
-    const exactItems = extactSearch.items
-      .map(c => {
-        return this.createSearchResultItem(c, term);
-      })
-      .filter(this.canView(principal));
-
-    const exactIDs: string[] = exactItems.map(c => c.id);
-
     const items = textSearch.items
       .map(c => this.createSearchResultItem(c, term))
-      .filter(
-        item =>
-          item && this.canView(principal)(item) && !exactIDs.includes(item.id)
-      );
-    const fullItems = [...exactItems, ...items];
+      .filter(this.canView(principal)) as Cotype.SearchResultItem[];
 
     return {
       total: textSearch.total,
-      items: fullItems
+      items
     };
   }
 
@@ -546,7 +528,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     previewOpts?: Cotype.PreviewOpts
   ): Promise<string[]> {
     const { items } = await this.adapter.search(term, true, {}, previewOpts);
-    const pattern = `${_escapeRegExp(term)}([\\w|ü|ö|ä|ß|Ü|Ö|Ä]*['|\\-|\\/|_|+]*[\\w|ü|ö|ä|ß|Ü|Ö|Ä]+|[\\w|ü|ö|ä|ß|Ü|Ö|Ä]*)`;
+    const pattern = `${_escapeRegExp(
+      term
+    )}([\\w|ü|ö|ä|ß|Ü|Ö|Ä]*['|\\-|\\/|_|+]*[\\w|ü|ö|ä|ß|Ü|Ö|Ä]+|[\\w|ü|ö|ä|ß|Ü|Ö|Ä]*)`;
     const re = new RegExp(pattern, "ig");
     const terms: string[] = [];
     items.forEach(item => {
