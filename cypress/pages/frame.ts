@@ -1,6 +1,6 @@
 export default {
   navigation(item) {
-    return cy.testable("main-navigation-item").contains(item);
+    return cy.testableContains("main-navigation-item", item);
   },
   sidebarItems() {
     return this.sidebar().find("a");

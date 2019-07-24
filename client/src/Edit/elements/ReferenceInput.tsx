@@ -4,7 +4,6 @@ import { FieldProps } from "formik";
 import { stringify } from "qs";
 import { inputClass } from "../../common/styles";
 import Autocomplete from "../../common/Autocomplete";
-import ImageCircle from "../../common/ImageCircle";
 import api from "../../api";
 import { required } from "./validation";
 import ColorHash from "color-hash";
@@ -15,17 +14,22 @@ const validationRegex = "W*(http:|https:)W*|^/.*$";
 
 const Root = styled("div")`
   ${inputClass} padding: 0;
-  padding-left: 10px;
 `;
 
 const borderlessClass = css`
   border: none;
   box-sizing: border-box;
-  padding: 4px 10px;
+  padding: 4px 10px 4px 0;
   flex: 1;
   font-size: inherit;
   height: 40px;
   outline: none;
+`;
+
+const Title = styled("span")`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const Kind = styled("div")`
@@ -36,7 +40,7 @@ const Kind = styled("div")`
   padding: 2px 5px;
 `;
 
-const ImageItem = styled("div")`
+const Item = styled("div")`
   width: 100%;
   display: flex;
   align-items: center;
@@ -45,6 +49,7 @@ const ImageItem = styled("div")`
 `;
 
 const Select = styled("select")`
+  flex-shrink: 0;
   display: flex;
   flex-direction: row;
   & > div:not(:last-child) {
@@ -76,7 +81,6 @@ type Ref = { id: string; model: string } | null;
 type State = {
   items: Item[];
   value: Ref;
-  // clearSelection: (() => void) | null;
   internalRef: boolean;
   prevValue: Ref;
 };
@@ -170,23 +174,14 @@ export default class ReferenceInput extends Component<Props, State> {
   itemToString = i => (i ? i.title : "");
 
   renderItem = i => {
-    if ("image" in i) {
-      const src = i.image
-        ? i.image.includes("://")
-          ? i.image
-          : `/thumbs/square/${i.image}`
-        : null;
-      return (
-        <ImageItem>
-          <ImageCircle src={src} alt={i.title} size={12} />
-          {i.title}
-          {i.kind && (
-            <Kind style={{ background: colorHash.hex(i.kind) }}>{i.kind}</Kind>
-          )}
-        </ImageItem>
-      );
-    }
-    return i.title;
+    return (
+      <Item>
+        <Title>{i.title}</Title>
+        {i.kind && (
+          <Kind style={{ background: colorHash.hex(i.kind) }}>{i.kind}</Kind>
+        )}
+      </Item>
+    );
   };
 
   onInputTypeChange = (e: React.FormEvent<HTMLSelectElement>) => {
@@ -226,6 +221,7 @@ export default class ReferenceInput extends Component<Props, State> {
               itemToString={this.itemToString}
               renderItem={this.renderItem}
               placeholder={placeholder ? placeholder : undefined}
+              style={{ paddingLeft: "10px" }}
             />
           </Root>
         ) : (

@@ -80,9 +80,6 @@ jobs:
           name: Install cypress
           command: CYPRESS_INSTALL_BINARY=3.3.2 $(npm bin)/cypress install
       - run:
-          name: Build Test-Client
-          command: export NODE_ENV=test; npm run build:client
-      - run:
           name: Run cypress
           command: npm run e2e
       - store_artifacts:

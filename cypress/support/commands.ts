@@ -67,12 +67,10 @@ Cypress.Commands.add("withContext", function(
 
 Cypress.Commands.add("logout", () => cy.clearCookies().visit("/"));
 Cypress.Commands.add("login", ({ email, password, name }: User = admin) => {
-  return cy.logout().then(() => {
-    loginPage.login(email, password);
-    loginPage.profile().should("have.text", name.substring(0, 2));
-
-    return cy.getCookie("session").then(({ value }) => value);
-  });
+  cy.logout();
+  loginPage.login(email, password);
+  loginPage.profile().should("have.text", name.substring(0, 2));
+  return cy.getCookie("session").then(({ value }) => value);
 });
 Cypress.Commands.add("restoreSession", (session: string) => {
   return cy.setCookie("session", session).visit("/");

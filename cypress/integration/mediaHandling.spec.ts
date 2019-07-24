@@ -118,7 +118,8 @@ context("Media", () => {
       mimeType: "image/png"
     });
     content.save();
-
+    // TODO Find a better way to wait for the upload to finish
+    cy.wait(500);
     frame.navigation("Media").click();
     media.tile(image1Name).should("have.length", 1);
   });

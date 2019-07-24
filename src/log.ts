@@ -13,7 +13,7 @@ function highlight(
 
 function logo(background: string = "#FB249D", color: string = "#ffffff") {
   if (!chalk.supportsColor) {
-    return "[cotype] ";
+    return "[cotype]";
   }
   return highlight(" { ", background, color);
 }
