@@ -546,7 +546,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     previewOpts?: Cotype.PreviewOpts
   ): Promise<string[]> {
     const { items } = await this.adapter.search(term, true, {}, previewOpts);
-    const pattern = `${_escapeRegExp(term)}(\\w*['|\\-|\\/|_|+]*\\w+|\\w*)`;
+    const pattern = `${_escapeRegExp(term)}([\\w|ü|ö|ä|ß|Ü|Ö|Ä]*['|\\-|\\/|_|+]*[\\w|ü|ö|ä|ß|Ü|Ö|Ä]+|[\\w|ü|ö|ä|ß|Ü|Ö|Ä]*)`;
     const re = new RegExp(pattern, "ig");
     const terms: string[] = [];
     items.forEach(item => {
