@@ -19,7 +19,8 @@ const Item = styled("div")`
     css`
       color: rgba(0, 0, 0, 0.95);
       background: var(--light-color);
-    `} ${(p: P) =>
+    `};
+  ${(p: P) =>
     p.isSelected &&
     css`
       font-weight: 700;
@@ -50,6 +51,7 @@ const listClass = css`
   border: 1px solid #f0f0f0;
   border-top-width: 0;
   box-shadow: 0 12px 12px -12px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 `;
 
 const Button = styled("button")`
