@@ -217,8 +217,7 @@ export default (
             if (fields) {
               result = pickFieldsFromResultData(
                 result,
-                fields,
-                model
+                fields
               ) as ListChunkWithRefs<Content>;
             }
             const { items, _refs } = result;
@@ -246,8 +245,7 @@ export default (
           if (fields) {
             results = pickFieldsFromResultData(
               results,
-              fields,
-              model
+              fields
             ) as ListChunkWithRefs<Content>;
           }
           const { total, items, _refs } = results;
@@ -283,11 +281,7 @@ export default (
         res.setHeader("last-modified", new Date(result.date).toUTCString());
 
         if (fields) {
-          result = pickFieldsFromResultData(
-            result,
-            fields,
-            model
-          ) as ContentWithRefs;
+          result = pickFieldsFromResultData(result, fields) as ContentWithRefs;
         }
 
         res.json({
@@ -332,8 +326,7 @@ export default (
               if (fields) {
                 result = pickFieldsFromResultData(
                   result,
-                  fields,
-                  model
+                  fields
                 ) as ListChunkWithRefs<Content>;
               }
 

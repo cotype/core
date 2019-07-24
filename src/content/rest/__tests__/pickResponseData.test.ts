@@ -2,9 +2,7 @@ import {
   Content,
   ContentWithRefs,
   ListChunkWithRefs,
-  Meta,
-  ModelOpts,
-  Model
+  Meta
 } from "../../../../typings";
 import pickFieldsFromResultData from "../pickFieldsFromResultData";
 
@@ -18,28 +16,6 @@ const mediaRef = {
   id: "abc.pdf",
   size: 12345
 } as Meta;
-
-const model: ModelOpts = {
-  name: "TestModel",
-  singular: "Foo",
-  plural: "Foos",
-  fields: {
-    foo: { type: "string" },
-    bar: {
-      type: "object",
-      fields: {
-        bar: { type: "number" }
-      }
-    },
-    fooBar: {
-      type: "media"
-    },
-    bazn: {
-      type: "content",
-      models: [contentRef._content]
-    }
-  }
-};
 
 const data: Content = {
   id: "1",
@@ -90,39 +66,29 @@ const listOfContent: ListChunkWithRefs<Content> = {
 describe("pickFieldsFromResultData", () => {
   describe("pick single content", () => {
     it("should return full response", async () => {
-      await expect(
-        pickFieldsFromResultData(singleContent, [], model as Model)
-      ).toEqual(expect.objectContaining(singleContent));
+      await expect(pickFieldsFromResultData(singleContent, [])).toEqual(
+        expect.objectContaining(singleContent)
+      );
     });
 
     it("should return only selected fields", async () => {
       const { fooBar, bazn, ...restData } = data.data;
       await expect(
-        pickFieldsFromResultData(
-          singleContent,
-          ["foo", "bar", "bazn"],
-          model as Model
-        )
+        pickFieldsFromResultData(singleContent, ["foo", "bar", "bazn"])
       ).toEqual(
         expect.objectContaining({
           ...singleContent,
           data: { ...restData, bazn },
-          _refs: {
-            media: {},
-            content: _contentRefs
-          }
+          _refs
         })
       );
       await expect(
-        pickFieldsFromResultData(singleContent, ["foo", "bar"], model as Model)
+        pickFieldsFromResultData(singleContent, ["foo", "bar"])
       ).toEqual(
         expect.objectContaining({
           ...singleContent,
           data: { ...restData },
-          _refs: {
-            media: {},
-            content: {}
-          }
+          _refs
         })
       );
     });
@@ -130,40 +96,30 @@ describe("pickFieldsFromResultData", () => {
 
   describe("pick list of content", () => {
     it("should return full response", async () => {
-      await expect(
-        pickFieldsFromResultData(listOfContent, [], model as Model)
-      ).toEqual(expect.objectContaining(listOfContent));
+      await expect(pickFieldsFromResultData(listOfContent, [])).toEqual(
+        expect.objectContaining(listOfContent)
+      );
     });
 
     it("should return only selected fields", async () => {
       const { fooBar, bazn, ...restData } = data.data;
 
       await expect(
-        pickFieldsFromResultData(
-          listOfContent,
-          ["foo", "bar", "bazn"],
-          model as Model
-        )
+        pickFieldsFromResultData(listOfContent, ["foo", "bar", "bazn"])
       ).toEqual(
         expect.objectContaining({
           total: 1,
           items: [{ ...data, data: { ...restData, bazn } }],
-          _refs: {
-            media: {},
-            content: _contentRefs
-          }
+          _refs
         })
       );
       await expect(
-        pickFieldsFromResultData(listOfContent, ["foo", "bar"], model as Model)
+        pickFieldsFromResultData(listOfContent, ["foo", "bar"])
       ).toEqual(
         expect.objectContaining({
           total: 1,
           items: [{ ...data, data: { ...restData } }],
-          _refs: {
-            media: {},
-            content: {}
-          }
+          _refs
         })
       );
     });
