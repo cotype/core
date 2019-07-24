@@ -1182,9 +1182,11 @@ export default class KnexContent implements ContentAdapter {
 
     if (orderByColumn) {
       k.orderBy(orderByColumn, order);
-      if (search && search.term) k.orderBy("isExact");
+      if (search && search.term && search.scope !== "title")
+        k.orderBy("isExact");
     } else {
-      if (search && search.term) k.orderBy("isExact");
+      if (search && search.term && search.scope !== "title")
+        k.orderBy("isExact");
       k.orderBy("contents.id", order);
     }
 
@@ -1194,7 +1196,7 @@ export default class KnexContent implements ContentAdapter {
       "contents.visibleFrom",
       "contents.visibleUntil",
       "content_revisions.data",
-      ...(search && search.term
+      ...(search && search.term && search.scope !== "title"
         ? ([
             this.knex.raw(
               `(case when content_search.text like '%${search.term
