@@ -414,7 +414,7 @@ export default class KnexContent implements ContentAdapter {
     const refs = this.knex
       .distinct(["crv.data", "c.id", "c.type"])
       .from("content_references as cr")
-      .whereIn("cr.contents", ids)
+      .whereIn("cr.content", ids)
       .innerJoin("contents as c", j => {
         j.on("c.id", "cr.id");
         j.andOn("c.deleted", "=", this.knex.raw("false"));
