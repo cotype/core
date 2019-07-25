@@ -1,7 +1,8 @@
 import removeUnnecessaryRefData, {
   createJoin,
   filterContentData,
-  getContainingMedia
+  getContainingMedia,
+  getDeepJoins
 } from "../filterRefData";
 import models from "./models";
 import { Model, Content, Refs } from "../../../../typings";
@@ -135,5 +136,62 @@ describe("removeUnnecessaryRefData", () => {
         "image.exe": { ...meta, id: "image.exe" }
       }
     });
+  });
+});
+
+describe("convertDeepJons", () => {
+  it("get Join Levels", async () => {
+    const deepJoins = getDeepJoins(
+      {
+        news: ["title", "ref.ean"]
+      },
+      models as Model[]
+    );
+
+    await expect(deepJoins).toEqual([
+      {
+        news: ["title", "ref"]
+      },
+      {
+        products: ["ean"]
+      }
+    ]);
+  });
+  it("get Join Levels with List", async () => {
+    const deepJoins = getDeepJoins(
+      {
+        products: ["title", "sections.title"]
+      },
+      models as Model[]
+    );
+
+    await expect(deepJoins).toEqual([
+      {
+        products: ["title", "sections"]
+      },
+      {
+        section: ["title"]
+      }
+    ]);
+  });
+  it("get Join Levels with List 2-Levels", async () => {
+    const deepJoins = getDeepJoins(
+      {
+        news: ["title", "ref.title", "ref.sections.title"]
+      },
+      models as Model[]
+    );
+
+    await expect(deepJoins).toEqual([
+      {
+        news: ["title", "ref"]
+      },
+      {
+        products: ["title", "sections"]
+      },
+      {
+        section: ["title"]
+      }
+    ]);
   });
 });

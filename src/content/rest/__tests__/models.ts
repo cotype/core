@@ -36,8 +36,19 @@ const models: ModelOpts[] = [
       title: { type: "string", required: true },
       ean: { type: "string" },
       brand: { type: "external", models: ["brands"] },
+      sections: {
+        type: "list",
+        item: { type: "content", models: ["section"] }
+      },
       description: { type: "richtext" },
       image: { type: "media" }
+    }
+  },
+  {
+    name: "section",
+    singular: "Section",
+    fields: {
+      title: { type: "string", required: true }
     }
   }
 ];
