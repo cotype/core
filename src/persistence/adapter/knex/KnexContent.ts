@@ -383,16 +383,68 @@ export default class KnexContent implements ContentAdapter {
     });
   }
 
+  loadRefs(ids: string[], types: string[] | false, published?: boolean) {
+    const refs = this.knex
+      .distinct(["crv.data", "c.id", "c.type"])
+      .from("content_references as cr")
+      .whereIn("cr.id", ids)
+      .innerJoin("contents as co", j => {
+        j.on("cr.id", "co.id");
+        j.on("cr.rev", published ? "co.published_rev" : "co.latest_rev");
+      })
+      .innerJoin("contents as c", j => {
+        j.on("c.id", "cr.content");
+        j.andOn("c.deleted", "=", this.knex.raw("false"));
+      })
+      .innerJoin("content_revisions as crv", j => {
+        j.on("crv.id", "c.id");
+        j.andOn("crv.rev", published ? "c.published_rev" : "c.latest_rev");
+      });
+
+    if (types) {
+      refs.whereIn(
+        "c.type",
+        types.map(m => m[0].toLowerCase() + m.substring(1))
+      );
+    }
+    return refs;
+  }
+
+  loadInverseRefs(ids: string[], types: string[] | false, published?: boolean) {
+    const refs = this.knex
+      .distinct(["crv.data", "c.id", "c.type"])
+      .from("content_references as cr")
+      .whereIn("cr.contents", ids)
+      .innerJoin("contents as c", j => {
+        j.on("c.id", "cr.id");
+        j.andOn("c.deleted", "=", this.knex.raw("false"));
+      })
+      .innerJoin("content_revisions as crv", j => {
+        j.on("crv.id", "c.id");
+        j.andOn("crv.rev", published ? "c.published_rev" : "c.latest_rev");
+      });
+
+    if (types) {
+      refs.whereIn(
+        "c.type",
+        types.map(m => m[0].toLowerCase() + m.substring(1))
+      );
+    }
+    return refs;
+  }
+
   async loadContentReferences(
     id: string[],
     model: Cotype.Model,
     models: Cotype.Model[],
     published?: boolean,
-    join: Cotype.Join[] = [{}]
+    joins: Cotype.Join[] = [{}]
   ) {
     let fullData: Cotype.Data[] = [];
 
     const fetch = async (ids: string[], types: string[], first: boolean) => {
+      // TODO Factor out function (model, types): {hasRefs, hasInverseRefs}
+
       // Only get references when needed
       // since this can be a expensive db operation
       let modelHasReverseReferences = false;
@@ -421,49 +473,23 @@ export default class KnexContent implements ContentAdapter {
       // otherwise we still need to load the main data of that join
       if (first && !modelHasReverseReferences && !modelHasReferences) return [];
 
-      const refs = this.knex
-        .distinct(["crv.data", "c.id", "c.type"])
-        .from("contents as c")
-        .innerJoin("content_references as cr", j => {
-          j.orOn("c.id", "cr.content");
-          j.orOn("c.id", "cr.id");
-        })
-        .innerJoin("content_revisions as crv", j => {
-          j.on("crv.rev", published ? "c.published_rev" : "c.latest_rev");
-          j.andOn("crv.id", "c.id");
-        })
+      const refs = modelHasReferences
+        ? this.loadRefs(ids, !first && types, published)
+        : [];
+      const inverseRefs = modelHasReverseReferences
+        ? this.loadInverseRefs(ids, !first && types, published)
+        : [];
 
-        .leftJoin("content_references as cr2", j => {
-          j.orOn("cr.id", "cr2.content");
-        })
-        .where("c.deleted", false);
-
-      // Only get references when needed
-      // since this can be a expensive db operation
-      refs.andWhere(k => {
-        if (modelHasReferences) {
-          k.orWhereIn("cr.id", ids);
-        }
-        if (modelHasReverseReferences) {
-          k.orWhereIn("cr.content", ids);
-        }
-      });
-
-      if (!first) {
-        refs.whereIn(
-          "c.type",
-          types.map(m => m[0].toLowerCase() + m.substring(1))
-        );
-      }
-      return (await refs).map((ref: any) =>
-        this.parseData(ref)
-      ) as Cotype.Data[];
+      const [data, inverseData] = await Promise.all([refs, inverseRefs]);
+      return data
+        .concat(inverseData)
+        .map((d: any) => this.parseData(d)) as Cotype.Data[];
     };
 
     let checkIds = id;
-    for (let i = 0; i < join.length; i++) {
-      const thisjoin = join[i];
-      const data = await fetch(checkIds, Object.keys(thisjoin), i === 0);
+    for (let i = 0; i < joins.length; i++) {
+      const join = joins[i];
+      const data = await fetch(checkIds, Object.keys(join), i === 0);
       fullData = [...fullData, ...data];
       checkIds = data.map(d => d.id);
     }
