@@ -49,6 +49,8 @@ type Props = {
 };
 export default class RichTextOutput extends Component<Props> {
   static getSummaryText(props: Props) {
+    if (!props.value || !props.value.ops || !props.value.ops.length)
+      return null;
     return <RichTextOutput {...props} />;
   }
 
