@@ -1,4 +1,4 @@
-import { Item } from "../../../typings";
+import { SearchResultItem } from "../../../typings";
 import React, { Component } from "react";
 import { css } from "react-emotion";
 import api from "../api";
@@ -50,9 +50,11 @@ export default class Search extends Component {
     return q ? api.get("/content", { q }) : Promise.resolve([]);
   };
 
-  renderItem = (item: Item) => <ResultItem item={item} />;
+  renderItem = (item: SearchResultItem, term: string) => {
+    return <ResultItem item={item} term={term} />;
+  };
 
-  itemToString = (i: Item) => (i ? i.title : "");
+  itemToString = (i: SearchResultItem) => (i ? i.title : "");
 
   render() {
     const { term, items } = this.state;
@@ -65,7 +67,7 @@ export default class Search extends Component {
         onChange={this.handleChange}
         items={items}
         itemToString={this.itemToString}
-        renderItem={this.renderItem}
+        renderItem={item => this.renderItem(item, this.state.term)}
         style={{ display: "flex", width: 400, zIndex: 3 }}
         placeholder="Search …"
       />
