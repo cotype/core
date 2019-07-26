@@ -31,6 +31,10 @@ const Grid = styled("div")`
   display: flex;
   flex-wrap: wrap;
 `;
+const FlexRow = styled("div")`
+  display: flex;
+  width: 100%;
+`;
 const Meta = styled("div")`
   display: inline-block;
   padding-left: 24px;
@@ -211,11 +215,23 @@ export default class Details extends Component<Props, State> {
                 </MetaInput>
                 <MetaInput>
                   <MetaItemLabel>URL</MetaItemLabel>
-                  <input
-                    className={inputClass}
-                    value={window.location.origin + "/media/" + id}
-                    readOnly
-                  />
+                  <FlexRow>
+                    <input
+                      className={inputClass}
+                      value={window.location.origin + "/media/" + id}
+                      readOnly
+                    />
+                    <Button
+                      icon={paths.OpenInTab}
+                      light
+                      href={"/media/" + id}
+                      target="_blank"
+                      asLink
+                      title="open in new tab"
+                    >
+                      open
+                    </Button>
+                  </FlexRow>
                 </MetaInput>
                 <MetaItemLabel>Tags</MetaItemLabel>
                 <ChipList

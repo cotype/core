@@ -41,9 +41,9 @@ const activeClass = css`
 
 const FilterTypes = [
   { label: "All", value: "all" },
-  { label: "Images", value: "image" },
-  { label: "Videos", value: "video" },
-  { label: "PDF", value: "pdf" }
+  { label: "Images", value: "image/" },
+  { label: "Videos", value: "video/" },
+  { label: "PDF", value: "application/pdf" }
 ];
 
 const OrderByTypes = [
@@ -66,6 +66,7 @@ type State = {
   search?: string;
   filters: Array<{ label: string; value: string }>;
   topbarProgress: number | undefined;
+  unUsed: boolean;
 };
 type Props = {
   model?: object;
@@ -94,7 +95,8 @@ export default class Media extends Component<Props, State> {
     orderBy: "created_at",
     order: "desc",
     filters: FilterTypes,
-    topbarProgress: undefined
+    topbarProgress: undefined,
+    unUsed: false
   };
 
   constructor(props: Props) {
@@ -119,7 +121,7 @@ export default class Media extends Component<Props, State> {
   };
 
   fetchData = (offset: number, limit = 50) => {
-    const { fileType, order, orderBy, search, items } = this.state;
+    const { fileType, order, orderBy, search, items, unUsed } = this.state;
 
     this.setState({ lastRequestedIndex: offset + limit });
 
@@ -129,7 +131,8 @@ export default class Media extends Component<Props, State> {
       orderBy,
       search,
       offset,
-      limit
+      limit,
+      unUsed: unUsed ? true : undefined
     };
     api.listMedia(query).then(res =>
       this.setState({
@@ -211,6 +214,9 @@ export default class Media extends Component<Props, State> {
   onOrderChange = (order: string) => {
     this.setState({ order, lastRequestedIndex: 0 }, this.fetchNextData);
   };
+  onUnUsedChange = (unUsed: boolean) => {
+    this.setState({ unUsed, lastRequestedIndex: 0 }, this.fetchNextData);
+  };
 
   onSearch = (search: string) => {
     this.setState({ search, lastRequestedIndex: 0 }, this.fetchNextData);
@@ -284,6 +290,7 @@ export default class Media extends Component<Props, State> {
           filters={filters}
           onFilterChange={this.onFilterChange}
           onOrderByChange={this.onOrderByChange}
+          onUnUsedChange={this.onUnUsedChange}
           onSearch={this.onSearch}
           orderBys={OrderByTypes}
           onOrderChange={this.onOrderChange}

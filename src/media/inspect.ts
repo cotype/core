@@ -1,22 +1,53 @@
-import sizeOf from "image-size";
+import probe from "probe-image-size";
+import fileType from "file-type";
+import { Readable } from "stream";
 import hasha from "hasha";
 
-type ImageInfo = {
+
+type FileImageInfo = {
   width: number | null;
   height: number | null;
-  type: string | null;
+  ext: string | null;
+  mime: string | null;
   hash: string;
 };
 
-export default function inspect(file: string): Promise<ImageInfo> {
-  return new Promise(async resolve => {
-    const hash = (await hasha.fromFile(file, { algorithm: "md5" })) as string;
+const inspect = async (
+  fileStream: NodeJS.ReadableStream
+): Promise<FileImageInfo> => {
 
-    sizeOf(file, (err, dimensions) => {
-      resolve({
-        ...(dimensions || { width: null, height: null, type: null }),
-        hash
-      });
-    });
-  });
-}
+  const readableStream = new Readable();
+  readableStream.wrap(fileStream);
+  const [pipedFileStream, hash] = await Promise.all([
+    fileType.stream(readableStream),
+    hasha.fromStream(fileStream, {
+      algorithm: "md5"
+    })
+  ]);
+
+  let fileImageInfo: FileImageInfo = {
+    hash: String(hash),
+    width: null,
+    height: null,
+    ext: null,
+    mime: null
+  };
+  if (!pipedFileStream.fileType) {
+    return fileImageInfo;
+  }
+
+  fileImageInfo = {
+    ...fileImageInfo,
+    ...pipedFileStream.fileType
+  };
+
+  if (fileImageInfo.mime!.startsWith("image")) {
+    const imageInfo = await probe(pipedFileStream);
+    if (imageInfo.width && imageInfo.height) {
+      fileImageInfo.width = imageInfo.width;
+      fileImageInfo.height = imageInfo.height;
+    }
+  }
+  return fileImageInfo;
+};
+export default inspect;

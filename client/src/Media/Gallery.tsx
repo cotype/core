@@ -118,6 +118,7 @@ export default class Gallery extends Component<Props> {
         height={size.height}
         width={size.width}
         style={{ outline: "none", padding: "20px" }}
+        overscanByPixels={1000}
         onCellsRendered={onRowsRendered}
       />
     );

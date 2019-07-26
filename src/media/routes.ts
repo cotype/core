@@ -1,7 +1,6 @@
 /**
  * Media routes (/api/media/*)
  */
-import tempWrite from "temp-write";
 import { Router } from "express";
 import { Persistence } from "../persistence";
 import ReferenceConflictError from "../persistence/errors/ReferenceConflictError";
@@ -27,19 +26,16 @@ export default function routes(
 
     for (const fileKey in filesUpload) {
       if (filesUpload.hasOwnProperty(fileKey)) {
-        const { filename: id, originalname, mimetype, size } = filesUpload[
-          fileKey
-        ];
+        const { filename: id, originalname, size } = filesUpload[fileKey];
 
-        const tmpFile = await tempWrite(storage.retrieve(id));
-        const { width, height, type, hash } = await inspect(tmpFile);
+        const { width, height, ext, hash, mime } = await inspect(storage.retrieve(id));
 
         const file = {
           id,
           size,
           originalname,
-          mimetype,
-          imagetype: type,
+          mimetype: mime,
+          imagetype: mime && mime.startsWith("image") ? ext : null,
           width,
           height,
           hash
@@ -63,7 +59,7 @@ export default function routes(
 
   router.get("/admin/rest/media", async (req, res) => {
     const { principal, query } = req;
-    const { limit = 50, offset = 0, orderBy, order, search, mimetype } = query;
+    const { limit = 50, offset = 0, orderBy, order, search, mimetype, unUsed } = query;
 
     const list = await media.list(principal, {
       limit,
@@ -71,7 +67,8 @@ export default function routes(
       orderBy,
       order,
       search,
-      mimetype
+      mimetype,
+      unUsed: !!unUsed
     });
     res.json(list);
   });
