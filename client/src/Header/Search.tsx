@@ -4,7 +4,7 @@ import { css } from "react-emotion";
 import api from "../api";
 import Autocomplete from "../common/Autocomplete";
 import ResultItem from "../common/ResultItem";
-
+import orderSearchResults from "../utils/orderSearchResults";
 export const inputClass = css`
   background: rgba(255, 255, 255, 0.05);
   border: none;
@@ -32,7 +32,9 @@ export default class Search extends Component {
   handleInput = (term: string | undefined) => {
     this.setState({ term });
     if (term && term.length) {
-      this.fetchItems(term).then(({ items }) => this.setState({ items }));
+      this.fetchItems(term).then(({ items }) =>
+        this.setState({ items: orderSearchResults(items, this.state.term) })
+      );
     } else {
       this.setState({ items: [] });
     }

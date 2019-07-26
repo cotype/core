@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import styled, { css, cx } from "react-emotion";
 import { FieldProps } from "formik";
+import orderSearchResults from "../../utils/orderSearchResults";
 import { stringify } from "qs";
 import { inputClass } from "../../common/styles";
 import Autocomplete from "../../common/Autocomplete";
@@ -57,7 +58,7 @@ type Props = FieldProps<ReferenceType> & {
 type Ref = { id: string; model: string } | null;
 
 type State = {
-  items: Item[];
+  items: SearchResultItem[];
   value: Ref;
   searchTerm: string;
   internalRef: boolean;
@@ -130,7 +131,9 @@ export default class ReferenceInput extends Component<Props, State> {
     });
 
     return api.get(`/${type}?${queryString}`).then(({ items }) => {
-      this.setState({ items });
+      this.setState({
+        items: orderSearchResults(items, this.state.searchTerm)
+      });
     });
   };
 
