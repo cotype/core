@@ -736,7 +736,8 @@ describe("rest api", () => {
         const res = await suggest(
           `${searchForNews
             .split(" ")
-            .slice(0, 3)
+            .slice(0, 2)
+            .map((el, i) => (i === 0 ? el : el.slice(0, 4)))
             .join(" ")}`,
           {
             published: false,
@@ -746,7 +747,7 @@ describe("rest api", () => {
         await expect(res).toMatchObject([
           searchForNews
             .split(" ")
-            .slice(0, 4)
+            .slice(0, 2)
             .join(" ")
         ]);
       });

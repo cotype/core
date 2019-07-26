@@ -505,18 +505,20 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     opts: Cotype.ListOpts,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.SearchResultItem>> {
-    const { total, items } = await this.adapter.search(
+    const textSearch = await this.adapter.search(
       term,
       false,
       opts,
       previewOpts
     );
 
+    const items = textSearch.items
+      .map(c => this.createSearchResultItem(c, term))
+      .filter(this.canView(principal)) as Cotype.SearchResultItem[];
+
     return {
-      total,
-      items: items
-        .map(c => this.createSearchResultItem(c, term))
-        .filter(this.canView(principal))
+      total: textSearch.total,
+      items
     };
   }
 
@@ -526,7 +528,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     previewOpts?: Cotype.PreviewOpts
   ): Promise<string[]> {
     const { items } = await this.adapter.search(term, true, {}, previewOpts);
-    const pattern = `${_escapeRegExp(term)}(\\S+|\\s\\S+)`;
+    const pattern = `${_escapeRegExp(
+      term
+    )}([\\w|ü|ö|ä|ß|Ü|Ö|Ä]*['|\\-|\\/|_|+]*[\\w|ü|ö|ä|ß|Ü|Ö|Ä]+|[\\w|ü|ö|ä|ß|Ü|Ö|Ä]*)`;
     const re = new RegExp(pattern, "ig");
     const terms: string[] = [];
     items.forEach(item => {
@@ -536,11 +540,16 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
         const m = text.match(re);
         if (m) {
           m.forEach(s => {
-            if (s && !terms.includes(s)) terms.push(s);
+            const cleaned = s.trim();
+            if (
+              cleaned &&
+              !terms.some(t => t.toLowerCase() === cleaned.toLowerCase())
+            )
+              terms.push(cleaned);
           });
         }
       }
     });
-    return terms;
+    return terms.sort((a, b) => a.length - b.length || a.localeCompare(b));
   }
 }

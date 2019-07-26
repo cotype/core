@@ -11,7 +11,6 @@ import _update from "lodash/update";
 import UniqueFieldError, {
   NonUniqueField
 } from "../../errors/UniqueFieldError";
-import cleanSearchTerm from "./cleanSearchTerm";
 import setPosition from "../../../model/setPosition";
 import getAlwaysUniqueFields from "../../../model/getAlwaysUniqueFields";
 import getPositionFields from "../../../model/getPositionFields";
@@ -783,10 +782,7 @@ export default class KnexContent implements ContentAdapter {
         k.whereRaw("text @@ plainto_tsquery(?)", `${text}:*`);
       } else if (this.knex.client.config.client === "mysql") {
         if (exact) {
-          k.whereRaw(
-            "MATCH(text) AGAINST(? IN BOOLEAN MODE)",
-            cleanSearchTerm(text)
-          );
+          k.where("text", "like", `%${text}%`);
         } else {
           k.whereRaw("MATCH(text) AGAINST(?)", text);
         }
@@ -851,10 +847,21 @@ export default class KnexContent implements ContentAdapter {
     k.distinct([
       `${searchTable}.id`,
       "contents.type",
-      "content_revisions.data"
+      "content_revisions.data",
+      ...(!exact
+        ? ([
+            this.knex.raw(
+              `(case when text like '%${text}%' then 1 else 2 end) as isExact`
+            )
+          ] as any)
+        : [])
     ]);
 
     k.offset(Number(offset)).limit(Number(limit));
+
+    if (!exact) {
+      k.orderBy("isExact");
+    }
 
     const items = await k;
 
@@ -956,7 +963,9 @@ export default class KnexContent implements ContentAdapter {
         } else if (this.knex.client.config.client === "mysql") {
           k.whereRaw("match(text) against(?)", searchTerm);
         } else {
-          k.where("content_search.text", "like", `%${searchTerm}%`);
+          searchTerm
+            .split(/\s+/)
+            .forEach(t => k.andWhere("text", "like", `%${t}%`));
         }
       }
     }
@@ -1169,21 +1178,40 @@ export default class KnexContent implements ContentAdapter {
         : "orderValue.literal_lc"
       : null;
 
-    k.offset(Number(offset))
-      .limit(Number(limit))
-      .orderBy(orderByColumn || "contents.id", order);
+    k.offset(Number(offset)).limit(Number(limit));
+
+    if (orderByColumn) {
+      k.orderBy(orderByColumn, order);
+      if (search && search.term && search.scope !== "title")
+        k.orderBy("isExact");
+    } else {
+      if (search && search.term && search.scope !== "title")
+        k.orderBy("isExact");
+      k.orderBy("contents.id", order);
+    }
 
     const selectColumns = [
       "contents.id",
       "contents.type",
       "contents.visibleFrom",
       "contents.visibleUntil",
-      "content_revisions.data"
+      "content_revisions.data",
+      ...(search && search.term && search.scope !== "title"
+        ? ([
+            this.knex.raw(
+              `(case when content_search.text like '%${search.term
+                .toLowerCase()
+                .trim()}%' then 1 else 2 end) as isExact`
+            )
+          ] as any)
+        : [])
     ];
+
     if (orderByColumn) {
       selectColumns.push(orderByColumn);
     }
     const items = k.select(selectColumns);
+
     return {
       total,
       items: (await items).map((item: any) => this.parseData(item, model))
