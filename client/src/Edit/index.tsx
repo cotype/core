@@ -24,7 +24,7 @@ type Props = RouteComponentProps & {
 };
 export type conflictTypes = "publish" | "unpublish" | "delete" | "media";
 type State = {
-  versions?: Array<Cotype.VersionItem & { published: boolean }>;
+  versions?: Cotype.VersionItem[];
   itemNotFoundError: boolean;
   conflictingRefs: VersionItem[] | null;
   conflictType: conflictTypes;
@@ -141,7 +141,7 @@ class Edit extends Component<Props, State> {
       );
     }
 
-    if (model.versioned && !versions) return null;
+    if (model.versioned && (!versions || !versions.length)) return null;
     return (
       <ReadOnlyHistory
         versions={versions}
