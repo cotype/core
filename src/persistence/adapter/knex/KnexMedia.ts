@@ -65,8 +65,8 @@ export default class KnexMedia implements MediaAdapter {
     });
     return media;
   }
-  async findByHash(hashs: string[]): Promise<Cotype.Media[]> {
-    const media = await this.knex("media").whereIn("hash", hashs);
+  async findByHash(hashes: string[]): Promise<Cotype.Media[]> {
+    const media = await this.knex("media").whereIn("hash", hashes);
     media.forEach((m: Cotype.Media) => {
       m.tags = JSON.parse(m.tags as any);
     });
@@ -77,7 +77,7 @@ export default class KnexMedia implements MediaAdapter {
     const args = pick(data, ["focusX", "focusY", "tags", "alt", "credit"]);
 
     const [media] = await this.knex("media").where({ id });
-    if (!media) return null;
+    if (!media) return false;
 
     if (typeof args.focusX !== undefined && args.focusX !== null)
       args.focusX = parseInt(args.focusX, 10);
@@ -91,13 +91,15 @@ export default class KnexMedia implements MediaAdapter {
       args.tags = JSON.stringify(args.tags);
     }
 
-    return this.knex("media")
+    await this.knex("media")
       .where({ id })
       .update({ ...args, search });
+
+    return true;
   }
 
   async delete(id: string, models: Cotype.Model[]): Promise<any> {
-    const unnecessaryReferences: [] = await this.knex("content_references")
+    const unnecessaryReferences = await this.knex("content_references")
       .where("media", "=", id)
       .join("contents", join => {
         join.on("contents.id", "content_references.id");
@@ -108,7 +110,7 @@ export default class KnexMedia implements MediaAdapter {
       })
       .where("contents.deleted", false);
 
-    const deadReferences: [] = await this.knex("content_references")
+    const deadReferences = await this.knex("content_references")
       .join("contents", join => {
         join.on("contents.id", "content_references.id");
       })

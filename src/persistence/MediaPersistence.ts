@@ -7,7 +7,7 @@ import { MediaAdapter } from "./adapter";
 import ContentPersistence from "./ContentPersistence";
 import SettingsPersistence from "./SettingsPersistence";
 
-export default class MediaPeristence {
+export default class MediaPersistence {
   adapter: MediaAdapter;
   content: ContentPersistence;
   settings: SettingsPersistence;
@@ -30,11 +30,11 @@ export default class MediaPeristence {
     return this.adapter.list(opts);
   }
 
-  async update(
+  update(
     principal: Cotype.Principal,
     id: string,
     data: Cotype.Media
-  ): Promise<Cotype.Settings> {
+  ): Promise<boolean> {
     return this.adapter.update(id, data);
   }
 
@@ -42,8 +42,8 @@ export default class MediaPeristence {
     return this.adapter.load(ids);
   }
 
-  findByHash(hashs: string[]) {
-    return this.adapter.findByHash(hashs);
+  findByHash(hashes: string[]) {
+    return this.adapter.findByHash(hashes);
   }
 
   async delete(principal: Cotype.Principal, id: string) {

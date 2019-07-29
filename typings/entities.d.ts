@@ -48,7 +48,7 @@ export type Criteria = {
   };
 };
 /**
- * Joins to resolve referenes in contents.
+ * Joins to resolve references in contents.
  */
 export type Join = {
   [field: string]: string[];
@@ -137,8 +137,9 @@ export type Item = {
 export type VersionItem = Item & {
   rev: number;
   latest: boolean;
-  published_rev: boolean;
+  published: boolean;
   latest_rev: number;
+  published_rev: boolean;
   author_name: string;
   date: string;
 };
