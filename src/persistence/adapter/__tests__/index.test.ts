@@ -1059,7 +1059,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         ).toMatchObject({ total: 0, items: [] });
       });
 
-      it("shoud search", async () => {
+      it("should search", async () => {
         const res = await content.search("ipsum lore", false, {});
         expect(res).toMatchObject({
           total: 1,
@@ -1067,7 +1067,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         });
       });
 
-      it("shoud not throw erros for specials chars in search", async () => {
+      it("should not throw errors for specials chars in search", async () => {
         await content.search(" ", true, {});
         await content.search("+", true, {});
         await content.search("-", true, {});
@@ -1075,9 +1075,26 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         await content.search("(~)", true, {});
         await content.search("hello- world ", true, {});
       });
+
+      it("should find content by media", async () => {
+        const image = "image.png";
+        await media.create({
+          id: image,
+          size: 1234,
+          originalname: "image.png",
+          mimetype: "image/png",
+          imagetype: "png",
+          width: 100,
+          height: 100
+        });
+        const [id] = await createNews({ image });
+        expect(await content.findByMedia(image)).toMatchObject([
+          { id, type: "news", data: { image } }
+        ]);
+      });
     });
 
-    describe("Content with unique fields", () => {
+    describe("constraints", () => {
       it("should create content", async () => {
         const id = await content.create(
           { slug: "unique" },
@@ -1122,7 +1139,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
     });
 
-    describe("Scheduling", () => {
+    describe("scheduled content", () => {
       let id: string;
       beforeAll(async () => {
         [id] = await createNews({ title: "tttest" });
@@ -1248,21 +1265,27 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
     });
 
-    it("should find content by media", async () => {
-      const image = "image.png";
-      await media.create({
-        id: image,
-        size: 1234,
-        originalname: "image.png",
-        mimetype: "image/png",
-        imagetype: "png",
-        width: 100,
-        height: 100
+    describe("rewrite", () => {
+      it("should", async () => {
+        const ids = await createNews(
+          {
+            title: "News 1"
+          },
+          {
+            title: "News 2"
+          },
+          {
+            title: "News 3"
+          }
+        );
+        await content.rewrite(news, models.content, (data, meta) => {
+          if (ids.includes(meta.id)) {
+            return { ...data, title: data.title.toUpperCase() };
+          }
+        });
+        const c = await content.load(news, ids[0]);
+        expect(c).toMatchObject({ data: { title: "NEWS 1" } });
       });
-      const [id] = await createNews({ image });
-      expect(await content.findByMedia(image)).toMatchObject([
-        { id, type: "news", data: { image } }
-      ]);
     });
   });
 
