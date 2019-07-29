@@ -1,6 +1,6 @@
 import * as Cotype from "../../../../typings";
 import knex from "knex";
-import { ContentAdapter } from "..";
+import { ContentAdapter, Migration } from "..";
 import extractRefs from "../../../model/extractRefs";
 import extractText from "../../../model/extractText";
 import extractValues from "../../../model/extractValues";
@@ -18,6 +18,8 @@ import getPositionFields from "../../../model/getPositionFields";
 import getInverseReferenceFields from "../../../model/getInverseReferenceFields";
 import log from "../../../log";
 import visitModel from "../../../model/visitModel";
+import { Model } from "../../../../typings";
+import MigrationContext from "../../MigrationContext";
 
 const ops: any = {
   eq: "=",
@@ -292,27 +294,41 @@ export default class KnexContent implements ContentAdapter {
       author
     });
 
+    // Set the new revision as latest on the content
     await this.knex("contents")
       .where({ id })
       .update({ latest_rev: rev });
 
+    await this.indexRevision(model, id, rev, data, models);
+
+    return rev;
+  }
+
+  async indexRevision(
+    model: Cotype.Model,
+    id: string,
+    rev: number,
+    data: object,
+    models: Cotype.Model[],
+    published = false
+  ) {
+    // Delete content_values except the published ones
     await this.knex("content_values")
-      .where({ id, published: false })
+      .where({ id, published })
       .del();
 
+    // Delete content_search except the published one
     await this.knex("content_search")
-      .where({ id, published: false })
+      .where({ id, published })
       .del();
 
-    await this.extractValues(data, model, id, rev, false);
-    await this.extractText(data, model, id, rev, false);
+    await this.extractValues(data, model, id, rev, published);
+    await this.extractText(data, model, id, rev, published);
 
     const refs = extractRefs(data, model, models);
     if (refs.length) {
-      // insert refs one by one in case a foreign key constraint violation occurs.
+      // Insert refs one by one in case a foreign key constraint violation occurs.
       // In a perfect world there shouldn't be any dead references in the first place, but...
-
-      // !!don't use forEach here, async/await stumbling block: https://codeburst.io/javascript-async-await-with-foreach-b6ba62bbf404
       for (const refKey in refs) {
         if (refs.hasOwnProperty(refKey)) {
           const ref = refs[refKey];
@@ -330,7 +346,6 @@ export default class KnexContent implements ContentAdapter {
         }
       }
     }
-    return rev;
   }
 
   extractValues(
@@ -551,57 +566,45 @@ export default class KnexContent implements ContentAdapter {
     return content ? this.parseData(content, model) : null;
   }
 
-  async loadRevision(
-    model: Cotype.Model,
-    id: string,
-    rev: number,
-    tx?: knex.Transaction
-  ) {
-    const k = this.knex("content_revisions")
-      .join("contents", "content_revisions.id", "contents.id")
+  async loadRevision(model: Cotype.Model, id: string, rev: number) {
+    const content = await this.knex("content_revisions as cr")
+      .join("contents as c", "c.id", "cr.id")
       .where({
-        "contents.type": model.name,
-        "contents.id": id,
-        "contents.deleted": false,
-        "content_revisions.rev": rev
+        "cr.id": id,
+        "cr.rev": rev,
+        "c.type": model.name,
+        "c.deleted": false
       })
-      .select(["contents.id", "content_revisions.data"]);
-
-    if (tx) k.transacting(tx);
-    const content = await k.first();
+      .first("c.id", "cr.data");
     return content && { id: content.id, rev, data: JSON.parse(content.data) };
   }
 
   async listVersions(model: Cotype.Model, id: string) {
-    const versions = await this.knex("content_revisions")
-      .join("contents", "content_revisions.id", "contents.id")
-      .join("users", "users.id", "content_revisions.author")
+    const versions = await this.knex("content_revisions as cr")
+      .join("contents as c", "cr.id", "c.id")
+      .join("users", "users.id", "cr.author")
       .where({
-        "contents.type": model.name,
-        "contents.id": id
+        "c.type": model.name,
+        "c.id": id
       })
       .select([
-        "contents.type",
-        "contents.id",
-        "contents.latest_rev",
-        "contents.published_rev",
-        "content_revisions.rev",
-        "content_revisions.date",
+        "c.type",
+        "c.id",
+        "c.latest_rev",
+        "c.published_rev",
+        "cr.rev",
+        "cr.date",
         "users.name as author_name",
-        this.knex.raw("contents.latest_rev = content_revisions.rev as latest"),
-        this.knex.raw(
-          "contents.published_rev = content_revisions.rev as published"
-        )
+        this.knex.raw("c.latest_rev = cr.rev as latest"),
+        this.knex.raw("c.published_rev = cr.rev as published")
       ])
-      .orderBy("content_revisions.rev", "desc");
+      .orderBy("cr.rev", "desc");
 
-    return versions.length > 0
-      ? versions.map((v: any) => ({
-          ...v,
-          latest: !!v.latest,
-          published: !!v.published
-        }))
-      : null;
+    return versions.map((v: Cotype.VersionItem) => ({
+      ...v,
+      latest: !!v.latest,
+      published: !!v.published
+    }));
   }
 
   async setPublishedRev(
@@ -725,7 +728,7 @@ export default class KnexContent implements ContentAdapter {
     if (contents.length > 0) {
       // TODO action delete/unpublish/schedule
       const err = new ReferenceConflictError({ type: "content" });
-      err.refs = contents.map(this.parseData);
+      err.refs = contents.map(c => this.parseData(c));
       throw err;
     }
   }
@@ -860,7 +863,7 @@ export default class KnexContent implements ContentAdapter {
 
     return {
       total,
-      items: items.map(this.parseData)
+      items: items.map(i => this.parseData(i))
     };
   }
 
@@ -882,7 +885,7 @@ export default class KnexContent implements ContentAdapter {
       .where("content_references.media", "=", media)
       .andWhere("contents.deleted", false);
 
-    return contents.map(this.parseData);
+    return contents.map(c => this.parseData(c));
   }
 
   async list(
@@ -1188,6 +1191,101 @@ export default class KnexContent implements ContentAdapter {
       total,
       items: (await items).map((item: any) => this.parseData(item, model))
     };
+  }
+
+  async rewrite(
+    model: Cotype.Model,
+    models: Cotype.Model[],
+    iterator: (
+      data: any,
+      meta: { id: string; rev: number; latest: boolean; published: boolean }
+    ) => any
+  ) {
+    const revs = await this.knex("content_revisions as cr")
+      .join("contents as c", "cr.id", "c.id")
+      .where({
+        "c.type": model.name
+      })
+      .select(["cr.id", "cr.rev", "c.latest_rev", "c.published_rev"]);
+
+    for (const { id, rev, latest_rev, published_rev } of revs) {
+      const { data } = await this.knex("content_revisions")
+        .where({ id, rev })
+        .first("data");
+
+      const meta = {
+        id,
+        rev,
+        latest: rev === latest_rev,
+        published: rev === published_rev
+      };
+      const rewritten = await iterator(JSON.parse(data), meta);
+
+      if (rewritten) {
+        await this.knex("content_revisions")
+          .update("data", JSON.stringify(rewritten))
+          .where({ id, rev });
+
+        if (meta.latest || meta.published) {
+          await this.indexRevision(
+            model,
+            id,
+            rev,
+            rewritten,
+            models,
+            rev === published_rev
+          );
+        }
+      }
+    }
+  }
+
+  async migrate(migrations: Migration[], models: Model[]) {
+    const applied = await this.knex("migrations").where({ state: "applied" });
+    const outstanding = migrations.filter(m => !applied.includes(m.name));
+    const names = outstanding.map(({ name }) => name);
+    try {
+      // Mark outstanding migrations as 'pending'
+      await this.knex("migrations").insert(
+        names.map(name => ({ name, state: "pending" }))
+      );
+      const tx = await this.knex.transaction();
+      try {
+        const ctx = new MigrationContext(new KnexContent(tx), models);
+        for (const m of outstanding) {
+          await m.execute(ctx);
+        }
+        // Mark migrations as 'applied'
+        await this.knex("migrations")
+          .update({ state: "applied" })
+          .whereIn("name", names)
+          .del();
+        tx.commit();
+      } catch (err) {
+        tx.rollback();
+        // Delete pending migrations
+        await this.knex("migrations")
+          .whereIn("name", names)
+          .del();
+      }
+    } catch (err) {
+      // poll until other node is ready
+      return new Promise((resolve, reject) => {
+        const poll = async (retries = 3 * 60) => {
+          // Wait until there are no more pending migrations
+          const count = await this.knex("migrations")
+            .where({ state: "pending" })
+            .count();
+          if (!count) resolve();
+          else if (!retries)
+            reject(
+              new Error("Timeout while waiting for migrations to finish.")
+            );
+          else setTimeout(() => poll(retries - 1), 1000);
+        };
+        poll();
+      });
+    }
   }
 
   private aggregateRefs(idCol: string, typeCol: string, fieldNamesCol: string) {
