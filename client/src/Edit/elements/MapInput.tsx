@@ -36,10 +36,6 @@ export default class MapInput extends Component<Props> {
   }
 
   static validate(value, props) {
-    let v;
-    if (typeof value === "object") {
-      v = Object.keys(value).length > 0;
-    }
     const isRequired = required(value, props);
     if (isRequired) return isRequired;
   }

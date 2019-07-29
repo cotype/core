@@ -1,4 +1,4 @@
-import React, { Component, Ref } from "react";
+import React, { Component } from "react";
 import { FieldProps, getIn } from "formik";
 import Quill from "../../common/Quill";
 import { required } from "./validation";
@@ -27,7 +27,7 @@ export default class RichTextInput extends Component<Props> {
       if (ops && ops.length === 0) {
         value = "";
       } else if (ops && ops.length > 0 && ops[0] && ops[0].insert) {
-        value = ops[0].insert.trim().replace(/\↵/g, "");
+        value = ops[0].insert.trim().replace(/↵/g, "");
       }
     }
     const isRequired = required(value, props);

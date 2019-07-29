@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "react-emotion";
 import ButtonImport from "../common/Button";
 import Icon from "../common/icons";
@@ -130,8 +130,8 @@ export default function Topbar(props: Props) {
   const [descending, setDescending] = useState(true);
   const [uploadFieldKey, setUploadFieldKey] = useState(0);
   const [files, setFiles] = useState<FileList>();
-
-  const { done, response, progress, error } = useUpload(files as any, {
+  const { onUpload } = props;
+  const { done, response } = useUpload(files as any, {
     path: "/upload",
     name: "file",
     withCredentials: true
@@ -139,8 +139,8 @@ export default function Topbar(props: Props) {
 
   useEffect(() => {
     if (!done) return;
-    props.onUpload(response.response);
-  }, [done, response]);
+    onUpload(response.response);
+  }, [done, response, onUpload]);
 
   const {
     filters,

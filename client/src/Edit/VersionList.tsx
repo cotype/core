@@ -1,5 +1,5 @@
 import * as Cotype from "../../../typings";
-import React, { Fragment } from "react";
+import React from "react";
 import TimeAgo from "react-time-ago";
 import styled, { css } from "react-emotion";
 import StatusLight from "../common/StatusLight";

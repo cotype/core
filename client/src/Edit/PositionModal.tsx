@@ -134,7 +134,7 @@ class PositionModal extends Component<Props, State> {
         Abbrechen
       </Button>
     ];
-    const sortOrder = this.props.model.order || "desc";
+    // const sortOrder = this.props.model.order || "desc";
     if (this.props.id) {
       items = items.filter(el => String(el.id) !== this.props.id);
     }

@@ -1,5 +1,5 @@
 import * as Cotype from "../../../typings";
-import React, { Fragment } from "react";
+import React from "react";
 import styled from "react-emotion";
 import { Link } from "react-router-dom";
 import _escape from "lodash/escape";

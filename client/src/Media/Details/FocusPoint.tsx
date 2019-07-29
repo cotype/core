@@ -1,5 +1,5 @@
 import { Media } from "../../../../typings";
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import Draggable from "react-draggable";
 import Icon, { paths } from "../../common/icons";
 import styled, { css } from "react-emotion";
@@ -233,6 +233,7 @@ export default class ImageFocus extends Component<Props, State> {
                 width: width! > height! ? width! : "unset",
                 height: width! < height! ? height! : "unset"
               }}
+              alt=""
             />
             <Draggable
               bounds="img"

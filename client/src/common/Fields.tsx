@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import styled, { css } from "react-emotion";
 import { Error } from "../common/styles";
 import { errorClass } from "../Edit/Form";
