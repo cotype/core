@@ -20,7 +20,7 @@
     "build": "rm -rf dist && NODE_ENV=production concurrently npm:build:client npm:build:server npm:schema",
     "build:server": "tsc",
     "build:client": "npm --prefix client run build && npm --prefix client run bundle",
-    "build:test-client": "export NODE_ENV=test; npm run build:client",
+    "build:test-client": "export NODE_ENV=test; export REACT_APP_TEST_ENV=test; npm run build:client",
     "watch:client": "npm --prefix client run watch",
     "dev": "concurrently -n server,client \"NODE_ENV=development npm --prefix demo run dev\" \"npm run watch:client\"",
     "prod": "NODE_ENV=production npm --prefix demo start",
@@ -39,7 +39,9 @@
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "dependencies": {
+    "@cypress/webpack-preprocessor": "^4.1.0",
     "@slite/quill-delta-markdown": "0.0.8",
+    "@testing-library/jest-dom": "^4.0.0",
     "@types/bcryptjs": "2.4.2",
     "@types/cookie": "^0.3.2",
     "@types/cookie-session": "^2.0.36",
@@ -81,7 +83,9 @@
     "quill-delta-to-html": "^0.10.12",
     "swagger-ui-dist": "^3.21.0",
     "temp-write": "^4.0.0",
-    "tempy": "^0.3.0"
+    "tempy": "^0.3.0",
+    "ts-loader": "^6.0.4",
+    "webpack": "^4.38.0"
   },
   "devDependencies": {
     "@cotype/local-thumbnail-provider": "0.0.2",
@@ -101,7 +105,6 @@
     "install": "^0.13.0",
     "jest": "^24.5.0",
     "mysql": "^2.16.0",
-    "parcel-bundler": "^1.12.2",
     "pg": "^7.9.0",
     "prettier": "^1.18.2",
     "qs": "^6.6.0",

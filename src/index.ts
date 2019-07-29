@@ -95,7 +95,7 @@ function getIndexHtml(basePath: string) {
 }
 export const clientMiddleware = promiseRouter()
   .use(
-    "/admin/static",
+    "/admin",
     express.static(root, {
       maxAge: "1y", // cache all static resources for a year ...
       immutable: true, // which is fine, as all resource URLs contain a hash

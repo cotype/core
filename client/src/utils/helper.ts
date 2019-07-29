@@ -72,7 +72,7 @@ export function slugify(text: string) {
 const noTestID = {};
 
 export function testable(id) {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "production" && !process.env.REACT_APP_TEST_ENV) {
     return noTestID;
   }
 
@@ -99,4 +99,7 @@ export function getPreviewUrl(values: object, modelUrl: string) {
   return `${baseUrl}/${slugUrl}`;
 }
 
-export const matchMime = (str, rule) => new RegExp(("^" + rule.split("*").join(".*") + "$").replace('+','\\+')).test(str)
+export const matchMime = (str, rule) =>
+  new RegExp(("^" + rule.split("*").join(".*") + "$").replace("+", "\\+")).test(
+    str
+  );

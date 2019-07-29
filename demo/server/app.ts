@@ -35,7 +35,7 @@ export function getKnexConfig() {
   }
   return {
     connection: process.env.DB,
-    client: getClient(process.env.DB)
+    client: getClient(process.env.DB as any)
   };
 }
 
@@ -83,7 +83,6 @@ function getClientMiddleware({ clientMiddleware, basePath }: Partial<Opts>) {
   if (clientMiddleware) {
     return clientMiddleware;
   }
-
   return process.env.NODE_ENV === "production" ||
     process.env.CLIENT_MIDDLEWARE === "production"
     ? [prodClientMiddleware]

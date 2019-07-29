@@ -40,6 +40,7 @@
     "title-case": "^2.1.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^4.0.0",
     "@testing-library/react": "^8.0.3",
     "@types/jest": "24.0.15",
     "@types/node": "12.6.8",
@@ -61,12 +62,12 @@
       ">0.2%",
       "not dead",
       "not op_mini all",
-      "IE 11"
+      "ie 11"
     ],
     "development": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all",
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version",
       "IE 11"
     ]
   }

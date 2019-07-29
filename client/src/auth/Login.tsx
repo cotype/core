@@ -37,7 +37,7 @@ const Root = styled("div")`
   align-items: center;
   justify-content: center;
   background-size: cover;
-  background-image: ${process.env.NODE_ENV === "test"
+  background-image: ${process.env.REACT_APP_TEST_ENV
     ? "none"
     : `url(https://source.unsplash.com/collection/2339015/${
         window.innerWidth
