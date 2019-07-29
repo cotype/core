@@ -175,9 +175,7 @@ class Form extends Component<Props, State> {
             uniqueErrors.forEach(e =>
               setFieldError(
                 e.field,
-                `This field value needs to be unique, but exists already on another ${
-                  model.singular
-                }!`
+                `This field value needs to be unique, but exists already on another ${model.singular}!`
               )
             );
           }
@@ -289,7 +287,7 @@ class Form extends Component<Props, State> {
                     message="There are changes that have not been saved. Is it ok to leave the page?"
                   />
                   <Cols>
-                    <Content style={{ padding: 0 }}>
+                    <Content style={{ padding: 0, width: "100%" }}>
                       {this.isNew && <NewTag>new</NewTag>}
                       <Input
                         key={id || "new"}
