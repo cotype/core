@@ -9,6 +9,7 @@ import api from "../../api";
 import { required } from "./validation";
 import { ReferenceType, SearchResultItem } from "../../../../typings";
 import { BasicResultItem } from "../../common/ResultItem";
+import { ControllerStateAndHelpers } from "downshift";
 
 const validationRegex = "W*(http:|https:)W*|^/.*$";
 
@@ -104,10 +105,13 @@ export default class ReferenceInput extends Component<Props, State> {
     }
   }
 
-  onInputValueChange = (inputValue, downshift) => {
+  onInputValueChange = (
+    inputValue,
+    { isOpen }: ControllerStateAndHelpers<any>
+  ) => {
     if (inputValue) {
       this.fetchItems({ q: inputValue });
-      this.setState({ searchTerm: inputValue });
+      this.setState({ searchTerm: isOpen ? inputValue : "" });
     } else this.fetchItems({});
   };
 
