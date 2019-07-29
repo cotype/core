@@ -41,7 +41,8 @@ const models: ModelOpts[] = [
         item: { type: "content", models: ["section"] }
       },
       description: { type: "richtext" },
-      image: { type: "media" }
+      image: { type: "media" },
+      ref: { type: "content", models: ["articleNews"] }
     }
   },
   {
