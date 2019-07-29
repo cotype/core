@@ -134,7 +134,7 @@ const ResultItem = ({ item, modelPaths, term }: Props) => {
 
   const path =
     type === "settings"
-      ? `${type}/${model}`
+      ? `/${type}/${model}`
       : modelPaths[type] && modelPaths[type][model];
 
   const to = link(path, "edit", id);
