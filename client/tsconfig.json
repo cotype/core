@@ -1,12 +1,18 @@
 {
-  "include": ["../typings/**.*", "./typings/**.*", "./src/**.*"],
-  "exclude": ["../node_modules/**/*"],
+  "include": [
+    "../typings/**.*",
+    "./typings/**.*",
+    "./src/**.*"
+  ],
+  "exclude": [
+    "../node_modules/**/*"
+  ],
   "compilerOptions": {
     "strict": true,
     "noImplicitAny": false,
     "outDir": "lib",
     "rootDir": "src",
-    "jsx": "react",
+    "jsx": "preserve",
     "target": "es5",
     "sourceMap": true,
     "module": "esnext",
@@ -15,6 +21,15 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es6", "es2017.object", "dom", "esnext.asynciterable"]
+    "lib": [
+      "es6",
+      "es2017.object",
+      "dom",
+      "esnext.asynciterable"
+    ],
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
   }
 }

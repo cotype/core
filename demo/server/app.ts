@@ -87,7 +87,7 @@ function getClientMiddleware({ clientMiddleware, basePath }: Partial<Opts>) {
   return process.env.NODE_ENV === "production" ||
     process.env.CLIENT_MIDDLEWARE === "production"
     ? [prodClientMiddleware]
-    : [devClientMiddleware(basePath)];
+    : devClientMiddleware(basePath);
 }
 
 export default async function app(customConfig?: Partial<Opts>) {

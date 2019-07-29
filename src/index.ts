@@ -93,10 +93,9 @@ function getIndexHtml(basePath: string) {
   if (!index) index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   return index.replace(/"src\./g, `"${basePath}/static/src.`);
 }
-
 export const clientMiddleware = promiseRouter()
   .use(
-    "/static",
+    "/admin/static",
     express.static(root, {
       maxAge: "1y", // cache all static resources for a year ...
       immutable: true, // which is fine, as all resource URLs contain a hash
@@ -107,15 +106,16 @@ export const clientMiddleware = promiseRouter()
       next();
     }
   )
-  .use((req, res, next) => {
-    if (
-      (req.method === "GET" || req.method === "HEAD") &&
-      req.accepts("html")
-    ) {
-      const basePath = req.originalUrl.replace(/^(.*\/admin).*/, "$1");
-      res.send(getIndexHtml(basePath));
-    } else next();
-  });
+  .use('/admin', (req, res, next) => {
+      if (
+        (req.method === "GET" || req.method === "HEAD") &&
+        req.accepts("html")
+      ) {
+        const basePath = req.originalUrl.replace(/^(.*\/admin).*/, "$1");
+        res.send(getIndexHtml(basePath));
+      } else next();
+    }
+  );
 
 function addSlash(str: string) {
   return `${str.replace(/\/$/, "")}/`;
@@ -253,7 +253,7 @@ export async function init(opts: Opts) {
 
   content.routes(router);
 
-  router.use("/admin", opts.clientMiddleware || clientMiddleware);
+  router.use(opts.clientMiddleware || clientMiddleware);
 
   if (opts.customSetup) {
     opts.customSetup(app, p.content);
