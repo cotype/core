@@ -442,7 +442,12 @@ export default class KnexContent implements ContentAdapter {
   ) {
     let fullData: Cotype.Data[] = [];
 
-    const fetch = async (ids: string[], types: string[], first: boolean) => {
+    const fetch = async (
+      ids: string[],
+      types: string[],
+      prevTypes: string[],
+      first: boolean
+    ) => {
       // TODO Factor out function (model, types): {hasRefs, hasInverseRefs}
 
       // Only get references when needed
@@ -450,7 +455,7 @@ export default class KnexContent implements ContentAdapter {
       let modelHasReverseReferences = false;
       let modelHasReferences = false;
 
-      (first ? [model.name] : types).forEach(typeName => {
+      (first ? [model.name] : prevTypes).forEach(typeName => {
         const typeModel = first
           ? model
           : models.find(m => m.name.toLowerCase() === typeName.toLowerCase());
@@ -489,7 +494,14 @@ export default class KnexContent implements ContentAdapter {
     let checkIds = id;
     for (let i = 0; i < joins.length; i++) {
       const join = joins[i];
-      const data = await fetch(checkIds, Object.keys(join), i === 0);
+
+      const data = await fetch(
+        checkIds,
+        Object.keys(join),
+        Object.keys(joins[i - 1] || {}),
+        i === 0
+      );
+
       fullData = [...fullData, ...data];
       checkIds = data.map(d => d.id);
     }
