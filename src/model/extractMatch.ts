@@ -21,6 +21,7 @@ export default function extractMatch(
 ) {
   const sentences: string[] = [];
   function add(text: string) {
+    if (typeof text !== "string") return;
     const s = text.replace(/[\n\s]+/g, " ");
     const re = /[^.?!]+.?/g;
     let m;
