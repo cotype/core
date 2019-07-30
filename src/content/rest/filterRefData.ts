@@ -26,8 +26,7 @@ export const getDeepJoins = (
             (topField.item.type === "content" ||
               topField.item.type === "references"))
         ) {
-          const searchModels = (("models" in topField &&
-            topField.models) ||
+          const searchModels = (("models" in topField && topField.models) ||
             ("model" in topField && [topField.model]) ||
             (topField.type === "list" &&
               "models" in topField.item &&
@@ -98,7 +97,7 @@ export const filterContentData = (
 ) => {
   return {
     ...pick(content.data, join[content.type.toLowerCase()]),
-    _id: content.id,
+    _id: String(content.id),
     _type: content.type
   };
 };

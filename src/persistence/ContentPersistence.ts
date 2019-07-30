@@ -6,6 +6,7 @@ import * as Cotype from "../../typings";
 import _escapeRegExp from "lodash/escapeRegExp";
 import _flatten from "lodash/flatten";
 import _uniq from "lodash/uniq";
+import _cloneDeep from "lodash/cloneDeep";
 import { ContentAdapter } from "./adapter";
 import removeDeprecatedData from "./removeDeprecatedData";
 import ReferenceConflictError from "./errors/ReferenceConflictError";
@@ -18,6 +19,8 @@ import { ContentFormat } from "../../typings";
 import extractMatch from "../model/extractMatch";
 import extractText from "../model/extractText";
 import log from "../log";
+import visit, { NO_STORE_VALUE } from "../model/visit";
+import setPosition from "../model/setPosition";
 
 function findValueByPath(path: string | undefined, data: Cotype.Data) {
   if (!path) return;
@@ -63,23 +66,22 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
   async applyPreHooks<T>(
     event: keyof Cotype.PreHooks,
     model: Cotype.Model,
-    data: Cotype.Data,
-    action: (d: Cotype.Data) => Promise<T>
-  ): Promise<[T, Cotype.Data]> {
+    data: Cotype.Data
+  ): Promise<Cotype.Data> {
     if (!this.config.contentHooks || !this.config.contentHooks.preHooks)
-      return Promise.all([action(data), data]);
+      return data;
     const preHook = this.config.contentHooks.preHooks[event];
-    if (!preHook) return Promise.all([action(data), data]);
+    if (!preHook) return data;
 
     try {
       const hookData = await preHook(model, data);
-      return Promise.all([action(hookData), hookData]);
+      return hookData;
     } catch (error) {
       log.error(
         `💥  An error occurred in the content preHook "${event}" for a "${model.name}" content`
       );
       log.error(error);
-      return Promise.all([action(data), data]);
+      return data;
     }
   }
 
@@ -162,18 +164,23 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     data: Cotype.Data,
     models: Cotype.Model[]
   ) {
-    // NOTE: principal.id will always be set since anonymous access is prevented by ACL.
+    data = this.setOrderPosition(data, model, models);
+    const hookData = await this.applyPreHooks("onCreate", model, data);
 
-    const [id, hookData] = await this.applyPreHooks(
-      "onCreate",
+    const { storeData, indexData } = await this.prepareData(hookData, model);
+
+    // NOTE: principal.id will always be set since anonymous access is prevented by ACL.
+    const id = await this.adapter.create(
+      storeData,
+      indexData,
       model,
-      data,
-      (d: Cotype.Data) => this.adapter.create(model, d, principal.id!, models)
+      models,
+      principal.id!
     );
 
-    this.applyPostHooks("onCreate", model, { id, data: hookData });
+    this.applyPostHooks("onCreate", model, { id, data: storeData });
 
-    return { id, data: hookData };
+    return { id: String(id), data: storeData };
   }
 
   async createRevision(
@@ -183,8 +190,18 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     data: object,
     models: Cotype.Model[]
   ) {
+    const { storeData, indexData } = await this.prepareData(data, model);
     // NOTE: principal.id will always be set since anonymous access is prevented by ACL.
-    return this.adapter.createRevision(model, id, principal.id!, data, models);
+    const rev = await this.adapter.createRevision(
+      storeData,
+      indexData,
+      model,
+      models,
+      id,
+      principal.id!
+    );
+
+    return { rev, data: storeData };
   }
 
   async fetchRefs(
@@ -332,12 +349,18 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     data: object,
     models: Cotype.Model[]
   ): Promise<{ id: string; data: object }> {
-    const hookResp = await this.applyPreHooks("onSave", model, data, d =>
-      this.createRevision(principal, model, id, d, models)
-    );
-    const resp = {
+    const hookData = await this.applyPreHooks("onSave", model, data);
+    const rev = await this.createRevision(
+      principal,
+      model,
       id,
-      data: hookResp[1]
+      hookData,
+      models
+    );
+
+    const resp = {
+      id: String(id),
+      data: rev.data
     };
 
     this.applyPostHooks("onSave", model, resp);
@@ -556,5 +579,42 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       }
     });
     return terms.sort((a, b) => a.length - b.length || a.localeCompare(b));
+  }
+
+  private async setOrderPosition(
+    data: Cotype.Data,
+    model: Cotype.Model,
+    models: Cotype.Model[]
+  ) {
+    if (model.orderBy) {
+      const lastItem = await this.adapter.list(model, models, {
+        limit: 1,
+        orderBy: model.orderBy,
+        order: "desc",
+        offset: 0
+      });
+
+      const orderPath = model.orderBy.split(".");
+
+      const lastOrderValue = (orderPath.reduce(
+        (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
+        lastItem.total > 0 ? lastItem.items[0].data : {}
+      ) as unknown) as string;
+
+      data = setPosition(data, model, lastOrderValue);
+    }
+    return data;
+  }
+
+  private prepareData(data: Cotype.Data, model: Cotype.Model) {
+    const storeData = _cloneDeep(data);
+
+    visit(storeData, model, {
+      string: (_, field: Cotype.Text) => {
+        if (field.store === false) return NO_STORE_VALUE;
+      }
+    });
+
+    return { storeData, indexData: data };
   }
 }

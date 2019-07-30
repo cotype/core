@@ -118,29 +118,13 @@ export default class KnexContent implements ContentAdapter {
   }
 
   async create(
+    storeData: Cotype.Data,
+    indexData: Cotype.Data,
     model: Cotype.Model,
-    data: any,
-    author: string,
-    models: Cotype.Model[]
+    models: Cotype.Model[],
+    author: string
   ) {
-    await this.testUniqueFields(model, models, data);
-    if (model.orderBy) {
-      const lastItem = await this.list(model, models, {
-        limit: 1,
-        orderBy: model.orderBy,
-        order: "desc",
-        offset: 0
-      });
-
-      const orderPath = model.orderBy.split(".");
-
-      const lastOrderValue = (orderPath.reduce(
-        (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
-        lastItem.total > 0 ? lastItem.items[0].data : {}
-      ) as unknown) as string;
-
-      data = setPosition(data, model, lastOrderValue);
-    }
+    await this.testUniqueFields(model, models, storeData);
 
     const [id] = await this.knex("contents")
       .insert({
@@ -148,7 +132,7 @@ export default class KnexContent implements ContentAdapter {
       })
       .returning("id");
 
-    await this.createRev(model, id, 1, author, data, models);
+    await this.createRev(storeData, indexData, model, models, id, 1, author);
     return id;
   }
 
@@ -258,36 +242,38 @@ export default class KnexContent implements ContentAdapter {
   }
 
   async createRevision(
+    storeData: Cotype.Data,
+    indexData: Cotype.Data,
     model: Cotype.Model,
+    models: Cotype.Model[],
     id: string,
-    author: string,
-    data: object,
-    models: Cotype.Model[]
+    author: string
   ) {
-    data = await this.testPositionFields(model, models, data, id);
+    storeData = await this.testPositionFields(model, models, storeData, id);
 
-    await this.testUniqueFields(model, models, data, id);
+    await this.testUniqueFields(model, models, storeData, id);
 
     const [content] = await this.knex("contents")
       .select(["latest_rev"])
       .where({ id });
 
     const rev = (content.latest_rev || 0) + 1;
-    return this.createRev(model, id, rev, author, data, models);
+    return this.createRev(storeData, indexData, model, models, id, rev, author);
   }
 
   async createRev(
+    storeData: Cotype.Data,
+    indexData: Cotype.Data,
     model: Cotype.Model,
+    models: Cotype.Model[],
     id: string,
     rev: number,
-    author: string,
-    data: object,
-    models: Cotype.Model[]
+    author: string
   ) {
     await this.knex("content_revisions").insert({
       id,
       rev,
-      data: JSON.stringify(data),
+      data: JSON.stringify(storeData),
       author
     });
 
@@ -303,10 +289,10 @@ export default class KnexContent implements ContentAdapter {
       .where({ id, published: false })
       .del();
 
-    await this.extractValues(data, model, id, rev, false);
-    await this.extractText(data, model, id, rev, false);
+    await this.extractValues(storeData, model, id, rev, false);
+    await this.extractText(indexData, model, id, rev, false);
 
-    const refs = extractRefs(data, model, models);
+    const refs = extractRefs(storeData, model, models);
     if (refs.length) {
       // insert refs one by one in case a foreign key constraint violation occurs.
       // In a perfect world there shouldn't be any dead references in the first place, but...
@@ -1256,7 +1242,7 @@ export default class KnexContent implements ContentAdapter {
               (val || []).concat({
                 _ref: "content",
                 _content,
-                _id
+                _id: String(_id)
               })
             );
           }

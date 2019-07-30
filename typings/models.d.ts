@@ -40,6 +40,7 @@ type Text = {
   hidden?: boolean;
   validationRegex?: string;
   regexError?: string;
+  store?: boolean;
 };
 type TextArea = {
   type: "string";
@@ -53,6 +54,7 @@ type TextArea = {
   index?: boolean;
   search?: boolean;
   hidden?: boolean;
+  store?: boolean;
 };
 
 type Slug = {
