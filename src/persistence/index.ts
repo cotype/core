@@ -24,7 +24,7 @@ export type Config = {
   migrationDir?: string;
 };
 
-class Persistence {
+export class Persistence {
   adapter: PersistenceAdapter;
   settings: SettingsPersistence;
   content: ContentPersistence;
