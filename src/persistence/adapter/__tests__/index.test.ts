@@ -1265,8 +1265,8 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       });
     });
 
-    describe("rewrite", () => {
-      it("should", async () => {
+    describe("migrations", () => {
+      it("should rewrite data", async () => {
         const ids = await createNews(
           {
             title: "News 1"
@@ -1286,6 +1286,24 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         const c = await content.load(news, ids[0]);
         expect(c).toMatchObject({ data: { title: "NEWS 1" } });
       });
+    });
+
+    it("should perform a migration only once", async () => {
+      const execute = jest.fn();
+      await content.migrate([{ name: "aaa", execute }], models.content);
+      await content.migrate([{ name: "aaa", execute }], models.content);
+      expect(execute).toBeCalledTimes(1);
+    });
+
+    it("should wait for migrations to finish", async () => {
+      const execute = jest.fn(
+        () => new Promise(resolve => setTimeout(resolve, 1000))
+      );
+      await Promise.all([
+        content.migrate([{ name: "bbb", execute }], models.content),
+        content.migrate([{ name: "bbb", execute }], models.content)
+      ]);
+      expect(execute).toBeCalledTimes(1);
     });
   });
 

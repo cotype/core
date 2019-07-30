@@ -24,7 +24,7 @@ export type Config = {
   migrationDir?: string;
 };
 
-export class Persistence {
+class Persistence {
   adapter: PersistenceAdapter;
   settings: SettingsPersistence;
   content: ContentPersistence;
@@ -49,12 +49,11 @@ export class Persistence {
   }
 
   async migrate(dir: string, models: Model[]) {
-    const extensions = Object.keys(require.extensions);
     const files = fs.readdirSync(dir).sort();
     const migrations = files
       .map(f => {
         const ext = path.extname(f);
-        if (extensions.includes(ext)) {
+        if (ext.match(/^\.(js|ts)$/)) {
           const name = path.basename(f, ext);
           return {
             name,

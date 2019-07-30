@@ -2,7 +2,7 @@ import * as Cotype from "../../../typings";
 import { Model } from "../../../typings";
 import MigrationContext from "../MigrationContext";
 
-export type SettingsAdapter = {
+export interface SettingsAdapter {
   create(model: Cotype.Model, data: object): Promise<string>;
   load(model: Cotype.Model, id: string): Promise<Cotype.Settings>;
   find(
@@ -19,14 +19,14 @@ export type SettingsAdapter = {
   deleteUser(id: string): Promise<any>;
   findUserByEmail(id: string): Promise<Cotype.Settings>;
   loadUser(id: string): Promise<Cotype.User>;
-};
+}
 
 export type Migration = {
   name: string;
-  execute(ctx: MigrationContext): Promise<void>;
+  execute(ctx: MigrationContext): Promise<any>;
 };
 
-export type ContentAdapter = {
+export interface ContentAdapter {
   create(
     storeData: Cotype.Data,
     indexData: Cotype.Data,
@@ -102,20 +102,20 @@ export type ContentAdapter = {
     ) => any
   ): Promise<void>;
   migrate(migrations: Migration[], models: Model[]): Promise<any>;
-};
+}
 
-export type MediaAdapter = {
+export interface MediaAdapter {
   create(meta: Cotype.Meta): Promise<void>;
   list(opts: Cotype.MediaListOpts): Promise<Cotype.ListChunk<Cotype.Media>>;
   load(id: string[]): Promise<Cotype.Media[]>;
   findByHash(hashes: string[]): Promise<Cotype.Media[]>;
   update(id: string, data: Cotype.Media): Promise<boolean>;
   delete(id: string, models: Cotype.Model[]): Promise<void>;
-};
+}
 
-export type PersistenceAdapter = {
+export interface PersistenceAdapter {
   settings: SettingsAdapter;
   content: ContentAdapter;
   media: MediaAdapter;
   shutdown(): void | Promise<any>;
-};
+}
