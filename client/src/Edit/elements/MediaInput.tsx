@@ -37,11 +37,6 @@ const Buttons = styled("div")`
   align-items: center;
 `;
 
-const Dialog = styled("div")`
-  height: calc(100vh - 250px);
-  width: calc(100vw - 220px);
-`;
-
 const EmptyTile = styled("div")`
   width: 150px;
   height: 150px;

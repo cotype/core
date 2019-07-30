@@ -1,4 +1,4 @@
-import React, { SyntheticEvent, ReactNode, InputHTMLAttributes } from "react";
+import React, { ReactNode, InputHTMLAttributes } from "react";
 import styled from "react-emotion";
 
 const FileInput = styled("input")`

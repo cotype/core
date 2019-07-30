@@ -2,7 +2,6 @@
 
 import * as Cotype from "../../typings";
 import basePath from "./basePath";
-import { Omit } from "../typings/helper";
 import { stringify } from "qs";
 
 type Opts = RequestInit & { query?: object };

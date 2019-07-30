@@ -148,6 +148,7 @@ export default class Image extends Component<Props> {
       <img
         style={{ objectFit: "contain" }}
         src={id.includes("://") ? id : `/thumbs/square/${id}`}
+        alt={""}
         width="150"
         height="150"
         {...testable("media-preview")}
