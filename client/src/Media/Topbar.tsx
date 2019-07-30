@@ -92,7 +92,12 @@ const Button = styled(ButtonImport)`
   }
 `;
 
-const UploadButton = styled(Button)`
+const UploadButton = styled(ButtonImport)`
+  -webkit-appearance: none;
+  border-width: 0;
+  :hover {
+    color: #fff;
+  }
   color: #fff;
   background: var(--accent-color);
   padding: 0.7em 1em;
@@ -133,7 +138,7 @@ export default function Topbar(props: Props) {
   const [descending, setDescending] = useState(true);
   const [uploadFieldKey, setUploadFieldKey] = useState(0);
   const [files, setFiles] = useState<FileList>();
-  const { onUpload } = props;
+  const { onUpload, onUploadProgress } = props;
   const { done, response, progress } = useUpload(files as any, {
     path: "/upload",
     name: "file",
@@ -141,8 +146,8 @@ export default function Topbar(props: Props) {
   });
 
   useEffect(() => {
-    props.onUploadProgress(progress || 0);
-  }, [progress]);
+    onUploadProgress(progress || 0);
+  }, [progress, onUploadProgress]);
 
   useEffect(() => {
     if (!done) return;

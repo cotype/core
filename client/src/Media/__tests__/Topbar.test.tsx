@@ -33,7 +33,8 @@ function renderTopbar(customProps: Partial<TopbarProps> = {}) {
     onOrderByChange: jest.fn(),
     onOrderChange: jest.fn(),
     onUpload: jest.fn(),
-    onUploadProgress: jest.fn()
+    onUploadProgress: jest.fn(),
+    onUnUsedChange: jest.fn(),
   };
 
   const queries = render(
