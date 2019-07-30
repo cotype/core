@@ -35,7 +35,7 @@
     "react-time-ago": "^5.0.4",
     "react-tiny-popover": "^3.4.2",
     "react-use-upload": "^0.5.2",
-    "react-virtualized": "^9.20.1",
+    "react-virtualized": "^9.21.1",
     "title-case": "^2.1.1"
   },
   "devDependencies": {

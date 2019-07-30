@@ -117,10 +117,10 @@ export default class Media extends Component<Props, State> {
   }
 
   fetchNextData = () => {
-    this.fetchData(this.state.lastRequestedIndex, 50);
+    this.fetchData(this.state.lastRequestedIndex, 100);
   };
 
-  fetchData = (offset: number, limit = 50) => {
+  fetchData = (offset: number, limit = 100) => {
     const { fileType, order, orderBy, search, items, unUsed } = this.state;
 
     this.setState({ lastRequestedIndex: offset + limit });
@@ -252,6 +252,9 @@ export default class Media extends Component<Props, State> {
     );
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return Object.entries(nextState).some(([k, v]) =>v !== this.state[k]);
+  }
   render() {
     const {
       total,
