@@ -28,7 +28,7 @@ export default function routes(
       if (filesUpload.hasOwnProperty(fileKey)) {
         const { filename: id, originalname, size } = filesUpload[fileKey];
 
-        const { width, height, ext, hash, mime } = await inspect(storage.retrieve(id));
+        const { width, height, ext, hash, mime } = await inspect(storage.retrieve(id), storage.getFile(id));
 
         const file = {
           id,

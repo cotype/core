@@ -3,7 +3,6 @@ import fileType from "file-type";
 import { Readable } from "stream";
 import hasha from "hasha";
 
-
 type FileImageInfo = {
   width: number | null;
   height: number | null;
@@ -13,14 +12,15 @@ type FileImageInfo = {
 };
 
 const inspect = async (
-  fileStream: NodeJS.ReadableStream
+  fileStream: NodeJS.ReadableStream,
+  filePath: string
 ): Promise<FileImageInfo> => {
-
   const readableStream = new Readable();
   readableStream.wrap(fileStream);
+
   const [pipedFileStream, hash] = await Promise.all([
     fileType.stream(readableStream),
-    hasha.fromStream(fileStream, {
+    hasha.fromFile(filePath, {
       algorithm: "md5"
     })
   ]);
@@ -40,7 +40,6 @@ const inspect = async (
     ...fileImageInfo,
     ...pipedFileStream.fileType
   };
-
   if (fileImageInfo.mime!.startsWith("image")) {
     const imageInfo = await probe(pipedFileStream);
     if (imageInfo.width && imageInfo.height) {
