@@ -1241,12 +1241,22 @@ export default class KnexContent implements ContentAdapter {
   }
 
   async migrate(migrations: Migration[], models: Model[]) {
-    const applied = await this.knex("migrations").where({ state: "applied" });
-    const outstanding = migrations.filter(m => !applied.includes(m.name));
+    const applied = await this.knex("content_migrations").where({
+      state: "applied"
+    });
+    const outstanding = migrations.filter(
+      m => !applied.some(a => a.name === m.name)
+    );
+
+    if (!outstanding.length) {
+      // Nothing left to migrate
+      return;
+    }
+
     const names = outstanding.map(({ name }) => name);
     try {
       // Mark outstanding migrations as 'pending'
-      await this.knex("migrations").insert(
+      await this.knex("content_migrations").insert(
         names.map(name => ({ name, state: "pending" }))
       );
       const tx = await this.knex.transaction();
@@ -1255,28 +1265,31 @@ export default class KnexContent implements ContentAdapter {
         for (const m of outstanding) {
           await m.execute(ctx);
         }
+        await tx.commit();
         // Mark migrations as 'applied'
-        await this.knex("migrations")
+        await this.knex("content_migrations")
           .update({ state: "applied" })
-          .whereIn("name", names)
-          .del();
-        tx.commit();
+          .whereIn("name", names);
       } catch (err) {
-        tx.rollback();
+        log.error("Content migration failed. Rolling back...");
+        log.error(err);
+        await tx.rollback();
         // Delete pending migrations
-        await this.knex("migrations")
+        await this.knex("content_migrations")
           .whereIn("name", names)
           .del();
       }
     } catch (err) {
-      // poll until other node is ready
+      log.info("Waiting for migrations to be applied ...");
+      // Poll until other node is ready
       return new Promise((resolve, reject) => {
         const poll = async (retries = 3 * 60) => {
           // Wait until there are no more pending migrations
-          const count = await this.knex("migrations")
+          const [pending] = await this.knex("content_migrations")
             .where({ state: "pending" })
-            .count();
-          if (!count) resolve();
+            .count("* as count");
+
+          if (!pending.count) resolve();
           else if (!retries)
             reject(
               new Error("Timeout while waiting for migrations to finish.")
