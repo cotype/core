@@ -4,9 +4,8 @@
   "private": true,
   "homepage": "/admin",
   "scripts": {
-    "build": "tsc",
     "bundle": "react-scripts build",
-    "postbundle": "rm -rf ../dist/client && mv ./build ../dist/client",
+    "postbundle": "rm -rf ../dist/client && mkdir -p ../dist && mv ./build ../dist/client",
     "watch": "react-scripts start"
   },
   "dependencies": {

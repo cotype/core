@@ -19,7 +19,7 @@
     "schema:navigation": "typescript-json-schema --topRef --aliasRefs ./tsconfig.json NavigationJson > ./navigation.schema.json",
     "build": "rm -rf dist && NODE_ENV=production concurrently npm:build:client npm:build:server npm:schema",
     "build:server": "tsc",
-    "build:client": "npm --prefix client run build && npm --prefix client run bundle",
+    "build:client": "npm --prefix client run bundle",
     "build:test-client": "export NODE_ENV=test; export REACT_APP_TEST_ENV=test; npm run build:client",
     "watch:client": "npm --prefix client run watch",
     "dev": "concurrently -n server,client \"NODE_ENV=development npm --prefix demo run dev\" \"npm run watch:client\"",
