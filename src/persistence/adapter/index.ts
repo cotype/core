@@ -21,17 +21,19 @@ export type SettingsAdapter = {
 
 export type ContentAdapter = {
   create(
+    storeData: Cotype.Data,
+    indexData: Cotype.Data,
     model: Cotype.Model,
-    data: object,
-    author: string,
-    models: Cotype.Model[]
+    models: Cotype.Model[],
+    author: string
   ): Promise<string>;
   createRevision(
+    storeData: Cotype.Data,
+    indexData: Cotype.Data,
     model: Cotype.Model,
+    models: Cotype.Model[],
     id: string,
-    author: string,
-    data: object,
-    models: Cotype.Model[]
+    author: string
   ): Promise<number>;
   findByMedia(media: string): Promise<any[]>;
   list(

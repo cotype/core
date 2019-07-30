@@ -4,6 +4,8 @@ import * as Cotype from "../../typings";
  */
 import _ from "lodash";
 
+export const NO_STORE_VALUE = "$$__noStore__$$";
+
 type Visitor = {
   [key: string]: (
     value: any,
@@ -73,10 +75,15 @@ export default function visit(
             _.set(parent, key, undefined);
           }
         },
-        Array.isArray(parent) ? stringPath.slice(0,-1) : stringPath + key // Remove Dot and ArrayKey when Parent is List
+        Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + key // Remove Dot and ArrayKey when Parent is List
       );
       if (typeof ret !== "undefined") {
-        if (parent && key) _.set(parent, key, ret);
+        if (parent && key) {
+          if (typeof ret === "string" && ret === NO_STORE_VALUE) {
+            return _.set(parent, key, undefined);
+          }
+          _.set(parent, key, ret);
+        }
       }
     }
   };
