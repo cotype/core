@@ -1,7 +1,6 @@
 import path from "path";
 import tempy from "tempy";
 import fs from "fs-extra";
-import { stringify } from "qs";
 import request from "supertest";
 import { init, Persistence, knexAdapter } from "../../..";
 import models from "./models";
@@ -10,6 +9,7 @@ import FsStorage from "../../../media/storage/FsStorage";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 import faker from "faker";
 import { Meta } from "../../../../typings";
+import { createApiReadHelpers, createApiWriteHelpers } from "./apiHelper";
 
 const uploadDir = path.join(__dirname, ".uploads");
 
@@ -45,25 +45,13 @@ describe("rest api", () => {
   let product: { id: string; data: ReturnType<typeof buildProduct> };
   let news: { id: string; data: ReturnType<typeof buildNews> };
   let updatedNews: { id: string; data: ReturnType<typeof buildNews> };
-
-  const create = async (type: string, data: object) => {
-    const { body } = await server
-      .post(`/admin/rest/content/${type}`)
-      .set(headers)
-      .send({ data })
-      .expect(200);
-
-    return body;
-  };
-  const update = async (type: string, id: string, data: object) => {
-    const { body } = await server
-      .put(`/admin/rest/content/${type}/${id}`)
-      .set(headers)
-      .send(data)
-      .expect(200);
-
-    return body;
-  };
+  let find: ReturnType<typeof createApiReadHelpers>["find"];
+  let list: ReturnType<typeof createApiReadHelpers>["list"];
+  let search: ReturnType<typeof createApiReadHelpers>["search"];
+  let findByField: ReturnType<typeof createApiReadHelpers>["findByField"];
+  let suggest: ReturnType<typeof createApiReadHelpers>["suggest"];
+  let create: ReturnType<typeof createApiWriteHelpers>["create"];
+  let update: ReturnType<typeof createApiWriteHelpers>["update"];
 
   beforeAll(async () => {
     const storage = new FsStorage(uploadDir);
@@ -86,6 +74,11 @@ describe("rest api", () => {
       "admin@cotype.dev",
       "admin"
     ));
+
+    ({ find, list, search, findByField, suggest } = createApiReadHelpers(
+      server
+    ));
+    ({ create, update } = createApiWriteHelpers(server, headers));
 
     const mediaBuffer = Buffer.from(faker.lorem.paragraphs(), "utf8");
 
@@ -186,124 +179,6 @@ describe("rest api", () => {
         slug: updatedNews.data.slug
       };
     });
-
-    const list = async (
-      type: string,
-      params: object = {},
-      published: boolean = true
-    ) => {
-      const { body } = await server
-        .get(
-          `/rest/${published ? "published" : "drafts"}/${type}?${stringify(
-            params
-          )}`
-        )
-        .expect(200);
-
-      return body;
-    };
-    const find = async (
-      type: string,
-      id: string,
-      params: object = {},
-      published: boolean = true
-    ) => {
-      const { body } = await server
-        .get(
-          `/rest/${
-            published ? "published" : "drafts"
-          }/${type}/${id}?${stringify(params)}`
-        )
-        .expect(200);
-
-      return body;
-    };
-
-    const search = async (
-      term: string,
-      opts: {
-        published?: boolean;
-        linkableOnly?: boolean;
-        includeModels?: string[];
-        excludeModels?: string[];
-        limit?: number;
-        offset?: number;
-      }
-    ) => {
-      const {
-        published = true,
-        linkableOnly = true,
-        includeModels = [],
-        excludeModels = [],
-        limit = 50,
-        offset = 0
-      } = opts;
-      const { body } = await server
-        .get(
-          `/rest/${
-            published ? "published" : "drafts"
-          }/search/content?${stringify({
-            term,
-            limit,
-            offset,
-            linkableOnly,
-            includeModels,
-            excludeModels
-          })}`
-        )
-        .expect(200);
-
-      return body;
-    };
-
-    const suggest = async (
-      term: string,
-      opts: {
-        published?: boolean;
-        linkableOnly?: boolean;
-        includeModels?: string[];
-        excludeModels?: string[];
-      }
-    ) => {
-      const {
-        published = true,
-        linkableOnly = true,
-        includeModels = [],
-        excludeModels = []
-      } = opts;
-      const { body } = await server
-        .get(
-          `/rest/${
-            published ? "published" : "drafts"
-          }/search/suggest?${stringify({
-            term,
-            linkableOnly,
-            includeModels,
-            excludeModels
-          })}`
-        )
-        .expect(200);
-
-      return body;
-    };
-
-    const findByField = async (
-      type: string,
-      field: string,
-      value: string,
-      params: object = {},
-      published: boolean = true
-    ) => {
-      const { body } = await server
-        .get(
-          `/rest/${
-            published ? "published" : "drafts"
-          }/${type}/${field}/${value}?${stringify(params)}`
-        )
-        .expect(200);
-
-      return body;
-    };
 
     describe("list contents", () => {
       it("should list news", async () => {
