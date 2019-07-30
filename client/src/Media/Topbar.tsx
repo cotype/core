@@ -134,7 +134,7 @@ export default function Topbar(props: Props) {
   const [uploadFieldKey, setUploadFieldKey] = useState(0);
   const [files, setFiles] = useState<FileList>();
   const { onUpload } = props;
-  const { done, response } = useUpload(files as any, {
+  const { done, response, progress } = useUpload(files as any, {
     path: "/upload",
     name: "file",
     withCredentials: true
