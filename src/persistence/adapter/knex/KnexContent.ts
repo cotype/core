@@ -1,6 +1,6 @@
 import * as Cotype from "../../../../typings";
 import knex from "knex";
-import { ContentAdapter, Migration } from "..";
+import { ContentAdapter } from "..";
 import extractRefs from "../../../model/extractRefs";
 import extractText from "../../../model/extractText";
 import extractValues from "../../../model/extractValues";
@@ -17,8 +17,7 @@ import getPositionFields from "../../../model/getPositionFields";
 import getInverseReferenceFields from "../../../model/getInverseReferenceFields";
 import log from "../../../log";
 import visitModel from "../../../model/visitModel";
-import { Model } from "../../../../typings";
-import MigrationContext from "../../MigrationContext";
+import { Migration, RewriteIterator } from "../../ContentPersistence";
 
 const ops: any = {
   eq: "=",
@@ -1211,10 +1210,7 @@ export default class KnexContent implements ContentAdapter {
   async rewrite(
     model: Cotype.Model,
     models: Cotype.Model[],
-    iterator: (
-      data: any,
-      meta: { id: string; rev: number; latest: boolean; published: boolean }
-    ) => any
+    iterator: RewriteIterator
   ) {
     const revs = await this.knex("content_revisions as cr")
       .join("contents as c", "cr.id", "c.id")
@@ -1237,14 +1233,16 @@ export default class KnexContent implements ContentAdapter {
       const rewritten = await iterator(JSON.parse(data), meta);
 
       if (rewritten) {
+        const { storeData, indexData } = rewritten;
+
         await this.knex("content_revisions")
-          .update("data", JSON.stringify(rewritten))
+          .update("data", JSON.stringify(storeData))
           .where({ id, rev });
 
         if (meta.latest || meta.published) {
           await this.indexRevision(
-            rewritten,
-            rewritten,
+            storeData,
+            indexData,
             model,
             models,
             id,
@@ -1256,7 +1254,13 @@ export default class KnexContent implements ContentAdapter {
     }
   }
 
-  async migrate(migrations: Migration[], models: Model[]) {
+  async migrate(
+    migrations: Migration[],
+    callback: (
+      adapter: ContentAdapter,
+      outstanding: Migration[]
+    ) => Promise<void>
+  ) {
     const applied = await this.knex("content_migrations").where({
       state: "applied"
     });
@@ -1277,10 +1281,7 @@ export default class KnexContent implements ContentAdapter {
       );
       const tx = await this.knex.transaction();
       try {
-        const ctx = new MigrationContext(new KnexContent(tx), models);
-        for (const m of outstanding) {
-          await m.execute(ctx);
-        }
+        await callback(new KnexContent(tx), outstanding);
         await tx.commit();
         // Mark migrations as 'applied'
         await this.knex("content_migrations")

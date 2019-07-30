@@ -15,12 +15,23 @@ import getRefUrl from "../content/getRefUrl";
 import convert from "../content/convert";
 import { Config } from ".";
 import { getDeepJoins } from "../content/rest/filterRefData";
-import { ContentFormat } from "../../typings";
+import { ContentFormat, Data, MetaData } from "../../typings";
 import extractMatch from "../model/extractMatch";
 import extractText from "../model/extractText";
 import log from "../log";
 import visit, { NO_STORE_VALUE } from "../model/visit";
 import setPosition from "../model/setPosition";
+import MigrationContext from "./MigrationContext";
+
+export type Migration = {
+  name: string;
+  execute(ctx: MigrationContext): Promise<any>;
+};
+
+export type RewriteIterator = (
+  data: Data,
+  meta: MetaData
+) => void | Data | Promise<Data>;
 
 function findValueByPath(path: string | undefined, data: Cotype.Data) {
   if (!path) return;
@@ -581,6 +592,32 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     return terms.sort((a, b) => a.length - b.length || a.localeCompare(b));
   }
 
+  rewrite(modelName: string, iterator: RewriteIterator) {
+    const model = this.getModel(modelName);
+    if (!model) throw new Error(`No such model: ${modelName}`);
+    return this.adapter.rewrite(
+      model,
+      this.models,
+      async (data: Data, meta: any) => {
+        let rewritten = await iterator(data, meta);
+        if (rewritten) {
+          rewritten = await this.applyPreHooks("onSave", model, rewritten);
+          return this.prepareData(rewritten, model);
+        }
+        return rewritten;
+      }
+    );
+  }
+
+  migrate(migrations: Migration[]) {
+    this.adapter.migrate(migrations, async (adapter, outstanding) => {
+      const content = new ContentPersistence(adapter, this.models, this.config);
+      const ctx = new MigrationContext(content);
+      for (const m of outstanding) {
+        await m.execute(ctx);
+      }
+    });
+  }
   private async setOrderPosition(
     data: Cotype.Data,
     model: Cotype.Model,
