@@ -263,7 +263,8 @@ export default class Media extends Component<Props, State> {
       editable,
       conflictingItems,
       filters,
-      topbarProgress
+      topbarProgress,
+      fileType
     } = this.state;
     return (
       <Root {...testable("upload-zone")}>
@@ -313,6 +314,7 @@ export default class Media extends Component<Props, State> {
               <Fragment>
                 <Main>
                   <Gallery
+                    key={fileType}
                     count={itemCount}
                     data={data}
                     editable={editable}
