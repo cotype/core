@@ -11,7 +11,7 @@ export const Menu = styled("div")`
   overflow: scroll;
 `;
 
-export const Item = styled("div")`
+export const Item = styled("div")<{active?:boolean}>`
   padding: 15px;
   border-bottom: 1px solid #f0f0f0;
   :last-child {
@@ -20,6 +20,7 @@ export const Item = styled("div")`
   :hover {
     background: var(--light-color);
   }
+  ${p=>p.active&&'background: var(--light-color);'}
 `;
 
 type PopoverProps = {

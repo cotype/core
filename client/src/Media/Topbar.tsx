@@ -22,7 +22,7 @@ const Filters = styled("div")`
   align-items: stretch;
 `;
 
-const Order = styled("div")`
+const IconBox = styled("div")`
   padding-left: 20px;
   padding-right: 20px;
   border-right: 1px solid #f0f0f0;
@@ -92,7 +92,12 @@ const Button = styled(ButtonImport)`
   }
 `;
 
-const UploadButton = styled(Button)`
+const UploadButton = styled(ButtonImport)`
+  -webkit-appearance: none;
+  border-width: 0;
+  :hover {
+    color: #fff;
+  }
   color: #fff;
   background: var(--accent-color);
   padding: 0.7em 1em;
@@ -105,6 +110,7 @@ type OrderButton = {
 };
 const OrderButton = styled("div")`
   padding-left: 20px;
+  padding-right: 20px;
   height: 24px;
   cursor: pointer;
   & > svg {
@@ -120,22 +126,28 @@ export type Props = {
   orderBys: Array<{ label: string; value: string }>;
   onOrderByChange: (orderBy: string) => void;
   onOrderChange: (order: string) => void;
+  onUnUsedChange: (unUsed: boolean) => void;
   onUpload: any;
   onUploadProgress: (progress: number) => void;
 };
 
 export default function Topbar(props: Props) {
   const [filter, setFilter] = useState(props.filters[0].label);
+  const [unUsed, setUnUsed] = useState(false);
   const [orderBy, setOrderBy] = useState("Date");
   const [descending, setDescending] = useState(true);
   const [uploadFieldKey, setUploadFieldKey] = useState(0);
   const [files, setFiles] = useState<FileList>();
-  const { onUpload } = props;
-  const { done, response } = useUpload(files as any, {
+  const { onUpload, onUploadProgress } = props;
+  const { done, response, progress } = useUpload(files as any, {
     path: "/upload",
     name: "file",
     withCredentials: true
   });
+
+  useEffect(() => {
+    onUploadProgress(progress || 0);
+  }, [progress, onUploadProgress]);
 
   useEffect(() => {
     if (!done) return;
@@ -148,7 +160,8 @@ export default function Topbar(props: Props) {
     onSearch,
     orderBys,
     onOrderByChange,
-    onOrderChange
+    onOrderChange,
+    onUnUsedChange
   } = props;
 
   return (
@@ -168,17 +181,17 @@ export default function Topbar(props: Props) {
             </Button>
           ))}
       </Filters>
-      <Order>
-        Orderd by: <span style={{ paddingLeft: "8px" }}>{orderBy}</span>
+      <IconBox>
         <MoreButton
           actions={orderBys.map(o => ({
-            label: o.label,
+            label: "Orderd by: " + o.label,
+            active: orderBy === o.label,
             onClick: () => {
               setOrderBy(o.label);
               onOrderByChange(o.value);
             }
           }))}
-          icon={<Icon.Down />}
+          icon={<Icon.SortAlphabetical />}
         />
         <OrderButton
           ascending={!descending}
@@ -189,7 +202,28 @@ export default function Topbar(props: Props) {
         >
           <Icon.Descending />
         </OrderButton>
-      </Order>
+        <MoreButton
+          actions={[
+            {
+              label: "Show all documents",
+              onClick: () => {
+                onUnUsedChange(false);
+                setUnUsed(false);
+              },
+              active: !unUsed
+            },
+            {
+              label: "Show unused documents",
+              onClick: () => {
+                onUnUsedChange(true);
+                setUnUsed(true);
+              },
+              active: unUsed
+            }
+          ]}
+          icon={unUsed ? <Icon.FilterRemove /> : <Icon.Filter />}
+        />
+      </IconBox>
       <Search>
         <Icon.Search />
         <SearchInput
@@ -205,7 +239,6 @@ export default function Topbar(props: Props) {
           key={uploadFieldKey}
           onFiles={e => {
             setFiles(e);
-            props.onUploadProgress(e.length);
             // set new key in order to render new input field, otherwise
             // onFiles is not called when trying to upload the same file twice
             setUploadFieldKey(Date.now());

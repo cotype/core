@@ -22,6 +22,7 @@ export const ItemAction = styled("button")`
 type Action = {
   label: string;
   onClick: () => void;
+  active?:boolean
 };
 
 type Props = {
@@ -50,6 +51,7 @@ export default class MoreButton extends Component<Props, State> {
         {actions.map(a => (
           <Item
             style={{ cursor: "pointer" }}
+            active={a.active}
             key={a.label}
             onClick={() => {
               if (a.onClick) a.onClick();
