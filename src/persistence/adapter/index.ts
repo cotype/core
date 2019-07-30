@@ -1,6 +1,5 @@
 import * as Cotype from "../../../typings";
-import { Model } from "../../../typings";
-import MigrationContext from "../MigrationContext";
+import { Migration, RewriteIterator } from "../ContentPersistence";
 
 export interface SettingsAdapter {
   create(model: Cotype.Model, data: object): Promise<string>;
@@ -20,11 +19,6 @@ export interface SettingsAdapter {
   findUserByEmail(id: string): Promise<Cotype.Settings>;
   loadUser(id: string): Promise<Cotype.User>;
 }
-
-export type Migration = {
-  name: string;
-  execute(ctx: MigrationContext): Promise<any>;
-};
 
 export interface ContentAdapter {
   create(
@@ -94,12 +88,15 @@ export interface ContentAdapter {
   rewrite(
     model: Cotype.Model,
     models: Cotype.Model[],
-    iterator: (
-      data: any,
-      meta: { id: string; rev: number; latest: boolean; published: boolean }
-    ) => any
+    iterator: RewriteIterator
   ): Promise<void>;
-  migrate(migrations: Migration[], models: Model[]): Promise<any>;
+  migrate(
+    migrations: Migration[],
+    callback: (
+      adapter: ContentAdapter,
+      outstanding: Migration[]
+    ) => Promise<void>
+  ): Promise<any>;
 }
 
 export interface MediaAdapter {

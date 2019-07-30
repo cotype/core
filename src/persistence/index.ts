@@ -8,13 +8,13 @@
 import fs from "fs";
 import path from "path";
 
-import { Models, BaseUrls, ContentHooks, Model } from "../../typings";
-import { PersistenceAdapter, Migration } from "./adapter";
+import { Models, BaseUrls, ContentHooks } from "../../typings";
+import { PersistenceAdapter } from "./adapter";
 import init from "./init";
 import withAuth from "../auth/withAuth";
 
 import SettingsPersistence from "./SettingsPersistence";
-import ContentPersistence from "./ContentPersistence";
+import ContentPersistence, { Migration } from "./ContentPersistence";
 import MediaPersistence from "./MediaPersistence";
 import MigrationContext from "./MigrationContext";
 
@@ -48,7 +48,7 @@ export class Persistence {
     return init(this.settings);
   }
 
-  async migrate(dir: string, models: Model[]) {
+  async migrate(dir: string) {
     const files = fs.readdirSync(dir).sort();
     const migrations = files
       .map(f => {
@@ -65,7 +65,8 @@ export class Persistence {
         }
       })
       .filter((m): m is Migration => !!m);
-    this.adapter.content.migrate(migrations, models);
+
+    await this.content.migrate(migrations);
   }
 
   shutdown() {
@@ -81,7 +82,7 @@ export default async (
   const p = new Persistence(models, adapter, config);
   await p.init();
   if (config.migrationDir) {
-    await p.migrate(config.migrationDir, models.content);
+    await p.migrate(config.migrationDir);
   }
   return p;
 };

@@ -134,15 +134,20 @@ export type Item = {
   orderValue?: string;
 };
 
-export type VersionItem = Item & {
+export type MetaData = {
+  id: string;
   rev: number;
   latest: boolean;
   published: boolean;
-  latest_rev: number;
-  published_rev: boolean;
-  author_name: string;
-  date: string;
 };
+
+export type VersionItem = Item &
+  MetaData & {
+    latest_rev: number;
+    published_rev: boolean;
+    author_name: string;
+    date: string;
+  };
 
 export type Schedule = {
   visibleFrom?: null | Date;

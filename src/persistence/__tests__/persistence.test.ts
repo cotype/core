@@ -24,7 +24,7 @@ describe("migration", () => {
         expect.objectContaining({ name: "001_first" }),
         expect.objectContaining({ name: "002_second" })
       ],
-      []
+      expect.any(Function)
     );
   });
 });

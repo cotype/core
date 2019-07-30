@@ -1270,20 +1270,22 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
     it("should perform a migration only once", async () => {
       const execute = jest.fn();
-      await content.migrate([{ name: "aaa", execute }], models.content);
-      await content.migrate([{ name: "aaa", execute }], models.content);
-      expect(execute).toBeCalledTimes(1);
+      const callback = jest.fn();
+      await content.migrate([{ name: "aaa", execute }], callback);
+      await content.migrate([{ name: "aaa", execute }], callback);
+      expect(callback).toBeCalledTimes(1);
     });
 
     it("should wait for migrations to finish", async () => {
-      const execute = jest.fn(
+      const execute = jest.fn();
+      const callback = jest.fn<Promise<void>, any>(
         () => new Promise(resolve => setTimeout(resolve, 1000))
       );
       await Promise.all([
-        content.migrate([{ name: "bbb", execute }], models.content),
-        content.migrate([{ name: "bbb", execute }], models.content)
+        content.migrate([{ name: "bbb", execute }], callback),
+        content.migrate([{ name: "bbb", execute }], callback)
       ]);
-      expect(execute).toBeCalledTimes(1);
+      expect(callback).toBeCalledTimes(1);
     });
   });
 
