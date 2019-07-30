@@ -193,10 +193,12 @@ export type ContentRefs = {
 export type SearchResultItem = {
   id: string;
   model: string;
+  type?: string;
+  kind?: string;
   title: string;
   description?: string;
   image: string | undefined;
-  url: string;
+  url?: string;
 };
 
 export type Revision = DataRecord & {

@@ -65,7 +65,7 @@ export default class SingleReferenceInput extends Component<Props, State> {
     const id = this.props.field.value;
 
     if (prevProps.field.value !== id) {
-      const { clearSelection } = this.state;
+      // const { clearSelection } = this.state;
       if (id) this.fetchItem(id);
       // if (id === null && clearSelection) clearSelection();
     }

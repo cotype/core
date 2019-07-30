@@ -56,7 +56,7 @@ export default class Overlay extends Component<Props> {
   };
 
   renderOverlay() {
-    const { style, onClose, children } = this.props;
+    const { style, children } = this.props;
     return (
       <Backdrop {...testable("overlay")}>
         <Modal onClick={ev => ev.stopPropagation()} style={style}>

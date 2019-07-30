@@ -126,7 +126,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
   createSearchResultItem = (
     content: Cotype.Content,
-    term: string
+    term: string,
+    external: boolean = true
   ): Cotype.SearchResultItem | null => {
     const { id, type, data } = content;
 
@@ -138,11 +139,13 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     return {
       id,
+      type: external ? undefined : model.type,
+      kind: external ? undefined : singular,
       title: title || singular,
-      description: extractMatch(data, model, term),
+      description: extractMatch(data, model, term, !external),
       image: image && ((data || {})[image] || null),
       model: model.name,
-      url: getRefUrl(data, model.urlPath) as string
+      url: external ? (getRefUrl(data, model.urlPath) as string) : undefined
     };
   };
 
@@ -486,7 +489,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     exact: boolean,
     opts: Cotype.ListOpts,
     previewOpts?: Cotype.PreviewOpts
-  ): Promise<Cotype.ListChunk<Cotype.Item>> {
+  ): Promise<Cotype.ListChunk<Cotype.SearchResultItem>> {
     const { total, items } = await this.adapter.search(
       term,
       exact,
@@ -495,7 +498,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     );
     return {
       total,
-      items: this.createItems(items, principal)
+      items: items
+        .map(c => this.createSearchResultItem(c, term, false))
+        .filter(this.canView(principal))
     };
   }
 

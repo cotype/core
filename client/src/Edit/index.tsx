@@ -1,5 +1,5 @@
 import * as Cotype from "../../../typings";
-import React, { Component, Fragment, ReactNode } from "react";
+import React, { Component, Fragment } from "react";
 import { match, Redirect, RouteComponentProps } from "react-router-dom";
 
 import api from "../api";

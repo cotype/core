@@ -1,5 +1,5 @@
 import { Model, Principal, User, Item, Data } from "../../../typings";
-import React, { Component, Fragment, ReactNode } from "react";
+import React, { Component, Fragment } from "react";
 import { Route, Switch, match as matchType, Redirect } from "react-router-dom";
 import { History } from "history";
 import SplitPane from "../common/SplitPane";

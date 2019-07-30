@@ -64,7 +64,7 @@ export default class OptionsInput extends Component<Props, State> {
   }
 
   render() {
-    const { field, nullLabel } = this.props;
+    const { field } = this.props;
     const { options } = this.state;
     const { value, ...props } = field;
     const selected = options.find(o => String(o.value) === String(value));

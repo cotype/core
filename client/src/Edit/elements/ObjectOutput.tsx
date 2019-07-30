@@ -22,6 +22,7 @@ export default class ObjectOutput extends Component<Props> {
       if (output[type] && value[key]) {
         return output[type]({ ...f, value: value[key] });
       }
+      return null
     }, null);
   };
 
