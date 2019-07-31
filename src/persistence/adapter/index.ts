@@ -1,5 +1,16 @@
 import * as Cotype from "../../../typings";
-import { Migration, RewriteIterator } from "../ContentPersistence";
+import { Migration } from "../ContentPersistence";
+import { Data, MetaData } from "../../../typings";
+
+type StoreAndSearchData = {
+  storeData: Data;
+  searchData: Data;
+};
+
+export type RewriteIterator = (
+  data: Data,
+  meta: MetaData
+) => Promise<void | StoreAndSearchData>;
 
 export interface SettingsAdapter {
   create(model: Cotype.Model, data: object): Promise<string>;

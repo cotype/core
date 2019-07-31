@@ -1278,9 +1278,12 @@ describe.each(implementations)("%s adapter", (_, impl) => {
             title: "News 3"
           }
         );
-        await content.rewrite(news, models.content, (data, meta) => {
+        await content.rewrite(news, models.content, async (data, meta) => {
           if (ids.includes(meta.id)) {
-            return { ...data, title: data.title.toUpperCase() };
+            return {
+              storeData: { ...data, title: data.title.toUpperCase() },
+              searchData: {}
+            };
           }
         });
         const c = await content.load(news, ids[0]);
