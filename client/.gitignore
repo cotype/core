@@ -1,5 +1,6 @@
 .cache/
 etc/
 lib/
+build/
 dist/
 node_modules/

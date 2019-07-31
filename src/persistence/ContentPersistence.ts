@@ -15,7 +15,7 @@ import getRefUrl from "../content/getRefUrl";
 import convert from "../content/convert";
 import { Config } from ".";
 import { getDeepJoins } from "../content/rest/filterRefData";
-import { ContentFormat, Data, MetaData } from "../../typings";
+import { ContentFormat, Data, RewriteDataIterator } from "../../typings";
 import extractMatch from "../model/extractMatch";
 import extractText from "../model/extractText";
 import log from "../log";
@@ -27,11 +27,6 @@ export type Migration = {
   name: string;
   execute(ctx: MigrationContext): Promise<any>;
 };
-
-export type RewriteDataIterator = (
-  data: Data,
-  meta: MetaData
-) => void | Data | Promise<Data>;
 
 function findValueByPath(path: string | undefined, data: Cotype.Data) {
   if (!path) return;
