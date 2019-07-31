@@ -23,7 +23,7 @@ type Props = {
 };
 
 export default (props: Props) => {
-  const { value, item: itemType, sortable } = props;
+  const { value, item: itemType } = props;
   const ItemComponent = outputs.get(itemType);
   return (
     <div>

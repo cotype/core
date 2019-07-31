@@ -46,7 +46,7 @@ export default class ErrorBoundary extends Component<{}, State> {
           </p>
           <Button
             icon={paths.Reload}
-            onClick={() => location.reload()}
+            onClick={() => window.location.reload()}
             className={ButtonStyle}
           >
             Reload

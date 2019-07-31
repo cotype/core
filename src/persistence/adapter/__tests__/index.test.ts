@@ -142,8 +142,9 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         password: "xxx"
       });
 
+      const data = { title: "News" };
       // create content with user for a foreign key constraint
-      await content.create(news, { title: "News" }, id, models.content);
+      await content.create(data, data, news, models.content, id);
 
       await settings.deleteUser(id);
       const userList = await settings.list(users, {});
@@ -187,10 +188,11 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         data.map(
           d =>
             content.create(
-              news,
               { ...sampleNews, ...d },
-              author,
-              models.content
+              { ...sampleNews, ...d },
+              news,
+              models.content,
+              author
             ) as Promise<string>
         )
       );
@@ -205,10 +207,11 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         data.map(
           d =>
             content.create(
-              pages,
               { ...samplePage, ...d },
-              author,
-              models.content
+              { ...samplePage, ...d },
+              pages,
+              models.content,
+              author
             ) as Promise<string>
         )
       );
@@ -219,10 +222,11 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         data.map(
           d =>
             content.create(
-              indexContent,
               { ...d },
-              author,
-              models.content
+              { ...d },
+              indexContent,
+              models.content,
+              author
             ) as Promise<string>
         )
       );
@@ -245,15 +249,17 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
     it("should create a revision", async () => {
       const [id] = await createNews({});
+      const data = {
+        ...sampleNews,
+        title: "Updated"
+      };
       const rev = await content.createRevision(
+        data,
+        data,
         news,
+        models.content,
         id,
-        author,
-        {
-          ...sampleNews,
-          title: "Updated"
-        },
-        models.content
+        author
       );
       await expect(rev).toBeGreaterThan(0);
     });
@@ -280,15 +286,17 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
     it("should list versions", async () => {
       const [id] = await createNews({});
+      const data = {
+        ...sampleNews,
+        title: "Updated"
+      };
       await content.createRevision(
+        data,
+        data,
         news,
+        models.content,
         id,
-        author,
-        {
-          ...sampleNews,
-          title: "Updated"
-        },
-        models.content
+        author
       );
       const revs = await content.listVersions(news, id);
       await expect(revs).toMatchObject([
@@ -877,28 +885,33 @@ describe.each(implementations)("%s adapter", (_, impl) => {
           }
         );
 
+        const data1 = {
+          ...sampleNews,
+          title: "Lorem ipsum dolor"
+        };
+
         // Create a second revision...
         const rev = await content.createRevision(
+          data1,
+          data1,
           news,
+          models.content,
           ids[0],
-          author,
-          {
-            ...sampleNews,
-            title: "Lorem ipsum dolor"
-          },
-          models.content
+          author
         );
 
+        const data2 = {
+          ...sampleNews,
+          title: "Lorem ipsum"
+        };
         // ...and a third one
         await content.createRevision(
+          data2,
+          data2,
           news,
+          models.content,
           ids[0],
-          author,
-          {
-            ...sampleNews,
-            title: "Lorem ipsum"
-          },
-          models.content
+          author
         );
 
         // ...and publish it
@@ -992,16 +1005,19 @@ describe.each(implementations)("%s adapter", (_, impl) => {
           items: [{ id: pageIds[0] }]
         });
 
+        const data3 = {
+          ...sampleNews,
+          title: "Don't find me"
+        };
+
         // Update previously found content
         await content.createRevision(
+          data3,
+          data3,
           news,
+          models.content,
           ids[1],
-          author,
-          {
-            ...sampleNews,
-            title: "Don't find me"
-          },
-          models.content
+          author
         );
 
         await expect(
@@ -1081,39 +1097,43 @@ describe.each(implementations)("%s adapter", (_, impl) => {
     describe("constraints", () => {
       it("should create content", async () => {
         const id = await content.create(
-          uniqueContent,
           { slug: "unique" },
-          author,
-          models.content
+          { slug: "unique" },
+          uniqueContent,
+          models.content,
+          author
         );
         await expect(id).toBeGreaterThan(0);
       });
       it("should not create content", async () => {
         await expect(
           content.create(
-            uniqueContent,
             { slug: "unique" },
-            author,
-            models.content
+            { slug: "unique" },
+            uniqueContent,
+            models.content,
+            author
           )
         ).rejects.toBeInstanceOf(UniqueFieldError);
       });
 
       it("should be able to update content", async () => {
         const id = await content.create(
-          uniqueContent,
           { slug: "foo-bar-baz" },
-          author,
-          models.content
+          { slug: "foo-bar-baz" },
+          uniqueContent,
+          models.content,
+          author
         );
 
         await expect(
           await content.createRevision(
-            uniqueContent,
-            id,
-            author,
             { slug: "foo-bar-baz" },
-            models.content
+            { slug: "foo-bar-baz" },
+            uniqueContent,
+            models.content,
+            id,
+            author
           )
         ).not.toBeNaN();
       });
@@ -1422,10 +1442,11 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
     it("should not delete media in use", async () => {
       const id = (await content.create(
-        news,
         { title: "News", image: image1.id },
-        author,
-        models.content
+        { title: "News", image: image1.id },
+        news,
+        models.content,
+        author
       )) as string;
 
       await expect(
@@ -1434,50 +1455,59 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
       await content.setPublishedRev(news, id, 1, models.content);
 
+      const data = {
+        title: "News Rev 2",
+        image: null
+      };
+
       await content.createRevision(
+        data,
+        data,
         news,
+        models.content,
         id,
-        author,
-        {
-          title: "News Rev 2",
-          image: null
-        },
-        models.content
+        author
       );
 
       await expect(
         media.delete(image1.id, models.content)
       ).rejects.toBeInstanceOf(ReferenceConflictError);
 
+      const data2 = { title: "News", image: image3.id };
       const id2 = (await content.create(
+        data2,
+        data2,
         news,
-        { title: "News", image: image3.id },
-        author,
-        models.content
+        models.content,
+        author
       )) as string;
 
+      const data3 = {
+        title: "News Rev 2",
+        image: image3.id
+      };
       await content.createRevision(
+        data3,
+        data3,
         news,
+        models.content,
         id2,
-        author,
-        {
-          title: "News Rev 2",
-          image: image3.id
-        },
-        models.content
+        author
       );
 
       await content.setPublishedRev(news, id2, 2, models.content);
 
+      const data4 = {
+        title: "News Rev 3",
+        image: image3.id
+      };
       await content.createRevision(
+        data4,
+        data4,
         news,
+        models.content,
         id2,
-        author,
-        {
-          title: "News Rev 3",
-          image: image3.id
-        },
-        models.content
+        author
       );
 
       await expect(
@@ -1499,10 +1529,11 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       await media.create(image);
 
       const id = (await content.create(
-        news,
         { title: "News", image: image.id },
-        author,
-        models.content
+        { title: "News", image: image.id },
+        news,
+        models.content,
+        author
       )) as string;
 
       await content.delete(news, id);
@@ -1524,10 +1555,11 @@ describe.each(implementations)("%s adapter", (_, impl) => {
       await media.create(image);
 
       await content.create(
-        news,
         { title: "News", image: image.id },
-        author,
-        models.content
+        { title: "News", image: image.id },
+        news,
+        models.content,
+        author
       );
 
       await expect(

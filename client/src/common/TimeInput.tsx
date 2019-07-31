@@ -10,7 +10,7 @@ const timeInputClass = css`
   font-variant-numeric: tabular-nums;
 `;
 
-const regexp = /^\d{0,2}?\:?\d{0,2}$/;
+const regexp = /^\d{0,2}?:?\d{0,2}$/;
 
 const isValidHour = (h: any) => Number.isInteger(h) && h >= 0 && h < 24;
 

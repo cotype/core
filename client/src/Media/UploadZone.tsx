@@ -48,7 +48,7 @@ export default function UploadZone({
     if (!done) return;
     reset();
     onUpload(response.response);
-  }, [done, response]);
+  }, [done, response, onUpload, reset]);
 
   return (
     <div

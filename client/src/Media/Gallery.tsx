@@ -68,7 +68,7 @@ export default class Gallery extends Component<Props> {
         (mediaFilter.maxHeight && mediaFilter.maxHeight < media.height) ||
         (mediaFilter.minHeight && mediaFilter.minHeight > media.height));
     return (
-      <CellMeasurer cache={this.cache} index={index} key={key} parent={parent}>
+      <CellMeasurer cache={this.cache} index={index} key={media.id} parent={parent}>
         <Image
           style={style}
           {...media}
@@ -118,6 +118,7 @@ export default class Gallery extends Component<Props> {
         height={size.height}
         width={size.width}
         style={{ outline: "none", padding: "20px" }}
+        overscanByPixels={1000}
         onCellsRendered={onRowsRendered}
       />
     );

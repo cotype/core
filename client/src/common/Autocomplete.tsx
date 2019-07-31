@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import styled, { css } from "react-emotion";
-import ScrollList from "./ScrollList";
 import Downshift, { DownshiftProps } from "downshift";
 import { inputClass } from "./styles";
 
@@ -25,6 +24,9 @@ const Item = styled("div")`
     css`
       font-weight: 700;
     `};
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 const rootClass = css`
@@ -45,13 +47,16 @@ const ListWrapper = styled("div")`
   z-index: 1;
 `;
 
-const listClass = css`
+const ScrollList = styled("div")`
   background: #fff;
   transition: opacity 0.1s ease;
   border: 1px solid #f0f0f0;
   border-top-width: 0;
   box-shadow: 0 12px 12px -12px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
+  max-height: 250px;
+  overflow: hidden;
+  overflow-y: scroll;
 `;
 
 const Button = styled("button")`
@@ -170,29 +175,21 @@ export default class Autocomplete extends Component<Props> {
               ))}
             {!isOpen || !items.length ? null : (
               <ListWrapper>
-                <ScrollList
-                  className={listClass}
-                  visibleRows={5}
-                  scrollToIndex={highlightedIndex || 0}
-                  rowCount={items.length}
-                  renderRow={({ key, index, style: rowStyle }) => {
-                    const item = items[index];
-                    return (
-                      <Item
-                        key={key}
-                        {...getItemProps({
-                          item,
-                          index,
-                          isSelected: selectedItem === items[index]
-                        })}
-                        style={rowStyle}
-                        isActive={highlightedIndex === index}
-                      >
-                        {renderItem(item)}
-                      </Item>
-                    );
-                  }}
-                />
+                <ScrollList>
+                  {items.map((item, index) => (
+                    <Item
+                      key={itemToString(item) + index}
+                      {...getItemProps({
+                        item,
+                        index,
+                        isSelected: selectedItem === items[index]
+                      })}
+                      isActive={highlightedIndex === index}
+                    >
+                      {renderItem(item)}
+                    </Item>
+                  ))}
+                </ScrollList>
               </ListWrapper>
             )}
           </div>

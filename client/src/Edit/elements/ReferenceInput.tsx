@@ -1,19 +1,21 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import styled, { css, cx } from "react-emotion";
 import { FieldProps } from "formik";
+import orderSearchResults from "../../utils/orderSearchResults";
 import { stringify } from "qs";
 import { inputClass } from "../../common/styles";
 import Autocomplete from "../../common/Autocomplete";
 import api from "../../api";
 import { required } from "./validation";
-import ColorHash from "color-hash";
-import { Item, ReferenceType } from "../../../../typings";
+import { ReferenceType, SearchResultItem } from "../../../../typings";
+import { BasicResultItem } from "../../common/ResultItem";
+import { ControllerStateAndHelpers } from "downshift";
 
-const colorHash = new ColorHash({ saturation: 0.7, lightness: 0.6 });
 const validationRegex = "W*(http:|https:)W*|^/.*$";
 
 const Root = styled("div")`
   ${inputClass} padding: 0;
+  min-width: 0;
 `;
 
 const borderlessClass = css`
@@ -24,28 +26,6 @@ const borderlessClass = css`
   font-size: inherit;
   height: 40px;
   outline: none;
-`;
-
-const Title = styled("span")`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const Kind = styled("div")`
-  margin-left: auto;
-  border-radius: 3px;
-  color: #fff;
-  font-size: 0.8em;
-  padding: 2px 5px;
-`;
-
-const Item = styled("div")`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: var(--dark-color);
 `;
 
 const Select = styled("select")`
@@ -79,8 +59,9 @@ type Props = FieldProps<ReferenceType> & {
 type Ref = { id: string; model: string } | null;
 
 type State = {
-  items: Item[];
+  items: SearchResultItem[];
   value: Ref;
+  searchTerm: string;
   internalRef: boolean;
   prevValue: Ref;
 };
@@ -99,6 +80,7 @@ export default class ReferenceInput extends Component<Props, State> {
   state: State = {
     items: [],
     value: null,
+    searchTerm: "",
     internalRef: true,
     prevValue: null
   };
@@ -123,9 +105,14 @@ export default class ReferenceInput extends Component<Props, State> {
     }
   }
 
-  onInputValueChange = (inputValue, downshift) => {
-    if (inputValue) this.fetchItems({ q: inputValue });
-    else this.fetchItems({});
+  onInputValueChange = (
+    inputValue,
+    { isOpen }: ControllerStateAndHelpers<any>
+  ) => {
+    if (inputValue) {
+      this.fetchItems({ q: inputValue });
+      this.setState({ searchTerm: isOpen ? inputValue : "" });
+    } else this.fetchItems({});
   };
 
   onChange = value => {
@@ -148,7 +135,9 @@ export default class ReferenceInput extends Component<Props, State> {
     });
 
     return api.get(`/${type}?${queryString}`).then(({ items }) => {
-      this.setState({ items });
+      this.setState({
+        items: orderSearchResults(items, this.state.searchTerm)
+      });
     });
   };
 
@@ -173,15 +162,8 @@ export default class ReferenceInput extends Component<Props, State> {
 
   itemToString = i => (i ? i.title : "");
 
-  renderItem = i => {
-    return (
-      <Item>
-        <Title>{i.title}</Title>
-        {i.kind && (
-          <Kind style={{ background: colorHash.hex(i.kind) }}>{i.kind}</Kind>
-        )}
-      </Item>
-    );
+  renderItem = (i, term: string) => {
+    return <BasicResultItem item={i} term={term}></BasicResultItem>;
   };
 
   onInputTypeChange = (e: React.FormEvent<HTMLSelectElement>) => {
@@ -219,7 +201,7 @@ export default class ReferenceInput extends Component<Props, State> {
               items={items}
               name={this.props.field.name}
               itemToString={this.itemToString}
-              renderItem={this.renderItem}
+              renderItem={item => this.renderItem(item, this.state.searchTerm)}
               placeholder={placeholder ? placeholder : undefined}
               style={{ paddingLeft: "10px" }}
             />

@@ -30,6 +30,7 @@ export default class ModelsSidebar extends Component<Props, State> {
     return sidebar.some(s => {
       if (s.type === "model" && s.model === model) return true;
       if (s.type === "group") return this.containsModel(s.items, model);
+      return false
     });
   };
 

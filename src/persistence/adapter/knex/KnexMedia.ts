@@ -24,7 +24,8 @@ export default class KnexMedia implements MediaAdapter {
     search,
     orderBy,
     order,
-    mimetype
+    mimetype,
+    unUsed
   }: Cotype.MediaListOpts): Promise<Cotype.ListChunk<Cotype.Media>> {
     const q = this.knex("media");
 
@@ -46,8 +47,23 @@ export default class KnexMedia implements MediaAdapter {
       }
     }
 
-    const [count] = await q.clone().count("* as total");
+    if(unUsed){
+      q.leftJoin('content_references',(join)=>{
+        join.on("media.id", "content_references.media");
+      })
+      q.leftJoin('contents',(join)=>{
+        join.on("content_references.id", "contents.id");
+        join.andOn((innerjoin)=>{
+          innerjoin.on("content_references.rev","contents.latest_rev")
+          innerjoin.orOn("content_references.rev","contents.published_rev")
+        });
+      })
+      q.whereNull('contents.id')
+    }
+
+    const [count] = await q.clone().countDistinct("media.id as total");
     const items = await q
+      .distinct('media.*')
       .offset(Number(offset || 0))
       .limit(Number(limit || 50))
       .orderBy(orderBy || "created_at", order || "desc");

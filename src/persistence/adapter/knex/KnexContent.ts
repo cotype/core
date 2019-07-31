@@ -1,6 +1,6 @@
 import * as Cotype from "../../../../typings";
 import knex from "knex";
-import { ContentAdapter } from "..";
+import { ContentAdapter, RewriteIterator } from "..";
 import extractRefs from "../../../model/extractRefs";
 import extractText from "../../../model/extractText";
 import extractValues from "../../../model/extractValues";
@@ -11,14 +11,13 @@ import _update from "lodash/update";
 import UniqueFieldError, {
   NonUniqueField
 } from "../../errors/UniqueFieldError";
-import cleanSearchTerm from "./cleanSearchTerm";
 import setPosition from "../../../model/setPosition";
 import getAlwaysUniqueFields from "../../../model/getAlwaysUniqueFields";
 import getPositionFields from "../../../model/getPositionFields";
 import getInverseReferenceFields from "../../../model/getInverseReferenceFields";
 import log from "../../../log";
 import visitModel from "../../../model/visitModel";
-import { Migration, RewriteIterator } from "../../ContentPersistence";
+import { Migration } from "../../ContentPersistence";
 
 const ops: any = {
   eq: "=",
@@ -120,29 +119,13 @@ export default class KnexContent implements ContentAdapter {
   }
 
   async create(
+    storeData: Cotype.Data,
+    indexData: Cotype.Data,
     model: Cotype.Model,
-    data: any,
-    author: string,
-    models: Cotype.Model[]
+    models: Cotype.Model[],
+    author: string
   ) {
-    await this.testUniqueFields(model, models, data);
-    if (model.orderBy) {
-      const lastItem = await this.list(model, models, {
-        limit: 1,
-        orderBy: model.orderBy,
-        order: "desc",
-        offset: 0
-      });
-
-      const orderPath = model.orderBy.split(".");
-
-      const lastOrderValue = (orderPath.reduce(
-        (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
-        lastItem.total > 0 ? lastItem.items[0].data : {}
-      ) as unknown) as string;
-
-      data = setPosition(data, model, lastOrderValue);
-    }
+    await this.testUniqueFields(model, models, storeData);
 
     const [id] = await this.knex("contents")
       .insert({
@@ -150,7 +133,7 @@ export default class KnexContent implements ContentAdapter {
       })
       .returning("id");
 
-    await this.createRev(model, id, 1, author, data, models);
+    await this.createRev(storeData, indexData, model, models, id, 1, author);
     return id;
   }
 
@@ -260,31 +243,33 @@ export default class KnexContent implements ContentAdapter {
   }
 
   async createRevision(
+    storeData: Cotype.Data,
+    indexData: Cotype.Data,
     model: Cotype.Model,
+    models: Cotype.Model[],
     id: string,
-    author: string,
-    data: object,
-    models: Cotype.Model[]
+    author: string
   ) {
-    data = await this.testPositionFields(model, models, data, id);
+    storeData = await this.testPositionFields(model, models, storeData, id);
 
-    await this.testUniqueFields(model, models, data, id);
+    await this.testUniqueFields(model, models, storeData, id);
 
     const [content] = await this.knex("contents")
       .select(["latest_rev"])
       .where({ id });
 
     const rev = (content.latest_rev || 0) + 1;
-    return this.createRev(model, id, rev, author, data, models);
+    return this.createRev(storeData, indexData, model, models, id, rev, author);
   }
 
   async createRev(
+    data: Cotype.Data,
+    searchData: Cotype.Data,
     model: Cotype.Model,
+    models: Cotype.Model[],
     id: string,
     rev: number,
-    author: string,
-    data: object,
-    models: Cotype.Model[]
+    author: string
   ) {
     await this.knex("content_revisions").insert({
       id,
@@ -298,17 +283,18 @@ export default class KnexContent implements ContentAdapter {
       .where({ id })
       .update({ latest_rev: rev });
 
-    await this.indexRevision(model, id, rev, data, models);
+    await this.indexRevision(data, searchData, model, models, id, rev);
 
     return rev;
   }
 
   async indexRevision(
+    data: Cotype.Data,
+    searchData: Cotype.Data,
     model: Cotype.Model,
+    models: Cotype.Model[],
     id: string,
     rev: number,
-    data: object,
-    models: Cotype.Model[],
     published = false
   ) {
     // Delete content_values except the published ones
@@ -322,7 +308,7 @@ export default class KnexContent implements ContentAdapter {
       .del();
 
     await this.extractValues(data, model, id, rev, published);
-    await this.extractText(data, model, id, rev, published);
+    await this.extractText(searchData, model, id, rev, published);
 
     const refs = extractRefs(data, model, models);
     if (refs.length) {
@@ -785,10 +771,7 @@ export default class KnexContent implements ContentAdapter {
         k.whereRaw("text @@ plainto_tsquery(?)", `${text}:*`);
       } else if (this.knex.client.config.client === "mysql") {
         if (exact) {
-          k.whereRaw(
-            "MATCH(text) AGAINST(? IN BOOLEAN MODE)",
-            cleanSearchTerm(text)
-          );
+          k.where("text", "like", `%${text}%`);
         } else {
           k.whereRaw("MATCH(text) AGAINST(?)", text);
         }
@@ -853,10 +836,21 @@ export default class KnexContent implements ContentAdapter {
     k.distinct([
       `${searchTable}.id`,
       "contents.type",
-      "content_revisions.data"
+      "content_revisions.data",
+      ...(!exact
+        ? ([
+            this.knex.raw(
+              `(case when text like '%${text}%' then 1 else 2 end) as isExact`
+            )
+          ] as any)
+        : [])
     ]);
 
     k.offset(Number(offset)).limit(Number(limit));
+
+    if (!exact) {
+      k.orderBy("isExact");
+    }
 
     const items = await k;
 
@@ -958,7 +952,9 @@ export default class KnexContent implements ContentAdapter {
         } else if (this.knex.client.config.client === "mysql") {
           k.whereRaw("match(text) against(?)", searchTerm);
         } else {
-          k.where("content_search.text", "like", `%${searchTerm}%`);
+          searchTerm
+            .split(/\s+/)
+            .forEach(t => k.andWhere("text", "like", `%${t}%`));
         }
       }
     }
@@ -1171,21 +1167,40 @@ export default class KnexContent implements ContentAdapter {
         : "orderValue.literal_lc"
       : null;
 
-    k.offset(Number(offset))
-      .limit(Number(limit))
-      .orderBy(orderByColumn || "contents.id", order);
+    k.offset(Number(offset)).limit(Number(limit));
+
+    if (orderByColumn) {
+      k.orderBy(orderByColumn, order);
+      if (search && search.term && search.scope !== "title")
+        k.orderBy("isExact");
+    } else {
+      if (search && search.term && search.scope !== "title")
+        k.orderBy("isExact");
+      k.orderBy("contents.id", order);
+    }
 
     const selectColumns = [
       "contents.id",
       "contents.type",
       "contents.visibleFrom",
       "contents.visibleUntil",
-      "content_revisions.data"
+      "content_revisions.data",
+      ...(search && search.term && search.scope !== "title"
+        ? ([
+            this.knex.raw(
+              `(case when content_search.text like '%${search.term
+                .toLowerCase()
+                .trim()}%' then 1 else 2 end) as isExact`
+            )
+          ] as any)
+        : [])
     ];
+
     if (orderByColumn) {
       selectColumns.push(orderByColumn);
     }
     const items = k.select(selectColumns);
+
     return {
       total,
       items: (await items).map((item: any) => this.parseData(item, model))
@@ -1218,17 +1233,20 @@ export default class KnexContent implements ContentAdapter {
       const rewritten = await iterator(JSON.parse(data), meta);
 
       if (rewritten) {
+        const { storeData, searchData } = rewritten;
+
         await this.knex("content_revisions")
-          .update("data", JSON.stringify(rewritten))
+          .update("data", JSON.stringify(storeData))
           .where({ id, rev });
 
         if (meta.latest || meta.published) {
           await this.indexRevision(
+            storeData,
+            searchData,
             model,
+            models,
             id,
             rev,
-            rewritten,
-            models,
             rev === published_rev
           );
         }
@@ -1338,7 +1356,7 @@ export default class KnexContent implements ContentAdapter {
               (val || []).concat({
                 _ref: "content",
                 _content,
-                _id
+                _id: String(_id)
               })
             );
           }

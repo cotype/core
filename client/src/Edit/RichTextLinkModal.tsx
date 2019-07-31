@@ -119,7 +119,7 @@ class RichTextLinkModal extends Component<Props> {
         }
       };
     }
-    const mediaMatch = /\$media:([\w\/\.]*)\$/gm.exec(initial.link);
+    const mediaMatch = /\$media:([\w/.]*)\$/gm.exec(initial.link);
 
     if (mediaMatch) {
       link.value = {

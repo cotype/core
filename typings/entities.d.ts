@@ -25,6 +25,7 @@ export type MediaListOpts = {
   orderBy?: string;
   mimetype?: string;
   search?: string;
+  unUsed?: boolean;
 };
 
 export type PreviewOpts = {
@@ -170,6 +171,11 @@ export type Record = {
   _id: string;
 } & Data;
 
+export type RevisionRecord = {
+  rev: number;
+  data: Data;
+};
+
 export type Content = DataRecord & {
   type: string;
   author: string;
@@ -198,10 +204,12 @@ export type ContentRefs = {
 export type SearchResultItem = {
   id: string;
   model: string;
+  type?: string;
+  kind?: string;
   title: string;
   description?: string;
   image: string | undefined;
-  url: string;
+  url?: string;
 };
 
 export type Revision = DataRecord & {
@@ -267,17 +275,17 @@ export type WritableDataSource = ReadOnlyDataSource & {
   create(
     principal: Principal,
     model: Model,
-    data: object,
+    data: Data,
     models: Model[]
-  ): Promise<{ id: string; data: object }>;
+  ): Promise<{ id: string; data: Data }>;
   delete(principal: Principal, model: Model, id: string): Promise<void>;
   update(
     principal: Principal,
     model: Model,
     id: string,
-    data: object,
+    data: Data,
     models: Model[]
-  ): Promise<{ id: string; data: object }>;
+  ): Promise<{ id: string; data: Data }>;
 };
 
 export type VersionedDataSource = WritableDataSource & {
@@ -303,9 +311,9 @@ export type VersionedDataSource = WritableDataSource & {
     principal: Principal,
     model: Model,
     id: string,
-    data: object,
+    data: Data,
     models: Model[]
-  ): Promise<number>;
+  ): Promise<RevisionRecord>;
   schedule(
     principal: Principal,
     model: Model,

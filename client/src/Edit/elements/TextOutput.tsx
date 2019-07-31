@@ -12,9 +12,11 @@ export default class TextOutput extends Component<Props> {
   }
 
   render() {
+    // eslint-disable-next-line
     const { value = "", ["data-name"]: dataName } = this.props;
 
     return (
+      // eslint-disable-next-line
       <div data-name={dataName} className={outputClass}>
         {value}
       </div>
