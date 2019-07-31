@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { ContentPersistence } from "..";
-import { RewriteIterator } from "./ContentPersistence";
+import { RewriteDataIterator } from "./ContentPersistence";
 
 export default class MigrationContext {
   content: ContentPersistence;
@@ -9,7 +9,7 @@ export default class MigrationContext {
     this.content = content;
   }
 
-  rewrite(modelName: string, iterator: RewriteIterator) {
+  rewrite(modelName: string, iterator: RewriteDataIterator) {
     return this.content.rewrite(modelName, iterator);
   }
 
