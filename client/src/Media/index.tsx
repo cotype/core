@@ -104,11 +104,13 @@ export default class Media extends Component<Props, State> {
     if (!props.onSelect) {
       this.state.editable = true;
     }
-    if (props.mediaType && props.mediaType !== "all") {
-      this.state.filters = this.state.filters.filter(
-        el => el.value === props.mediaType
+    if (props.mediaType && typeof props.mediaType === 'string' && props.mediaType !== "all") {
+      this.state.filters = this.state.filters.filter(el =>
+        el.value.includes(props.mediaType as string)
       );
-      this.state.fileType = this.state.filters[0].value;
+      if(this.state.filters.length >0){
+        this.state.fileType = this.state.filters[0].value
+      }
     }
   }
 
@@ -253,7 +255,7 @@ export default class Media extends Component<Props, State> {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return Object.entries(nextState).some(([k, v]) =>v !== this.state[k]);
+    return Object.entries(nextState).some(([k, v]) => v !== this.state[k]);
   }
   render() {
     const {
