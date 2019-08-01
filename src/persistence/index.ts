@@ -3,6 +3,7 @@
  * routed through this class and handed over to an adapter.
  * NOTE: Currently there is only an adapter for relational databases.
  * Adding other storage backends like elasticsearch or mongodb is possible.
+ *
  */
 
 import fs from "fs";
