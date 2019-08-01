@@ -121,6 +121,7 @@
     "tslint-react": "^4.0.0",
     "typescript": "^3.5.2",
     "typescript-json-schema": "^0.38.0",
+    "wait-for-expect": "^1.2.0",
     "with-server": "^1.0.0"
   },
   "jest": {

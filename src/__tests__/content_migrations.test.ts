@@ -9,6 +9,7 @@ import FsStorage from "../media/storage/FsStorage";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 import { createApiReadHelpers } from "../content/rest/__tests__/apiHelper";
 import { ModelOpts } from "../../typings";
+import waitForExpect from "wait-for-expect";
 
 const uploadDir = path.join(__dirname, ".uploads");
 
@@ -81,13 +82,17 @@ describe("content migrations", () => {
   it("should have rewritten/added/removed data", async () => {
     const defaultData = { _id: "1", _refs: { content: {}, media: {} } };
 
-    const draftRev = await find(initialModel.name, "1", {}, false);
-    expect(draftRev).toStrictEqual({ ...draftsData, ...defaultData });
+    await waitForExpect(async () => {
+      await expect(await find(initialModel.name, "1", {}, false)).toStrictEqual(
+        { ...draftsData, ...defaultData }
+      );
+    });
 
-    const publishedRev = await find(initialModel.name, "1", {}, true);
-    expect(publishedRev).toStrictEqual({
-      ...publishedData,
-      ...defaultData
+    await waitForExpect(async () => {
+      expect(await find(initialModel.name, "1", {}, true)).toStrictEqual({
+        ...publishedData,
+        ...defaultData
+      });
     });
   });
 });
