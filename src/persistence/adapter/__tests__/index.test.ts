@@ -785,7 +785,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
         await expect(
           await content.loadContentReferences([pageId], pages, models.content)
-        ).toMatchObject([expect.any(Object), expect.any(Object)]);
+        ).toMatchObject([{ id: newsId }]);
       });
 
       it("should not find deleted content references", async () => {
@@ -797,7 +797,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
 
         await expect(
           await content.loadContentReferences([pageId], pages, models.content)
-        ).toMatchObject([expect.any(Object)]);
+        ).toMatchObject([]);
       });
 
       it("should contain inverseReferences", async () => {

@@ -1,7 +1,17 @@
 import * as Cotype from "../../../typings";
 import pick = require("lodash/pick");
-import visit from "./visit";
+import visit from "../../model/visit";
+import { Field } from "../../../typings";
 
+const getModelsFromFieldType = (field: Field): string[] =>
+  (("models" in field && field.models) ||
+    ("model" in field && [field.model]) ||
+    (field.type === "list" && "models" in field.item && field.item.models) ||
+    (field.type === "list" && "model" in field.item && [field.item.model]) ||
+    []) as string[];
+
+// Converts Join with Dots to Array of Joins
+// {news:['ref.slug']}=>[{news:['ref]},{product:['slug']}
 export const getDeepJoins = (
   dp: Cotype.Join = {},
   models: Cotype.Model[]
@@ -15,27 +25,15 @@ export const getDeepJoins = (
     if (!contentModel) {
       return;
     }
-    fields.forEach(f => {
-      const [first, ...deepFields] = f.split(".");
-      if (deepFields.length >= 1) {
-        const topField = contentModel.fields[first];
-        if (
-          topField.type === "content" ||
-          topField.type === "references" ||
-          (topField.type === "list" &&
-            (topField.item.type === "content" ||
-              topField.item.type === "references"))
-        ) {
-          const searchModels = (("models" in topField && topField.models) ||
-            ("model" in topField && [topField.model]) ||
-            (topField.type === "list" &&
-              "models" in topField.item &&
-              topField.item.models) ||
-            (topField.type === "list" &&
-              "model" in topField.item && [topField.item.model]) ||
-            []) as string[];
-          deeperJoins = {
-            ...searchModels.reduce<Cotype.Join>((acc, m) => {
+    const deepJoinParser = (stringPath: string, field: Field) => {
+      const fieldJoins = fields.filter(f => f.startsWith(stringPath));
+      if (fieldJoins.length > 0) {
+        fieldJoins.forEach(fieldJoin => {
+          const [first, ...deepFields] = fieldJoin.split(".");
+          if (deepFields.length >= 1) {
+            const searchModels = getModelsFromFieldType(field);
+
+            deeperJoins = searchModels.reduce<Cotype.Join>((acc, m) => {
               if (m) {
                 if (acc[m]) {
                   acc[m] = [...acc[m], deepFields.join(".")];
@@ -44,13 +42,26 @@ export const getDeepJoins = (
                 }
               }
               return acc;
-            }, deeperJoins)
-          };
-          deeps[joinModel] = fields.filter(fl => fl !== f);
-          if (!deeps[joinModel].includes(first)) {
-            deeps[joinModel].push(first);
+            }, deeperJoins);
+
+            deeps[joinModel] = deeps[joinModel].filter(fl => fl !== fieldJoin);
+
+            if (!deeps[joinModel].includes(first)) {
+              deeps[joinModel].push(first);
+            }
           }
-        }
+        });
+      }
+    };
+    visit({}, contentModel, {
+      content(s, field, d, stringPath) {
+        deepJoinParser(stringPath, field);
+      },
+      references(s: string, field, d, stringPath) {
+        deepJoinParser(stringPath, field);
+      },
+      list(s: string, field, d, stringPath) {
+        deepJoinParser(stringPath, field);
       }
     });
   });
@@ -60,6 +71,8 @@ export const getDeepJoins = (
 
   return [deeps];
 };
+
+// CreateJoin resolve WildCards in Join Models
 export const createJoin = (join: Cotype.Join, models: Cotype.Model[]) => {
   // const joins = Object.keys(join || {});
   const filteredJoins: Cotype.Join = {};
