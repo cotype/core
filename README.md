@@ -59,13 +59,11 @@ init(opts).then(({ app }) => {
 
 ## Options
 
-**\*required**
-
-- #### \*`models: ModelOpts[]`
+- #### `models?: ModelOpts[]`
 
   Describes what content types exist, which fields they have and how they are edited.
 
-- #### \*`persistenceAdapter: Promise<PersistenceAdapter>`
+- #### `persistenceAdapter: Promise<PersistenceAdapter>`
 
   Adapter providing the database connection of the server.
 
@@ -83,7 +81,7 @@ init(opts).then(({ app }) => {
   });
   ```
 
-- #### \*`storage: Storage`
+- #### `storage: Storage`
 
   When files are uploaded, the meta data is stored in the database while the
   binary data is stored using this adapter.
@@ -99,14 +97,14 @@ init(opts).then(({ app }) => {
   });
   ```
 
-- #### \*`thumbnailProvider: ThumbnailProvider`
+- #### `thumbnailProvider: ThumbnailProvider`
 
   Thumbnail creator for uploaded image files.  
   Cotype does not come with a default provider for size-reasons.
 
   Please see [`@cotype/local-thumbnail-provider`](https://github.com/cotype/local-thumbnail-provider) for a straight-forward implementation.
 
-* #### `basePath: string`
+* #### `basePath?: string`
 
   **Default: `/`**
 
@@ -122,7 +120,7 @@ init(opts).then(({ app }) => {
   });
   ```
 
-- #### `sessionOpts: SessionOpts`
+- #### `sessionOpts?: SessionOpts`
 
   The server uses a [cookie-session](https://github.com/expressjs/cookie-session)
   that holds nothing but the user's id.
@@ -134,6 +132,12 @@ init(opts).then(({ app }) => {
   be provided using `sessionOpts.secret` or via the `SESSION_SECRET` env var. If
   omitted, a random string will be generated, which means that sessions will
   become invalid once the server is restarted.
+
+- #### `migrationDir?: string`
+
+  Absolute path to a directory containing content migration scripts. The scripts
+  are read in alphabetic order and executed only once. Each script must export a
+  function that takes exactly one argument: a [MigrationContext](https://github.com/cotype/core/blob/feature/content-migrations/src/persistence/MigrationContext.ts).
 
 ## How it works
 

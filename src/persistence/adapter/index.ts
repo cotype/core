@@ -1,6 +1,18 @@
 import * as Cotype from "../../../typings";
+import { Migration } from "../ContentPersistence";
+import { Data, MetaData } from "../../../typings";
 
-export type SettingsAdapter = {
+type StoreAndSearchData = {
+  storeData: Data;
+  searchData: Data;
+};
+
+export type RewriteIterator = (
+  data: Data,
+  meta: MetaData
+) => Promise<void | StoreAndSearchData>;
+
+export interface SettingsAdapter {
   create(model: Cotype.Model, data: object): Promise<string>;
   load(model: Cotype.Model, id: string): Promise<Cotype.Settings>;
   find(
@@ -17,9 +29,9 @@ export type SettingsAdapter = {
   deleteUser(id: string): Promise<any>;
   findUserByEmail(id: string): Promise<Cotype.Settings>;
   loadUser(id: string): Promise<Cotype.User>;
-};
+}
 
-export type ContentAdapter = {
+export interface ContentAdapter {
   create(
     storeData: Cotype.Data,
     indexData: Cotype.Data,
@@ -86,20 +98,32 @@ export type ContentAdapter = {
     opts: Cotype.ListOpts,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.Content>>;
-};
+  rewrite(
+    model: Cotype.Model,
+    models: Cotype.Model[],
+    iterator: RewriteIterator
+  ): Promise<void>;
+  migrate(
+    migrations: Migration[],
+    callback: (
+      adapter: ContentAdapter,
+      outstanding: Migration[]
+    ) => Promise<void>
+  ): Promise<any>;
+}
 
-export type MediaAdapter = {
+export interface MediaAdapter {
   create(meta: Cotype.Meta): Promise<void>;
   list(opts: Cotype.MediaListOpts): Promise<Cotype.ListChunk<Cotype.Media>>;
   load(id: string[]): Promise<Cotype.Media[]>;
-  findByHash(hash: string[]): Promise<Cotype.Media[]>;
-  update(id: string, data: Cotype.Media): Promise<Cotype.Media>;
-  delete(id: string, models: Cotype.Model[]): Promise<any>;
-};
+  findByHash(hashes: string[]): Promise<Cotype.Media[]>;
+  update(id: string, data: Cotype.Media): Promise<boolean>;
+  delete(id: string, models: Cotype.Model[]): Promise<void>;
+}
 
-export type PersistenceAdapter = {
+export interface PersistenceAdapter {
   settings: SettingsAdapter;
   content: ContentAdapter;
   media: MediaAdapter;
-  shutdown: () => void | Promise<any>;
-};
+  shutdown(): void | Promise<any>;
+}

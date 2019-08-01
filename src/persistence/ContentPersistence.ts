@@ -15,12 +15,23 @@ import getRefUrl from "../content/getRefUrl";
 import convert from "../content/convert";
 import { Config } from ".";
 import { getDeepJoins } from "../content/rest/filterRefData";
-import { ContentFormat } from "../../typings";
+import { ContentFormat, Data, MetaData } from "../../typings";
 import extractMatch from "../model/extractMatch";
 import extractText from "../model/extractText";
 import log from "../log";
 import visit, { NO_STORE_VALUE } from "../model/visit";
 import setPosition from "../model/setPosition";
+import MigrationContext from "./MigrationContext";
+
+export type Migration = {
+  name: string;
+  execute(ctx: MigrationContext): Promise<any>;
+};
+
+export type RewriteDataIterator = (
+  data: Data,
+  meta: MetaData
+) => void | Data | Promise<Data>;
 
 function findValueByPath(path: string | undefined, data: Cotype.Data) {
   if (!path) return;
@@ -167,12 +178,15 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     data = this.setOrderPosition(data, model, models);
     const hookData = await this.applyPreHooks("onCreate", model, data);
 
-    const { storeData, indexData } = await this.prepareData(hookData, model);
+    const { storeData, searchData } = await this.splitStoreAndIndexData(
+      hookData,
+      model
+    );
 
     // NOTE: principal.id will always be set since anonymous access is prevented by ACL.
     const id = await this.adapter.create(
       storeData,
-      indexData,
+      searchData,
       model,
       models,
       principal.id!
@@ -190,11 +204,14 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     data: object,
     models: Cotype.Model[]
   ) {
-    const { storeData, indexData } = await this.prepareData(data, model);
+    const { storeData, searchData } = await this.splitStoreAndIndexData(
+      data,
+      model
+    );
     // NOTE: principal.id will always be set since anonymous access is prevented by ACL.
     const rev = await this.adapter.createRevision(
       storeData,
-      indexData,
+      searchData,
       model,
       models,
       id,
@@ -581,6 +598,33 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     return terms.sort((a, b) => a.length - b.length || a.localeCompare(b));
   }
 
+  rewrite(modelName: string, iterator: RewriteDataIterator) {
+    const model = this.getModel(modelName);
+    if (!model) throw new Error(`No such model: ${modelName}`);
+    return this.adapter.rewrite(
+      model,
+      this.models,
+      async (data: Data, meta: any) => {
+        let rewritten = await iterator(data, meta);
+        if (rewritten) {
+          rewritten = await this.applyPreHooks("onSave", model, rewritten);
+          return this.splitStoreAndIndexData(rewritten, model);
+        }
+        return rewritten;
+      }
+    );
+  }
+
+  migrate(migrations: Migration[]) {
+    this.adapter.migrate(migrations, async (adapter, outstanding) => {
+      const content = new ContentPersistence(adapter, this.models, this.config);
+      const ctx = new MigrationContext(content);
+      for (const m of outstanding) {
+        await m.execute(ctx);
+      }
+    });
+  }
+
   private async setOrderPosition(
     data: Cotype.Data,
     model: Cotype.Model,
@@ -606,7 +650,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     return data;
   }
 
-  private prepareData(data: Cotype.Data, model: Cotype.Model) {
+  private splitStoreAndIndexData(data: Cotype.Data, model: Cotype.Model) {
     const storeData = _cloneDeep(data);
 
     visit(storeData, model, {
@@ -615,6 +659,6 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       }
     });
 
-    return { storeData, indexData: data };
+    return { storeData, searchData: data };
   }
 }

@@ -65,8 +65,8 @@
     "got": "^9.6.0",
     "graphql": "^14.1.1",
     "hasha": "^5.0.0",
-    "http-proxy-middleware": "^0.19.1",
-    "knex": "^0.16.3",
+    "image-size": "^0.7.2",
+    "knex": "^0.19.1",
     "lodash": "^4.17.15",
     "mdi-json": "^1.0.0",
     "mudder": "^1.0.4",
@@ -116,6 +116,7 @@
     "tslint-react": "^4.0.0",
     "typescript": "^3.5.2",
     "typescript-json-schema": "^0.38.0",
+    "wait-for-expect": "^1.2.0",
     "with-server": "^1.0.0"
   },
   "jest": {

@@ -49,7 +49,7 @@ export type Criteria = {
   };
 };
 /**
- * Joins to resolve referenes in contents.
+ * Joins to resolve references in contents.
  */
 export type Join = {
   [field: string]: string[];
@@ -135,14 +135,20 @@ export type Item = {
   orderValue?: string;
 };
 
-export type VersionItem = Item & {
+export type MetaData = {
+  id: string;
   rev: number;
   latest: boolean;
-  published_rev: boolean;
-  latest_rev: number;
-  author_name: string;
-  date: string;
+  published: boolean;
 };
+
+export type VersionItem = Item &
+  MetaData & {
+    latest_rev: number;
+    published_rev: boolean;
+    author_name: string;
+    date: string;
+  };
 
 export type Schedule = {
   visibleFrom?: null | Date;

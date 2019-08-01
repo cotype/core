@@ -1,18 +1,11 @@
 import { Permission } from "../auth/acl";
 const { view, edit, publish } = Permission;
 
-import log from '../log';
+import log from "../log";
 import bcrypt from "bcryptjs";
 import SettingsPersistence from "./SettingsPersistence";
-import ContentPersistence from "./ContentPersistence";
-import { Models } from "../../typings";
-// import ReferenceConflictError from "./ReferenceConflictError";
 
-export default async function(
-  settings: SettingsPersistence,
-  contents: ContentPersistence,
-  models: Models
-) {
+export default async function(settings: SettingsPersistence) {
   const Roles = settings.getModel("roles")!;
   const Users = settings.getModel("users")!;
   const adminRole = await settings.adapter.find(Roles, "name", "admin");
@@ -35,29 +28,4 @@ export default async function(
       password: bcrypt.hashSync("admin", 10)
     });
   }
-  // TODO find a solution for initializing singletons on server startup
-  // const singletonModels = models.content.filter(
-  //   m => m.collection === "singleton"
-  // );
-  // if (singletonModels.length) {
-  //   singletonModels.forEach(async model => {
-  //     const { total } = await contents.adapter.find(model, {});
-  //     if (!total) {
-  //       const id = await contents.adapter.create(
-  //         model,
-  //         {},
-  //         "1",
-  //         models.content
-  //       );
-  //       if (!(id instanceof ReferenceConflictError)) {
-  //         await contents.adapter.setPublishedRev(
-  //           model,
-  //           id as string,
-  //           1,
-  //           models.content
-  //         );
-  //       }
-  //     }
-  //   });
-  // }
 }

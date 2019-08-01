@@ -4,7 +4,7 @@ import * as Cotype from "../../typings";
  */
 import _ from "lodash";
 
-export const NO_STORE_VALUE = "$$__noStore__$$";
+export const NO_STORE_VALUE = Symbol("NoStore");
 
 type Visitor = {
   [key: string]: (
