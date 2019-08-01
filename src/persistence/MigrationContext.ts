@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { ContentPersistence } from "..";
-import { RewriteDataIterator } from "../../typings";
+import { RewriteDataIterator } from "./ContentPersistence";
 
 export default class MigrationContext {
   content: ContentPersistence;
