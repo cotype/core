@@ -52,8 +52,8 @@ export class Persistence {
     const files = fs.readdirSync(dir).sort();
     const migrations = files
       .map(f => {
-        const ext = path.extname(f);
-        if (ext.match(/^\.(js|ts)$/)) {
+        if (f.match(/(?<!\.d)\.(js|ts)$/)) {
+          const ext = path.extname(f);
           const name = path.basename(f, ext);
           return {
             name,
