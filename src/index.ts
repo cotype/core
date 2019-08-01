@@ -49,6 +49,7 @@ import {
 import ContentPersistence from "./persistence/ContentPersistence";
 import Storage from "./media/storage/Storage";
 import logResponseTime from "./responseTimeLogger";
+import MigrationContext from "./persistence/MigrationContext";
 
 type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
 
@@ -66,6 +67,7 @@ export {
   RequestHandler,
   AnonymousPermissions,
   ContentPersistence,
+  MigrationContext,
   log
 };
 
