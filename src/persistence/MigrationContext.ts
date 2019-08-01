@@ -28,6 +28,9 @@ export default class MigrationContext {
     });
   }
 
+  removeField(modelName: string, fieldPath: string) {
+    return this.rewrite(modelName, async data => {
+      _.unset(data, fieldPath);
       return data;
     });
   }
