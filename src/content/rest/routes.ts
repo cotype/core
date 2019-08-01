@@ -16,12 +16,10 @@ import {
 
 import { Router } from "express";
 import { Persistence } from "../../persistence";
-import _pick from "lodash/pick";
-import _cloneDeep from "lodash/cloneDeep";
 import prepareSearchResults from "./prepareSearchResults";
 import filterRefData, { createJoin } from "./filterRefData";
 import { checkPermissions, Permission } from "../../auth/acl";
-import { linkableModelNames, searchableModelNames } from "./utils";
+import { linkableAndSearchableModelNames, searchableModelNames } from "./utils";
 import pickFieldsFromResultData from "./pickFieldsFromResultData";
 
 const modes = ["published", "drafts"];
@@ -36,8 +34,9 @@ export default (
 ) => {
   const { content, media } = persistence;
 
-  const linkableModels = linkableModelNames(models);
+  const linkableModels = linkableAndSearchableModelNames(models);
   const searchableModels = searchableModelNames(models);
+
 
   const getDataSource = (modelName: string): DataSource => {
     return (
