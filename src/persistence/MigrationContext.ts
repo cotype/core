@@ -13,13 +13,20 @@ export default class MigrationContext {
     return this.content.rewrite(modelName, iterator);
   }
 
-  addField(modelName: string, fieldPath: string, defaultValue: any) {
-    this.rewrite(modelName, (data, meta) => {
+  addField(
+    modelName: string,
+    fieldPath: string,
+    defaultValue: RewriteDataIterator | object | any[] | string | number
+  ) {
+    return this.rewrite(modelName, async (data, meta) => {
       const value =
         typeof defaultValue === "function"
           ? defaultValue(data, meta)
           : defaultValue;
       _.set(data, fieldPath, value);
+      return data;
+    });
+  }
 
       return data;
     });
