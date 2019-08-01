@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@cotype/local-thumbnail-provider": "0.0.2",
-    "got": "^9.6.0"
+    "got": "^9.6.0",
+    "http-proxy-middleware": "^0.19.1"
   },
   "devDependencies": {
+    "@types/http-proxy-middleware": "^0.19.2",
     "nodemon": "^1.18.9",
     "ts-node": "^8.1.0"
   }
