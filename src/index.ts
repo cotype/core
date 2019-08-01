@@ -84,6 +84,7 @@ export type Opts = {
   anonymousPermissions?: AnonymousPermissions;
   customSetup?: (app: Express, contentPersistence: ContentPersistence) => void;
   contentHooks?: ContentHooks;
+  migrationDir?: string;
 };
 
 const root = path.resolve(__dirname, "../dist/client");
@@ -106,16 +107,15 @@ export const clientMiddleware = promiseRouter()
       next();
     }
   )
-  .use('/admin', (req, res, next) => {
-      if (
-        (req.method === "GET" || req.method === "HEAD") &&
-        req.accepts("html")
-      ) {
-        const basePath = req.originalUrl.replace(/^(.*\/admin).*/, "$1");
-        res.send(getIndexHtml(basePath));
-      } else next();
-    }
-  );
+  .use("/admin", (req, res, next) => {
+    if (
+      (req.method === "GET" || req.method === "HEAD") &&
+      req.accepts("html")
+    ) {
+      const basePath = req.originalUrl.replace(/^(.*\/admin).*/, "$1");
+      res.send(getIndexHtml(basePath));
+    } else next();
+  });
 
 function addSlash(str: string) {
   return `${str.replace(/\/$/, "")}/`;
@@ -170,7 +170,8 @@ export async function init(opts: Opts) {
 
   const p = await persistence(models, await opts.persistenceAdapter, {
     baseUrls,
-    contentHooks: opts.contentHooks
+    contentHooks: opts.contentHooks,
+    migrationDir: opts.migrationDir
   });
   const auth = Auth(p, opts.anonymousPermissions);
   const content = Content(
