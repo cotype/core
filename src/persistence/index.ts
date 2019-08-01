@@ -59,6 +59,9 @@ export class Persistence {
             name,
             async execute(ctx: MigrationContext) {
               const fn = require(path.join(dir, name));
+              if (typeof fn === "object" && fn.default) {
+                return await fn.default(ctx);
+              }
               await fn(ctx);
             }
           };
