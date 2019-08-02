@@ -1,5 +1,5 @@
 import * as Cotype from "../../../typings";
-import React, { Component } from "react";
+import React, { Component, useMemo } from "react";
 import styled, { css } from "react-emotion";
 import { RenderInfo } from "../common/ScrollList";
 import api from "../api";
@@ -263,13 +263,9 @@ export default class Media extends Component<Props, State> {
   }
   render() {
     const {
-      total,
-      items,
       details,
-      editable,
       conflictingItems,
-      filters,
-      topbarProgress
+      filters
     } = this.state;
     return (
       <Root {...testable("upload-zone")}>
@@ -308,19 +304,25 @@ export default class Media extends Component<Props, State> {
           className={className}
           activeClass={activeClass}
           onUpload={this.onUpload}
-          render={({ progress, onFiles }: any) => {
+          render={({ progress }: any) => {
+            const {
+              total,
+              items,
+              editable,
+              topbarProgress
+            } = this.state;
             const isProgress =
               (progress && progress < 100) ||
               (topbarProgress && topbarProgress < 100);
             const itemCount = isProgress ? total + 1 : total;
             const data = isProgress
               ? [
-                  {
-                    progress:
-                      progress && progress < 100 ? progress : topbarProgress
-                  },
-                  ...items
-                ]
+                {
+                  progress:
+                    progress && progress < 100 ? progress : topbarProgress
+                },
+                ...items
+              ]
               : items;
             return (
               <Main>
