@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, memo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { useUpload } from "react-use-upload";
 import createValidator, { MediaFilter } from "./createValidator";
@@ -70,7 +70,7 @@ export default function UploadZone({
             error,
             files
           }),
-        [render, progress, files]
+        [render, progress, files, onFiles, onUpload, done, response]
       )}
     </div>
   );

@@ -1,5 +1,5 @@
 import * as Cotype from "../../../typings";
-import React, { Component, useMemo } from "react";
+import React, { Component } from "react";
 import styled, { css } from "react-emotion";
 import { RenderInfo } from "../common/ScrollList";
 import api from "../api";
