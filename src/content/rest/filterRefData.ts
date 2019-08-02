@@ -95,10 +95,12 @@ export const createJoin = (join: Cotype.Join, models: Cotype.Model[]) => {
             : joins;
         }
       });
-    } else if (models.find(m => m.name.toLowerCase() === type)) {
-      filteredJoins[type] = filteredJoins[type]
-        ? filteredJoins[type].concat(joins)
-        : joins;
+    } else {
+      const model = models.find(m => m.name.toLowerCase() === type);
+      if (model)
+        filteredJoins[model.name] = filteredJoins[model.name]
+          ? filteredJoins[model.name].concat(joins)
+          : joins;
     }
   });
   return filteredJoins;
@@ -109,7 +111,7 @@ export const filterContentData = (
   join: Cotype.Join
 ) => {
   return {
-    ...pick(content.data, join[content.type.toLowerCase()]),
+    ...pick(content.data, join[content.type]),
     _id: String(content.id),
     _type: content.type
   };

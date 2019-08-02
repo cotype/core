@@ -402,10 +402,7 @@ export default class KnexContent implements ContentAdapter {
       });
 
     if (types) {
-      refs.whereIn(
-        "c.type",
-        types.map(m => m[0].toLowerCase() + m.substring(1))
-      );
+      refs.whereIn("c.type", types);
     }
     return refs;
   }
@@ -425,10 +422,7 @@ export default class KnexContent implements ContentAdapter {
       });
 
     if (types) {
-      refs.whereIn(
-        "c.type",
-        types.map(m => m[0].toLowerCase() + m.substring(1))
-      );
+      refs.whereIn("c.type", types);
     }
     return refs;
   }
