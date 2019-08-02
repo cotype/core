@@ -70,7 +70,7 @@ export default function UploadZone({
             error,
             files
           }),
-        [render, progress, files, onFiles, onUpload, done, response]
+        [render, progress, files, onFiles, onUpload, done, response, error]
       )}
     </div>
   );
