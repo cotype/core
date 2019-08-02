@@ -7,7 +7,8 @@ import {
   ThumbnailProvider,
   BaseUrls,
   ContentHooks,
-  ResponseHeaders
+  ResponseHeaders,
+  ExternalDataSource
 } from "../typings";
 import express, {
   Request,
@@ -42,10 +43,6 @@ import apiBuilder from "./api/apiBuilder";
 import swaggerUi from "./api/swaggerUi";
 import HttpError from "./HttpError";
 import { PersistenceAdapter } from "./persistence/adapter";
-import {
-  provide as provideExternalDataSourceHelper,
-  ExternalDataSourceWithOptionalHelper
-} from "./externalDataSourceHelper";
 import ContentPersistence from "./persistence/ContentPersistence";
 import Storage from "./media/storage/Storage";
 import logResponseTime from "./responseTimeLogger";
@@ -62,7 +59,6 @@ export * from "./utils";
 export {
   PersistenceAdapter,
   Storage,
-  ExternalDataSourceWithOptionalHelper,
   SessionOpts,
   RequestHandler,
   AnonymousPermissions,
@@ -78,7 +74,7 @@ export type Opts = {
   baseUrls?: Partial<BaseUrls>;
   basePath?: string;
   persistenceAdapter: Promise<PersistenceAdapter>;
-  externalDataSources?: ExternalDataSourceWithOptionalHelper[];
+  externalDataSources?: ExternalDataSource[];
   sessionOpts?: SessionOpts;
   responseHeader?: ResponseHeaders;
   thumbnailProvider: ThumbnailProvider;
@@ -142,15 +138,8 @@ function getUrls(opts: Pick<Opts, "basePath" | "baseUrls">) {
   };
 }
 
-function getModels(
-  opts: Pick<Opts, "externalDataSources" | "models">,
-  baseUrls: BaseUrls
-) {
-  const externalDataSources = provideExternalDataSourceHelper(
-    opts.externalDataSources,
-    { baseUrls }
-  ).map(withAuth);
-
+function getModels(opts: Pick<Opts, "externalDataSources" | "models">) {
+  const externalDataSources = (opts.externalDataSources || []).map(withAuth);
   return {
     models: buildModels(opts.models, externalDataSources),
     externalDataSources
@@ -161,14 +150,14 @@ export async function getRestApiBuilder(
   opts: Pick<Opts, "models" | "basePath" | "baseUrls" | "externalDataSources">
 ) {
   const { baseUrls } = getUrls(opts);
-  const { models } = getModels(opts, baseUrls);
+  const { models } = getModels(opts);
 
   return createRestApiBuilder(models, baseUrls);
 }
 
 export async function init(opts: Opts) {
   const { baseUrls, basePath } = getUrls(opts);
-  const { models, externalDataSources } = getModels(opts, baseUrls);
+  const { models, externalDataSources } = getModels(opts);
 
   const p = await persistence(models, await opts.persistenceAdapter, {
     baseUrls,
