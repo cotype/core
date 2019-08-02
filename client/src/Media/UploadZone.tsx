@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, memo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { useUpload } from "react-use-upload";
 import createValidator, { MediaFilter } from "./createValidator";
@@ -27,7 +27,6 @@ export default function UploadZone({
   mediaType,
   mediaFilter
 }: Props) {
-  const Render = useMemo(() => memo(props => render(props)), [render]);
   const validator = useMemo(() => createValidator(mediaType, mediaFilter), [
     mediaType,
     mediaFilter
@@ -61,16 +60,14 @@ export default function UploadZone({
       className={`${className} ${isDragActive ? activeClass : ""}`}
     >
       <input {...getInputProps()} />
-      <Render
-        {...{
+      {render({...{
           ...response,
           complete: done,
           onFiles,
           progress,
           error,
           files
-        }}
-      />
+        }})}
     </div>
   );
 }
