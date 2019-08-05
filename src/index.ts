@@ -134,11 +134,13 @@ export const clientMiddleware = process.env.DEVCLIENT // Use Proxy to Dev Server
   ? [
       proxyMiddleware("/static", {
         target: `http://localhost:4001`,
-        logLevel:'error'
+        logLevel: "error",
+        changeOrigin: true
       }),
       proxyMiddleware("/admin", {
         target: `http://localhost:4001`,
-        logLevel:'error'
+        logLevel: "error",
+        changeOrigin: true
       })
     ]
   : promiseRouter()
