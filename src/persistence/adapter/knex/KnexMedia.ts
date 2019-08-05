@@ -47,27 +47,29 @@ export default class KnexMedia implements MediaAdapter {
       }
     }
 
-    if(unUsed){
-      q.leftJoin('content_references',(join)=>{
-        join.on("media.id", "content_references.media");
-      })
-      q.leftJoin('contents',(join)=>{
-        join.on("content_references.id", "contents.id");
-        join.andOn((innerjoin)=>{
-          innerjoin.on("content_references.rev","contents.latest_rev")
-          innerjoin.orOn("content_references.rev","contents.published_rev")
+    if (unUsed) {
+      q.whereNotIn("media.id", subquery => {
+        subquery.select("media.id").from("media");
+        subquery.join("content_references", join => {
+          join.on("media.id", "content_references.media");
         });
-      })
-      q.whereNull('contents.id')
+        subquery.join("contents", join => {
+          join.on("contents.id", "content_references.id");
+          join.on(j => {
+            j.on("contents.latest_rev", "=", "content_references.rev");
+            j.orOn("contents.published_rev", "=", "content_references.rev");
+          });
+        });
+      });
     }
-
     const [count] = await q.clone().countDistinct("media.id as total");
     const items = await q
-      .distinct('media.*')
+      .distinct("media.*")
       .offset(Number(offset || 0))
       .limit(Number(limit || 50))
       .orderBy(orderBy || "created_at", order || "desc");
 
+    console.log(q.toQuery());
     return {
       total: Number(count.total),
       items: items.map((i: any) => ({ ...i, tags: JSON.parse(i.tags) }))
