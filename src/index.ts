@@ -5,7 +5,6 @@ import {
   ModelOpts,
   NavigationOpts,
   ThumbnailProvider,
-  BaseUrls,
   ContentHooks,
   ResponseHeaders,
   ExternalDataSource
@@ -19,7 +18,7 @@ import express, {
 } from "express";
 import promiseRouter from "express-promise-router";
 import * as path from "path";
-import { resolve as resolveUrl } from "url";
+import urlJoin from "url-join";
 import * as fs from "fs-extra";
 import log from "./log";
 import session from "./session";
@@ -29,7 +28,7 @@ import filterModels, { createModelFilter } from "./model/filterModels";
 
 import { buildInfo } from "./model/navigationBuilder";
 
-import persistence from "./persistence";
+import createPersistence from "./persistence";
 
 import icons from "./icons";
 
@@ -71,12 +70,12 @@ export type Opts = {
   models: ModelOpts[];
   navigation?: NavigationOpts[];
   storage: Storage;
-  baseUrls?: Partial<BaseUrls>;
   basePath?: string;
+  mediaUrl?: string;
   persistenceAdapter: Promise<PersistenceAdapter>;
   externalDataSources?: ExternalDataSource[];
   sessionOpts?: SessionOpts;
-  responseHeader?: ResponseHeaders;
+  responseHeaders?: ResponseHeaders;
   thumbnailProvider: ThumbnailProvider;
   clientMiddleware?: RequestHandler | RequestHandler[];
   anonymousPermissions?: AnonymousPermissions;
@@ -115,29 +114,6 @@ export const clientMiddleware = promiseRouter()
     } else next();
   });
 
-function addSlash(str: string) {
-  return `${str.replace(/\/$/, "")}/`;
-}
-
-function getUrls(opts: Pick<Opts, "basePath" | "baseUrls">) {
-  const basePath = (opts.basePath || "").replace(
-    new RegExp(path.posix.sep, "g"),
-    "/"
-  );
-  const baseUrls = {
-    cms: basePath,
-    ...(opts.baseUrls || {})
-  };
-
-  return {
-    basePath: addSlash(basePath),
-    baseUrls: {
-      ...baseUrls,
-      cms: addSlash(baseUrls.cms)
-    }
-  };
-}
-
 function getModels(opts: Pick<Opts, "externalDataSources" | "models">) {
   const externalDataSources = (opts.externalDataSources || []).map(withAuth);
   return {
@@ -147,33 +123,47 @@ function getModels(opts: Pick<Opts, "externalDataSources" | "models">) {
 }
 
 export async function getRestApiBuilder(
-  opts: Pick<Opts, "models" | "basePath" | "baseUrls" | "externalDataSources">
+  opts: Pick<Opts, "models" | "basePath" | "externalDataSources">
 ) {
-  const { baseUrls } = getUrls(opts);
+  const { basePath = "" } = opts;
   const { models } = getModels(opts);
 
-  return createRestApiBuilder(models, baseUrls);
+  return createRestApiBuilder(models, basePath);
 }
 
 export async function init(opts: Opts) {
-  const { baseUrls, basePath } = getUrls(opts);
   const { models, externalDataSources } = getModels(opts);
+  const {
+    basePath = "",
+    mediaUrl = "/media",
+    storage,
+    thumbnailProvider,
+    responseHeaders,
+    contentHooks,
+    migrationDir
+  } = opts;
 
-  const p = await persistence(models, await opts.persistenceAdapter, {
-    baseUrls,
-    contentHooks: opts.contentHooks,
-    migrationDir: opts.migrationDir
-  });
-  const auth = Auth(p, opts.anonymousPermissions);
-  const content = Content(
-    p,
+  const persistence = await createPersistence(
+    models,
+    await opts.persistenceAdapter,
+    {
+      basePath,
+      mediaUrl,
+      contentHooks,
+      migrationDir
+    }
+  );
+  const auth = Auth(persistence, opts.anonymousPermissions);
+  const content = Content({
+    persistence,
     models,
     externalDataSources,
-    baseUrls,
-    opts.responseHeader
-  );
-  const settings = Settings(p, models);
-  const media = Media(p, models, opts.storage, opts.thumbnailProvider);
+    basePath,
+    mediaUrl,
+    responseHeaders
+  });
+  const settings = Settings(persistence, models);
+  const media = Media(persistence, models, storage, thumbnailProvider);
 
   const app = express();
 
@@ -209,7 +199,10 @@ export async function init(opts: Opts) {
     res.json({
       ...filteredInfo,
       models: filteredModels,
-      baseUrls,
+      baseUrls: {
+        media: mediaUrl,
+        cms: basePath
+      },
       user: req.principal
     });
   });
@@ -218,6 +211,7 @@ export async function init(opts: Opts) {
     const filteredModels = filterModels(models, req.principal);
     res.json(filteredModels.content.map(m => m.name));
   });
+
   router.get("/admin/rest/info/settings", (req, res) => {
     const filteredModels = filterModels(models, req.principal);
     res.json(filteredModels.settings.map(m => m.name));
@@ -235,12 +229,12 @@ export async function init(opts: Opts) {
   router.use(
     "/admin/rest/docs",
     swaggerUi(
-      resolveUrl(baseUrls.cms, "admin/rest/docs/"),
-      resolveUrl(baseUrls.cms, "admin/rest/swagger.json")
+      urlJoin(basePath, "admin/rest/docs/"),
+      urlJoin(basePath, "admin/rest/swagger.json")
     )
   );
   router.get("/admin/rest", (req, res) =>
-    res.redirect(resolveUrl(baseUrls.cms, "admin/rest/docs"))
+    res.redirect(urlJoin(basePath, "admin/rest/docs"))
   );
 
   content.routes(router);
@@ -248,12 +242,10 @@ export async function init(opts: Opts) {
   router.use(opts.clientMiddleware || clientMiddleware);
 
   if (opts.customSetup) {
-    opts.customSetup(app, p.content);
+    opts.customSetup(app, persistence.content);
   }
 
-  app.get(basePath, (_, res) =>
-    res.redirect(resolveUrl(baseUrls.cms, "admin"))
-  );
+  app.get(basePath, (_, res) => res.redirect(urlJoin(basePath, "admin")));
 
   app.use((err: Error, req: Request, res: Response, _: () => void) => {
     if (err instanceof HttpError) {
@@ -266,5 +258,5 @@ export async function init(opts: Opts) {
     return;
   });
 
-  return { app, persistence: p };
+  return { app, persistence };
 }

@@ -4,7 +4,6 @@ import {
   Model,
   DataSource,
   ExternalDataSource,
-  BaseUrls,
   Principal,
   Join,
   ListOpts,
@@ -24,19 +23,18 @@ import pickFieldsFromResultData from "./pickFieldsFromResultData";
 
 const modes = ["published", "drafts"];
 
-export default (
+export default function routes(
   router: Router,
   persistence: Persistence,
   models: Model[],
   externalDataSources: ExternalDataSource[],
-  baseUrls: BaseUrls,
-  responseHeader?: ResponseHeaders["rest"]
-) => {
+  mediaUrl: string,
+  responseHeaders?: ResponseHeaders
+) {
   const { content, media } = persistence;
-
+  const headers = responseHeaders && responseHeaders.rest;
   const linkableModels = linkableAndSearchableModelNames(models);
   const searchableModels = searchableModelNames(models);
-
 
   const getDataSource = (modelName: string): DataSource => {
     return (
@@ -89,8 +87,8 @@ export default (
     router.use(`/rest/${mode}`, (req, res, next) => {
       if (mode === "drafts") {
         res.setHeader("Cache-Control", "private");
-        if (responseHeader && responseHeader.drafts) {
-          Object.entries(responseHeader.drafts).forEach(([key, value]) =>
+        if (headers && headers.drafts) {
+          Object.entries(headers.drafts).forEach(([key, value]) =>
             res.setHeader(key, value)
           );
         }
@@ -102,8 +100,8 @@ export default (
         }
       } else {
         res.setHeader("Cache-Control", "public, max-age=300");
-        if (responseHeader && responseHeader.published) {
-          Object.entries(responseHeader.published).forEach(([key, value]) =>
+        if (headers && headers.published) {
+          Object.entries(headers.published).forEach(([key, value]) =>
             res.setHeader(key, value)
           );
         }
@@ -141,7 +139,7 @@ export default (
         req.previewOpts
       );
 
-      const preparedResults = prepareSearchResults(results, models, baseUrls);
+      const preparedResults = prepareSearchResults(results, models, mediaUrl);
 
       const imageData = await media.load(principal, preparedResults.mediaIds);
 
@@ -341,4 +339,4 @@ export default (
       }
     });
   });
-};
+}

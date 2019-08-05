@@ -12,12 +12,17 @@ import ReferenceConflictError from "../persistence/errors/ReferenceConflictError
 import UniqueFieldError from "../persistence/errors/UniqueFieldError";
 import ContentEventError from "../persistence/errors/ContentEventError";
 import { linkableModelNames } from "./rest/utils";
+import { Models, ExternalDataSource } from "../../typings";
+
+type Opts = {
+  persistence: Persistence;
+  models: Models;
+  externalDataSources: ExternalDataSource[];
+};
 
 export default (
   router: Router,
-  persistence: Persistence,
-  models: Cotype.Models,
-  externalDataSources: Cotype.ExternalDataSource[]
+  { persistence, models, externalDataSources }: Opts
 ) => {
   const { content } = persistence;
   // all models that have their own page

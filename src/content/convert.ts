@@ -1,12 +1,12 @@
 import {
   Model,
   QuillDelta,
-  BaseUrls,
   Data,
   ContentRefs,
   PreviewOpts,
   ContentFormat
 } from "../../typings";
+import urlJoin from "url-join";
 import visit from "../model/visit";
 import formatQuillDelta from "./formatQuillDelta";
 import getRefUrl from "./getRefUrl";
@@ -14,9 +14,6 @@ import getRefUrl from "./getRefUrl";
 /**
  * Converts a content from its internal representation to a format
  * requested by the client.
- *
- * NOTE: Currently `richtext` is the only type that gets converted.
- * This could also be a good place to convert `media` ids to full URLs.
  */
 
 type ConvertProps = {
@@ -25,7 +22,7 @@ type ConvertProps = {
   contentModel: Model;
   allModels: Model[];
   contentFormat: ContentFormat;
-  baseUrls?: BaseUrls;
+  mediaUrl: string;
   previewOpts?: PreviewOpts;
 };
 export default function convert({
@@ -34,7 +31,7 @@ export default function convert({
   contentModel,
   allModels,
   contentFormat = "html",
-  baseUrls,
+  mediaUrl,
   previewOpts = {}
 }: ConvertProps) {
   visit(content, contentModel, {
@@ -66,9 +63,7 @@ export default function convert({
                 el.attributes.link
               );
               if (mediaMatch) {
-                el.attributes.link =
-                  (baseUrls && baseUrls.media ? baseUrls.media : "/media/") +
-                  mediaMatch[1];
+                el.attributes.link = urlJoin(mediaUrl, mediaMatch[1]);
               }
             }
           }
@@ -122,8 +117,10 @@ export default function convert({
         if (!refModel || !refModel.urlPath) return convertedRef;
 
         const allRefData = contentRefs[ref.model][ref.id];
-        const url = getRefUrl((allRefData || {}).data, refModel.urlPath);
-        convertedRef._url = url;
+        convertedRef._url = getRefUrl(
+          (allRefData || {}).data,
+          refModel.urlPath
+        );
 
         return convertedRef;
       }
@@ -133,9 +130,7 @@ export default function convert({
         return {
           _id: media,
           _ref: "media",
-          _src: `${
-            baseUrls && baseUrls.media ? baseUrls.media : "/media/"
-          }${media}`
+          _src: urlJoin(mediaUrl, media)
         };
     },
     union(
