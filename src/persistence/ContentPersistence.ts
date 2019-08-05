@@ -15,7 +15,14 @@ import getRefUrl from "../content/getRefUrl";
 import convert from "../content/convert";
 import { Config } from ".";
 import { getDeepJoins } from "../content/rest/filterRefData";
-import { ContentFormat, Data, MetaData } from "../../typings";
+import {
+  ContentFormat,
+  Data,
+  MetaData,
+  Model,
+  ContentRefs,
+  Content
+} from "../../typings";
 import extractMatch from "../model/extractMatch";
 import extractText from "../model/extractText";
 import log from "../log";
@@ -244,33 +251,44 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       previewOpts.publishedOnly
     );
 
-    // sort and and convert loaded content into type categories
-    const sortedContentRefs: { [key: string]: any } = {};
+    // sort content into type categories
+    const sortedContentRefs: ContentRefs = {};
 
-    contentRefs.forEach(c => {
+    contentRefs.forEach(({ data, ...ref }) => {
       // ignore unknown content
-      const contentModel = this.getModel(c.type);
+      const contentModel = this.getModel(ref.type);
       if (!contentModel) return;
 
-      if (!sortedContentRefs[c.type]) {
-        sortedContentRefs[c.type] = {};
+      if (!sortedContentRefs[ref.type]) {
+        sortedContentRefs[ref.type] = {};
       }
 
-      // convert referenced data
-      const data = convert({
-        content: removeDeprecatedData(c.data, contentModel),
-        contentModel,
-        contentFormat,
-        allModels: this.models,
-        baseUrls: this.config.baseUrls,
-        previewOpts
-      });
-
-      sortedContentRefs[c.type][c.id] = {
-        ...c,
+      sortedContentRefs[ref.type][ref.id] = {
+        ...ref,
         data
-      };
+      } as Content;
     });
+
+    // convert sorted references
+    // we need to separate the sorting step from the converting step
+    // because we need the whole refs object to convert correctly (urls)
+    Object.values(sortedContentRefs).forEach(category =>
+      Object.values(category).forEach(entry => {
+        const contentModel = this.getModel(entry.type) as Model;
+        return {
+          ...entry,
+          data: convert({
+            content: removeDeprecatedData(entry.data, contentModel),
+            contentModel,
+            contentRefs: sortedContentRefs,
+            contentFormat,
+            allModels: this.models,
+            baseUrls: this.config.baseUrls,
+            previewOpts
+          })
+        };
+      })
+    );
 
     // assign media refs to an object with it's ids as keys
     const media: Cotype.MediaRefs = {};

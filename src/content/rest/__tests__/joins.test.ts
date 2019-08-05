@@ -97,7 +97,12 @@ describe("joins", () => {
             [b.id]: {
               _id: b.id,
               _type: modelB.name,
-              refC: { _content: modelC.name, _id: c.id, _ref: "content" }
+              refC: {
+                _content: modelC.name,
+                _id: c.id,
+                _ref: "content",
+                _url: `/path/to/${c.data.title}`
+              }
             }
           },
           C: {
@@ -145,5 +150,34 @@ describe("joins", () => {
     );
 
     await expect(resp).toStrictEqual(expectedResponse);
+  });
+
+  it("should join refs with urls when model is containing an urlPath", async () => {
+    const resp = await find(
+      modelA.name,
+      a.id,
+      { join: { B: ["refC"] } },
+      false
+    );
+
+    await expect(resp).toMatchObject({
+      _refs: {
+        content: {
+          B: {
+            [b.id]: {
+              _id: b.id,
+              _type: modelB.name,
+              refC: {
+                _content: modelC.name,
+                _id: c.id,
+                _ref: "content",
+                _url: `/path/to/${c.data.title}`
+              }
+            }
+          }
+        },
+        media: {}
+      }
+    });
   });
 });
