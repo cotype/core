@@ -50,6 +50,8 @@ import ContentPersistence from "./persistence/ContentPersistence";
 import Storage from "./media/storage/Storage";
 import logResponseTime from "./responseTimeLogger";
 import MigrationContext from "./persistence/MigrationContext";
+import proxyMiddleware from "http-proxy-middleware";
+import { spawn } from "child_process";
 
 type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
 
@@ -96,28 +98,71 @@ function getIndexHtml(basePath: string) {
   if (!index) index = fs.readFileSync(path.join(root, "index.html"), "utf8");
   return index.replace(/"src\./g, `"${basePath}/static/src.`);
 }
-export const clientMiddleware = promiseRouter()
-  .use(
-    "/admin",
-    express.static(root, {
-      maxAge: "1y", // cache all static resources for a year ...
-      immutable: true, // which is fine, as all resource URLs contain a hash
-      index: false // index.html will be served by the fallback middleware
-    }),
-    (_: Request, res: Response, next: NextFunction) => {
-      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-      next();
-    }
-  )
-  .use("/admin", (req, res, next) => {
-    if (
-      (req.method === "GET" || req.method === "HEAD") &&
-      req.accepts("html")
-    ) {
-      const basePath = req.originalUrl.replace(/^(.*\/admin).*/, "$1");
-      res.send(getIndexHtml(basePath));
-    } else next();
+
+const startDevServer = () => {
+  process.stdout.write("Starting development server...\n");
+  const child = spawn(`npm run watch`, [], {
+    cwd: path.resolve(__dirname, "../client/"),
+    shell: true
   });
+  child.stdout.on("data", (data: Buffer) => {
+    const string = data.toString();
+    if (string.includes("Compiled successfully!")) {
+      process.stdout.write("Development server updated!\n");
+    }
+    if (string.includes("Compiling...\n")) {
+      process.stdout.write("Development server compiling...\n");
+    }
+    if (
+      string.includes("Failed to compile.") ||
+      string.includes("TypeScript error")
+    ) {
+      process.stderr.write(data);
+    }
+  });
+  child.stderr.on("data", data => {
+    process.stderr.write(data);
+  });
+  child.on("exit", data => {
+    process.stdout.write("Stopping development server!");
+    process.kill(1);
+  });
+  process.on("beforeExit", code => child.kill());
+};
+
+export const clientMiddleware = process.env.DEVCLIENT //Use Proxy to Dev Server
+  ? [
+      proxyMiddleware("/static", {
+        target: `http://localhost:4001`,
+        logLevel:'error'
+      }),
+      proxyMiddleware("/admin", {
+        target: `http://localhost:4001`,
+        logLevel:'error'
+      })
+    ]
+  : promiseRouter()
+      .use(
+        "/admin",
+        express.static(root, {
+          maxAge: "1y", // cache all static resources for a year ...
+          immutable: true, // which is fine, as all resource URLs contain a hash
+          index: false // index.html will be served by the fallback middleware
+        }),
+        (_: Request, res: Response, next: NextFunction) => {
+          res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+          next();
+        }
+      )
+      .use("/admin", (req, res, next) => {
+        if (
+          (req.method === "GET" || req.method === "HEAD") &&
+          req.accepts("html")
+        ) {
+          const basePath = req.originalUrl.replace(/^(.*\/admin).*/, "$1");
+          res.send(getIndexHtml(basePath));
+        } else next();
+      });
 
 function addSlash(str: string) {
   return `${str.replace(/\/$/, "")}/`;
@@ -255,6 +300,10 @@ export async function init(opts: Opts) {
   );
 
   content.routes(router);
+
+  if (process.env.DEVCLIENT) {
+    startDevServer();
+  }
 
   router.use(opts.clientMiddleware || clientMiddleware);
 

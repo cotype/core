@@ -4,12 +4,10 @@ import {
   knexAdapter,
   Opts,
   FsStorage,
-  clientMiddleware as prodClientMiddleware
 } from "../../src";
 import * as path from "path";
 import { models } from "../models";
 import { navigation } from "../navigation.json";
-import devClientMiddleware from "./devClientMiddleware";
 import { Express } from "express";
 import ContentPersistence from "../../src/persistence/ContentPersistence";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
@@ -79,16 +77,6 @@ const defaultConfig: Opts = {
   }
 };
 
-function getClientMiddleware({ clientMiddleware, basePath }: Partial<Opts>) {
-  if (clientMiddleware) {
-    return clientMiddleware;
-  }
-  return process.env.NODE_ENV === "production" ||
-    process.env.CLIENT_MIDDLEWARE === "production"
-    ? [prodClientMiddleware]
-    : devClientMiddleware(basePath);
-}
-
 export default async function app(customConfig?: Partial<Opts>) {
   const preConfig = {
     ...defaultConfig,
@@ -96,8 +84,7 @@ export default async function app(customConfig?: Partial<Opts>) {
   };
 
   const config = {
-    ...preConfig,
-    clientMiddleware: getClientMiddleware(preConfig)
+    ...preConfig
   };
 
   return {
