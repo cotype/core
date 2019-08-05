@@ -130,7 +130,7 @@ const startDevServer = () => {
   process.on("beforeExit", code => child.kill());
 };
 
-export const clientMiddleware = process.env.DEVCLIENT //Use Proxy to Dev Server
+export const clientMiddleware = process.env.DEVCLIENT // Use Proxy to Dev Server
   ? [
       proxyMiddleware("/static", {
         target: `http://localhost:4001`,
