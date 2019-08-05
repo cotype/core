@@ -68,7 +68,12 @@ export default class Gallery extends Component<Props> {
         (mediaFilter.maxHeight && mediaFilter.maxHeight < media.height) ||
         (mediaFilter.minHeight && mediaFilter.minHeight > media.height));
     return (
-      <CellMeasurer cache={this.cache} index={index} key={media.id} parent={parent}>
+      <CellMeasurer
+        cache={this.cache}
+        index={index}
+        key={media.id}
+        parent={parent}
+      >
         <Image
           style={style}
           {...media}

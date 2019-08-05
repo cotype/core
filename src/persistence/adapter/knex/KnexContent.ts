@@ -745,7 +745,7 @@ export default class KnexContent implements ContentAdapter {
     if (contents.length > 0) {
       // TODO action delete/unpublish/schedule
       const err = new ReferenceConflictError({ type: "content" });
-      err.refs = contents.map(c => this.parseData(c));
+      err.refs = contents.map((c:any) => this.parseData(c));
       throw err;
     }
   }
@@ -888,7 +888,7 @@ export default class KnexContent implements ContentAdapter {
 
     return {
       total,
-      items: items.map(i => this.parseData(i))
+      items: items.map((i:any) => this.parseData(i))
     };
   }
 
@@ -910,7 +910,7 @@ export default class KnexContent implements ContentAdapter {
       .where("content_references.media", "=", media)
       .andWhere("contents.deleted", false);
 
-    return contents.map(c => this.parseData(c));
+    return contents.map((c:any) => this.parseData(c));
   }
 
   async list(
@@ -1297,7 +1297,7 @@ export default class KnexContent implements ContentAdapter {
       state: "applied"
     });
     const outstanding = migrations.filter(
-      m => !applied.some(a => a.name === m.name)
+      m => !applied.some((a:any) => a.name === m.name)
     );
 
     if (!outstanding.length) {
@@ -1311,7 +1311,7 @@ export default class KnexContent implements ContentAdapter {
       await this.knex("content_migrations").insert(
         names.map(name => ({ name, state: "pending" }))
       );
-      const tx = await this.knex.transaction();
+      const tx = await (this.knex as any).transaction(); // TODO: Fix Line
       try {
         await callback(new KnexContent(tx), outstanding);
         await tx.commit();
