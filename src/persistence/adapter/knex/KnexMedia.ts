@@ -69,7 +69,6 @@ export default class KnexMedia implements MediaAdapter {
       .limit(Number(limit || 50))
       .orderBy(orderBy || "created_at", order || "desc");
 
-    console.log(q.toQuery());
     return {
       total: Number(count.total),
       items: items.map((i: any) => ({ ...i, tags: JSON.parse(i.tags) }))
