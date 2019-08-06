@@ -21,7 +21,8 @@ import {
   MetaData,
   Model,
   ContentRefs,
-  Content
+  Content,
+  Principal
 } from "../../typings";
 import extractMatch from "../model/extractMatch";
 import extractText from "../model/extractText";
@@ -408,7 +409,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     id: string,
     schedule: Cotype.Schedule
   ): Promise<void> {
-    await this.adapter.schedule(model, id, schedule);
+    await this.adapter
+      .schedule(model, id, schedule)
+      .catch(err => this.processReferenceConflictError(principal, err));
     const content = await this.adapter.load(model, id);
     if (content) {
       this.applyPostHooks("onSchedule", model, content);
@@ -422,39 +425,29 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     rev: number,
     models: Cotype.Model[]
   ): Promise<void> {
-    try {
-      const resp = await this.adapter.setPublishedRev(model, id, rev, models);
-      const content = await this.adapter.load(model, id);
-      if (content) {
-        this.applyPostHooks(
-          rev !== null ? "onPublish" : "onUnpublish",
-          model,
-          content
-        );
-      }
-      return resp;
-    } catch (err) {
-      if (err instanceof ReferenceConflictError && err.refs) {
-        err.refs = this.createItems(err.refs as any, principal);
-        throw err;
-      }
+    const resp = await this.adapter
+      .setPublishedRev(model, id, rev, models)
+      .catch(err => this.processReferenceConflictError(principal, err));
+    const content = await this.adapter.load(model, id);
+    if (content) {
+      this.applyPostHooks(
+        rev !== null ? "onPublish" : "onUnpublish",
+        model,
+        content
+      );
     }
+    return resp;
   }
 
   async delete(principal: Cotype.Principal, model: Cotype.Model, id: string) {
-    try {
-      const content = await this.adapter.load(model, id);
-      const resp = await this.adapter.delete(model, id);
-      if (content) {
-        this.applyPostHooks("onDelete", model, content);
-      }
-      return resp;
-    } catch (err) {
-      if (err instanceof ReferenceConflictError && err.refs) {
-        err.refs = this.createItems(err.refs as any, principal);
-        throw err;
-      }
+    const content = await this.adapter.load(model, id);
+    const resp = await this.adapter
+      .delete(model, id)
+      .catch(err => this.processReferenceConflictError(principal, err));
+    if (content) {
+      this.applyPostHooks("onDelete", model, content);
     }
+    return resp;
   }
 
   async list(
@@ -642,6 +635,13 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       }
     });
   }
+
+  private processReferenceConflictError = (principal: Principal, err: any) => {
+    if (err instanceof ReferenceConflictError && err.refs) {
+      err.refs = this.createItems(err.refs as any, principal);
+      throw err;
+    }
+  };
 
   private async setOrderPosition(
     data: Cotype.Data,

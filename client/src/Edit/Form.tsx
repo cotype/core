@@ -247,8 +247,9 @@ class Form extends Component<Props, State> {
                   schedule={this.state.schedule}
                   onClose={() => this.setState({ modal: null })}
                   onSchedule={schedule => {
-                    api.schedule(model, id, schedule);
-                    this.setState({ modal: null, schedule });
+                    return api.schedule(model, id, schedule).then(() => {
+                      this.setState({ modal: null, schedule });
+                    });
                   }}
                 />
               )}

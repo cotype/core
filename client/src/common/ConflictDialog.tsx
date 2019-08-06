@@ -11,6 +11,11 @@ const defaultValues = {
     description:
       "The content you're trying to publish contains references to other unpublished content. Please publish following content: "
   },
+  schedule: {
+    title: "Content in use",
+    description:
+      "The content you're trying to schedule is required by other content. Please remove all references to this content from following contents in order to proceed the scheduling: "
+  },
   unpublish: {
     title: "Content in use",
     description:
@@ -50,7 +55,7 @@ type Props = {
   items: VersionItem[];
   title?: string;
   description?: string;
-  type: "publish" | "unpublish" | "delete" | "media";
+  type: "publish" | "unpublish" | "delete" | "media" | "schedule";
 };
 
 export default class ConflictDialog extends Component<Props> {
