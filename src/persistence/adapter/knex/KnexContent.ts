@@ -13,12 +13,13 @@ import UniqueFieldError, {
 } from "../../errors/UniqueFieldError";
 import setPosition from "../../../model/setPosition";
 import getAlwaysUniqueFields from "../../../model/getAlwaysUniqueFields";
-import getPositionFields from "../../../model/getPositionFields";
+import { getPositionFieldsWithValue } from "../../../model/getPositionFields";
 import getInverseReferenceFields from "../../../model/getInverseReferenceFields";
 import log from "../../../log";
 import visitModel from "../../../model/visitModel";
 import { Migration } from "../../ContentPersistence";
 import { Model } from "../../../../typings";
+import visit from "../../../model/visit";
 
 const ops: any = {
   eq: "=",
@@ -199,47 +200,67 @@ export default class KnexContent implements ContentAdapter {
     data: any,
     id: string
   ): Promise<any> {
-    const positionFields = getPositionFields(model);
-    if (positionFields) {
+    const positionFields = getPositionFieldsWithValue(data, model);
+    if (positionFields.length > 0) {
       await Promise.all(
-        positionFields.map(async f => {
-          const criteria: any = {};
-
-          const value = (f.split(".").reduce((obj, key) => {
-            if (obj && obj[key] !== "undefined") {
-              return obj[key];
-            } else {
-              obj[key] = "";
-              return obj[key];
-            }
-          }, data) as unknown) as string;
-          if (value !== undefined) {
-            criteria[`data.${f}`] = { gte: value };
-          }
-
-          const opts = { offset: 0, limit: 3, orderBy: f, order: "asc" };
-          const items = await this.list(model, models, opts, criteria);
-          items.items = items.items.filter(item => item.id === id);
-          let nextPos;
+        positionFields.map(async ({ fieldPath, value }) => {
+          const criteria: any = value
+            ? {
+                [`data.${fieldPath}`]: { gte: value }
+              }
+            : {};
+          const opts = {
+            offset: 0,
+            limit: 3,
+            orderBy: fieldPath,
+            order: value ? "asc" : "desc"
+          };
+          const items = await this.list(model, models, opts, criteria, {
+            ignoreSchedule: true
+          });
           if (items.items[0]) {
-            nextPos = (f
-              .split(".")
-              .reduce(
-                (obj: any, key) =>
-                  obj && obj[key] !== "undefined" ? obj[key] : undefined,
-                items.items[0].data
-              ) as unknown) as string;
-            if (value === nextPos && items.items[1]) {
-              nextPos = (f
-                .split(".")
-                .reduce(
-                  (obj: any, key) =>
-                    obj && obj[key] !== "undefined" ? obj[key] : undefined,
-                  items.items[1].data
-                ) as unknown) as string;
-            }
+            visit(items.items[0].data, model, {
+              position(s: string, f, d, stringPath) {
+                if (stringPath === fieldPath) {
+                  if (!value) {
+                    // No Position Value passed, use end of list
+                    data = setPosition(data, model, s, "z", true, fieldPath);
+                  } else if (
+                    s === value &&
+                    String(items.items[0].id) !== String(id) // Value exists, and is not same document
+                  ) {
+                    if (items.items[1]) {
+                      // get next one and middle it
+                      visit(items.items[0].data, model, {
+                        position(nextPosition: string, g, h, nextStringPath) {
+                          if (nextStringPath === fieldPath) {
+                            data = setPosition(
+                              data,
+                              model,
+                              value,
+                              nextPosition,
+                              true,
+                              fieldPath
+                            );
+                          }
+                        }
+                      });
+                    } else {
+                      // No next one, just middle to end
+                      data = setPosition(
+                        data,
+                        model,
+                        value,
+                        "z",
+                        true,
+                        fieldPath
+                      );
+                    }
+                  }
+                }
+              }
+            });
           }
-          data = setPosition(data, model, value, nextPos, true);
         })
       );
     }

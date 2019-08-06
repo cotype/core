@@ -13,15 +13,18 @@ export default function setPosition(
   model: Cotype.Model,
   lastPos: string = firstMudderCharacter,
   nextPos?: string,
-  forcePositionSet?: boolean
+  forcePositionSet?: boolean,
+  stringPath?: string
 ) {
   visit(obj, model, {
-    position(pos: string) {
-      if (!pos || forcePositionSet) {
-        return middleString(
-          lastPos,
-          nextPos === lastPos ? nextPos + "z" : nextPos
-        );
+    position(pos: string, f, d, path: string) {
+      if ((stringPath && stringPath === path) || !stringPath) {
+        if (!pos || forcePositionSet) {
+          return middleString(
+            lastPos,
+            nextPos === lastPos ? nextPos + "z" : nextPos
+          );
+        }
       }
     }
   });

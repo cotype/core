@@ -12,3 +12,20 @@ const getPositionFields = (model: Cotype.Model): string[] => {
 };
 
 export default getPositionFields;
+
+export const getPositionFieldsWithValue = (
+  data: any,
+  model: Cotype.Model
+): Array<{ fieldPath: string; value: string }> => {
+  const fields: Array<{ fieldPath: string; value: string }> = [];
+  visit(data, model, {
+    position(s: string, f, d, stringPath) {
+      if (stringPath)
+        fields.push({
+          value: s,
+          fieldPath: stringPath
+        });
+    }
+  });
+  return fields;
+};
