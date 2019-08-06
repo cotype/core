@@ -22,7 +22,7 @@
     "build:client": "npm --prefix client run bundle",
     "build:test-client": "export NODE_ENV=test; export REACT_APP_TEST_ENV=test; npm run build:client",
     "watch:client": "npm --prefix client run watch",
-    "dev": "concurrently -n server,client \"NODE_ENV=development npm --prefix demo run dev\" \"npm run watch:client\"",
+    "dev": "npm --prefix demo run dev",
     "prod": "NODE_ENV=production npm --prefix demo start",
     "start": "npm run dev",
     "testserver": "npm --prefix demo run testserver",
@@ -42,16 +42,6 @@
     "@cypress/webpack-preprocessor": "^4.1.0",
     "@slite/quill-delta-markdown": "0.0.8",
     "@testing-library/jest-dom": "^4.0.0",
-    "@types/bcryptjs": "2.4.2",
-    "@types/cookie": "^0.3.2",
-    "@types/cookie-session": "^2.0.36",
-    "@types/fs-extra": "^8.0.0",
-    "@types/got": "^9.6.2",
-    "@types/graphql": "^14.2.3",
-    "@types/lodash": "^4.14.132",
-    "@types/multer": "^1.3.7",
-    "@types/pluralize": "0.0.29",
-    "@types/swagger-ui-dist": "^3.0.0",
     "bcryptjs": "2.4.3",
     "chalk": "2.4.2",
     "change-case": "^3.1.0",
@@ -81,15 +71,27 @@
     "temp-write": "^4.0.0",
     "tempy": "^0.3.0",
     "ts-loader": "^6.0.4",
-    "webpack": "^4.38.0"
+    "webpack": "^4.38.0",
+    "http-proxy-middleware": "latest"
   },
   "devDependencies": {
     "@cotype/local-thumbnail-provider": "0.0.2",
     "@types/faker": "^4.1.5",
-    "@types/jest": "^24.0.11",
+    "@types/jest": "^24.0.17",
     "@types/qs": "^6.5.2",
     "@types/supertest": "^2.0.7",
     "@types/tough-cookie": "^2.3.5",
+    "@types/bcryptjs": "2.4.2",
+    "@types/cookie": "^0.3.2",
+    "@types/cookie-session": "^2.0.36",
+    "@types/fs-extra": "^8.0.0",
+    "@types/got": "^9.6.2",
+    "@types/graphql": "^14.2.3",
+    "@types/lodash": "^4.14.132",
+    "@types/multer": "^1.3.7",
+    "@types/pluralize": "0.0.29",
+    "@types/swagger-ui-dist": "^3.0.0",
+    "@types/http-proxy-middleware": "^0.19.2",
     "@xiphe/cypress-parcel-preprocessor": "1.0.1-RC.1",
     "codecov": "3.5.0",
     "concurrently": "^4.1.1",
@@ -146,6 +148,9 @@
     ],
     "watchPathIgnorePatterns": [
       "node_modules"
-    ]
+    ],
+    "moduleNameMapper": {
+      "\\.(css)$": "<rootDir>/__mocks__/styleMock.js"
+    }
   }
 }

@@ -30,10 +30,10 @@ export default class TextInput extends Component<Props> {
     const isRequired = validateRequired(value, props);
     if (isRequired) return isRequired;
     if (props.minLength && value.length < props.minLength) {
-      return "Text is to short";
+      return "Text is too short";
     }
     if (props.maxLength && value.length > props.maxLength) {
-      return "Text is to long";
+      return "Text is too long";
     }
   }
 

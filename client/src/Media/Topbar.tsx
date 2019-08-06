@@ -146,6 +146,7 @@ export default function Topbar(props: Props) {
   });
 
   useEffect(() => {
+    if (!progress) return;
     onUploadProgress(progress || 0);
   }, [progress, onUploadProgress]);
 

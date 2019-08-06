@@ -13,11 +13,13 @@ import UniqueFieldError, {
 } from "../../errors/UniqueFieldError";
 import setPosition from "../../../model/setPosition";
 import getAlwaysUniqueFields from "../../../model/getAlwaysUniqueFields";
-import getPositionFields from "../../../model/getPositionFields";
+import { getPositionFieldsWithValue } from "../../../model/getPositionFields";
 import getInverseReferenceFields from "../../../model/getInverseReferenceFields";
 import log from "../../../log";
 import visitModel from "../../../model/visitModel";
 import { Migration } from "../../ContentPersistence";
+import { Model } from "../../../../typings";
+import visit from "../../../model/visit";
 
 const ops: any = {
   eq: "=",
@@ -111,6 +113,9 @@ const getRecursiveOrderField = (
   return false;
 };
 
+const getModel = (name: string, models: Model[]) =>
+  models.find(m => m.name.toLowerCase() === name.toLowerCase());
+
 export default class KnexContent implements ContentAdapter {
   knex: knex;
 
@@ -195,47 +200,67 @@ export default class KnexContent implements ContentAdapter {
     data: any,
     id: string
   ): Promise<any> {
-    const positionFields = getPositionFields(model);
-    if (positionFields) {
+    const positionFields = getPositionFieldsWithValue(data, model);
+    if (positionFields.length > 0) {
       await Promise.all(
-        positionFields.map(async f => {
-          const criteria: any = {};
-
-          const value = (f.split(".").reduce((obj, key) => {
-            if (obj && obj[key] !== "undefined") {
-              return obj[key];
-            } else {
-              obj[key] = "";
-              return obj[key];
-            }
-          }, data) as unknown) as string;
-          if (value !== undefined) {
-            criteria[`data.${f}`] = { gte: value };
-          }
-
-          const opts = { offset: 0, limit: 3, orderBy: f, order: "asc" };
-          const items = await this.list(model, models, opts, criteria);
-          items.items = items.items.filter(item => item.id === id);
-          let nextPos;
+        positionFields.map(async ({ fieldPath, value }) => {
+          const criteria: any = value
+            ? {
+                [`data.${fieldPath}`]: { gte: value }
+              }
+            : {};
+          const opts = {
+            offset: 0,
+            limit: 3,
+            orderBy: fieldPath,
+            order: value ? "asc" : "desc"
+          };
+          const items = await this.list(model, models, opts, criteria, {
+            ignoreSchedule: true
+          });
           if (items.items[0]) {
-            nextPos = (f
-              .split(".")
-              .reduce(
-                (obj: any, key) =>
-                  obj && obj[key] !== "undefined" ? obj[key] : undefined,
-                items.items[0].data
-              ) as unknown) as string;
-            if (value === nextPos && items.items[1]) {
-              nextPos = (f
-                .split(".")
-                .reduce(
-                  (obj: any, key) =>
-                    obj && obj[key] !== "undefined" ? obj[key] : undefined,
-                  items.items[1].data
-                ) as unknown) as string;
-            }
+            visit(items.items[0].data, model, {
+              position(s: string, f, d, stringPath) {
+                if (stringPath === fieldPath) {
+                  if (!value) {
+                    // No Position Value passed, use end of list
+                    data = setPosition(data, model, s, "z", true, fieldPath);
+                  } else if (
+                    s === value &&
+                    String(items.items[0].id) !== String(id) // Value exists, and is not same document
+                  ) {
+                    if (items.items[1]) {
+                      // get next one and middle it
+                      visit(items.items[0].data, model, {
+                        position(nextPosition: string, g, h, nextStringPath) {
+                          if (nextStringPath === fieldPath) {
+                            data = setPosition(
+                              data,
+                              model,
+                              value,
+                              nextPosition,
+                              true,
+                              fieldPath
+                            );
+                          }
+                        }
+                      });
+                    } else {
+                      // No next one, just middle to end
+                      data = setPosition(
+                        data,
+                        model,
+                        value,
+                        "z",
+                        true,
+                        fieldPath
+                      );
+                    }
+                  }
+                }
+              }
+            });
           }
-          data = setPosition(data, model, value, nextPos, true);
         })
       );
     }
@@ -402,10 +427,7 @@ export default class KnexContent implements ContentAdapter {
       });
 
     if (types) {
-      refs.whereIn(
-        "c.type",
-        types.map(m => m[0].toLowerCase() + m.substring(1))
-      );
+      refs.whereIn("c.type", types);
     }
     return refs;
   }
@@ -425,10 +447,7 @@ export default class KnexContent implements ContentAdapter {
       });
 
     if (types) {
-      refs.whereIn(
-        "c.type",
-        types.map(m => m[0].toLowerCase() + m.substring(1))
-      );
+      refs.whereIn("c.type", types);
     }
     return refs;
   }
@@ -442,47 +461,67 @@ export default class KnexContent implements ContentAdapter {
   ) {
     let fullData: Cotype.Data[] = [];
 
+    const getLinkableModelNames = (checkModels: string[]) => {
+      const foundModels: string[] = [];
+      checkModels.forEach(name => {
+        const foundModel = getModel(name, models);
+        if (foundModel) foundModels.push(foundModel.name);
+      });
+
+      return foundModels;
+    };
+
     const fetch = async (
       ids: string[],
       types: string[],
       prevTypes: string[],
       first: boolean
     ) => {
-      // TODO Factor out function (model, types): {hasRefs, hasInverseRefs}
-
       // Only get references when needed
       // since this can be a expensive db operation
-      let modelHasReverseReferences = false;
-      let modelHasReferences = false;
-
+      let hasRefs = false;
+      let hasInverseRefs = false;
+      let implicitTypes: string[] = [];
       (first ? [model.name] : prevTypes).forEach(typeName => {
-        const typeModel = first
-          ? model
-          : models.find(m => m.name.toLowerCase() === typeName.toLowerCase());
-
+        const typeModel = first ? model : getModel(typeName, models);
         if (!typeModel) return;
 
-        visitModel(typeModel, (key, value) => {
+        visitModel(typeModel, (_, value) => {
           if (!("type" in value)) return;
 
           if (value.type === "references") {
-            modelHasReverseReferences = true;
+            hasRefs = true;
+
+            // No types means this data is only needed to populate _urls in refs
+            if (types.length === 0) {
+              implicitTypes = implicitTypes.concat(
+                getLinkableModelNames([value.model!])
+              );
+            }
           }
           if (value.type === "content") {
-            modelHasReferences = true;
+            hasInverseRefs = true;
+            // No types means this data is only needed to populate _urls in refs
+            if (types.length === 0) {
+              implicitTypes = implicitTypes.concat(
+                getLinkableModelNames(value.models || [value.model!])
+              );
+            }
           }
         });
       });
 
       // we don't need to load anything if a model has no refs and it is a first level fetch
       // otherwise we still need to load the main data of that join
-      if (first && !modelHasReverseReferences && !modelHasReferences) return [];
+      if (first && !hasRefs && !hasInverseRefs) return [];
 
-      const refs = modelHasReferences
-        ? this.loadRefs(ids, !first && types, published)
+      const refTypes = !!types.length ? types : implicitTypes;
+
+      const refs = hasInverseRefs
+        ? this.loadRefs(ids, !first && refTypes, published)
         : [];
-      const inverseRefs = modelHasReverseReferences
-        ? this.loadInverseRefs(ids, !first && types, published)
+      const inverseRefs = hasRefs
+        ? this.loadInverseRefs(ids, !first && refTypes, published)
         : [];
 
       const [data, inverseData] = await Promise.all([refs, inverseRefs]);
@@ -492,12 +531,17 @@ export default class KnexContent implements ContentAdapter {
     };
 
     let checkIds = id;
-    for (let i = 0; i < joins.length; i++) {
+
+    /**
+     * Go one level deeper than joins suggest in order to provide
+     * enough data to populate all _url fields later on
+     */
+    for (let i = 0; i < joins.length + 1; i++) {
       const join = joins[i];
 
       const data = await fetch(
         checkIds,
-        Object.keys(join),
+        Object.keys(join || {}),
         Object.keys(joins[i - 1] || {}),
         i === 0
       );
@@ -751,7 +795,7 @@ export default class KnexContent implements ContentAdapter {
     if (contents.length > 0) {
       // TODO action delete/unpublish/schedule
       const err = new ReferenceConflictError({ type: "content" });
-      err.refs = contents.map(c => this.parseData(c));
+      err.refs = contents.map((c: any) => this.parseData(c));
       throw err;
     }
   }
@@ -894,7 +938,7 @@ export default class KnexContent implements ContentAdapter {
 
     return {
       total,
-      items: items.map(i => this.parseData(i))
+      items: items.map((i: any) => this.parseData(i))
     };
   }
 
@@ -916,7 +960,7 @@ export default class KnexContent implements ContentAdapter {
       .where("content_references.media", "=", media)
       .andWhere("contents.deleted", false);
 
-    return contents.map(c => this.parseData(c));
+    return contents.map((c: any) => this.parseData(c));
   }
 
   async list(
@@ -1303,7 +1347,7 @@ export default class KnexContent implements ContentAdapter {
       state: "applied"
     });
     const outstanding = migrations.filter(
-      m => !applied.some(a => a.name === m.name)
+      m => !applied.some((a: any) => a.name === m.name)
     );
 
     if (!outstanding.length) {
@@ -1317,7 +1361,7 @@ export default class KnexContent implements ContentAdapter {
       await this.knex("content_migrations").insert(
         names.map(name => ({ name, state: "pending" }))
       );
-      const tx = await this.knex.transaction();
+      const tx = await (this.knex as any).transaction(); // TODO: Fix Line
       try {
         await callback(new KnexContent(tx), outstanding);
         await tx.commit();

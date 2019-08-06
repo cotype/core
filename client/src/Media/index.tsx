@@ -1,5 +1,5 @@
 import * as Cotype from "../../../typings";
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import styled, { css } from "react-emotion";
 import { RenderInfo } from "../common/ScrollList";
 import api from "../api";
@@ -104,12 +104,16 @@ export default class Media extends Component<Props, State> {
     if (!props.onSelect) {
       this.state.editable = true;
     }
-    if (props.mediaType && typeof props.mediaType === 'string' && props.mediaType !== "all") {
+    if (
+      props.mediaType &&
+      typeof props.mediaType === "string" &&
+      props.mediaType !== "all"
+    ) {
       this.state.filters = this.state.filters.filter(el =>
         el.value.includes(props.mediaType as string)
       );
-      if(this.state.filters.length >0){
-        this.state.fileType = this.state.filters[0].value
+      if (this.state.filters.length > 0) {
+        this.state.fileType = this.state.filters[0].value;
       }
     }
   }
@@ -259,14 +263,9 @@ export default class Media extends Component<Props, State> {
   }
   render() {
     const {
-      total,
-      items,
       details,
-      editable,
       conflictingItems,
-      filters,
-      topbarProgress,
-      fileType
+      filters
     } = this.state;
     return (
       <Root {...testable("upload-zone")}>
@@ -305,28 +304,38 @@ export default class Media extends Component<Props, State> {
           className={className}
           activeClass={activeClass}
           onUpload={this.onUpload}
-          render={({ progress, onFiles }: any) => {
-            const itemCount =
-              !!progress || !!topbarProgress ? total + 1 : total;
-            const data =
-              !!progress || !!topbarProgress
-                ? [{ progress: progress || topbarProgress }, ...items]
-                : items;
+          render={({ progress }: any) => {
+            const {
+              total,
+              items,
+              editable,
+              topbarProgress
+            } = this.state;
+            const isProgress =
+              (progress && progress < 100) ||
+              (topbarProgress && topbarProgress < 100);
+            const itemCount = isProgress ? total + 1 : total;
+            const data = isProgress
+              ? [
+                {
+                  progress:
+                    progress && progress < 100 ? progress : topbarProgress
+                },
+                ...items
+              ]
+              : items;
             return (
-              <Fragment>
-                <Main>
-                  <Gallery
-                    key={fileType}
-                    count={itemCount}
-                    data={data}
-                    editable={editable}
-                    onSelect={this.onSelect}
-                    onDelete={this.deleteMedia}
-                    onRowsRendered={this.onRowsRendered}
-                    mediaFilter={this.props.mediaFilter}
-                  />
-                </Main>
-              </Fragment>
+              <Main>
+                <Gallery
+                  count={itemCount}
+                  data={data}
+                  editable={editable}
+                  onSelect={this.onSelect}
+                  onDelete={this.deleteMedia}
+                  onRowsRendered={this.onRowsRendered}
+                  mediaFilter={this.props.mediaFilter}
+                />
+              </Main>
             );
           }}
         />

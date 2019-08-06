@@ -124,7 +124,8 @@ class PositionModal extends Component<Props, State> {
     if (this.props.model.order !== "asc") {
       [prev, post] = [post, prev];
     }
-    this.props.onSave(middleString(prev, post));
+
+    this.props.onSave(middleString(prev, prev !== post ? post : undefined));
   };
   render() {
     let { items } = this.state;
