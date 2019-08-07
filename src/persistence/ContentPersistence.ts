@@ -273,13 +273,13 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     // convert sorted references
     // we need to separate the sorting step from the converting step
     // because we need the whole refs object to convert correctly (urls)
-    Object.values(sortedContentRefs).forEach(category =>
-      Object.values(category).forEach(entry => {
-        const contentModel = this.getModel(entry.type) as Model;
+    Object.entries(sortedContentRefs).forEach(([type, items]) => {
+      const contentModel = this.getModel(type) as Model;
+      return Object.values(items).forEach(item => {
         return {
-          ...entry,
+          ...item,
           data: convert({
-            content: removeDeprecatedData(entry.data, contentModel),
+            content: removeDeprecatedData(item.data, contentModel),
             contentModel,
             contentRefs: sortedContentRefs,
             contentFormat,
@@ -288,8 +288,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
             previewOpts
           })
         };
-      })
-    );
+      });
+    });
 
     // assign media refs to an object with it's ids as keys
     const media: Cotype.MediaRefs = {};
