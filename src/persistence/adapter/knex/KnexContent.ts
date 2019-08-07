@@ -408,14 +408,21 @@ export default class KnexContent implements ContentAdapter {
     });
   }
 
-  loadRefs(ids: string[], types: string[] | false, published?: boolean) {
+  loadRefs(
+    ids: string[],
+    types: string[] | false,
+    previewOpts: Cotype.PreviewOpts = {}
+  ) {
     const refs = this.knex
       .distinct(["crv.data", "c.id", "c.type"])
       .from("content_references as cr")
       .whereIn("cr.id", ids)
       .innerJoin("contents as co", j => {
         j.on("cr.id", "co.id");
-        j.on("cr.rev", published ? "co.published_rev" : "co.latest_rev");
+        j.on(
+          "cr.rev",
+          previewOpts.publishedOnly ? "co.published_rev" : "co.latest_rev"
+        );
       })
       .innerJoin("contents as c", j => {
         j.on("c.id", "cr.content");
@@ -423,16 +430,36 @@ export default class KnexContent implements ContentAdapter {
       })
       .innerJoin("content_revisions as crv", j => {
         j.on("crv.id", "c.id");
-        j.andOn("crv.rev", published ? "c.published_rev" : "c.latest_rev");
+        j.andOn(
+          "crv.rev",
+          previewOpts.publishedOnly ? "c.published_rev" : "c.latest_rev"
+        );
       });
 
     if (types) {
       refs.whereIn("c.type", types);
     }
+    if (previewOpts.publishedOnly && !previewOpts.ignoreSchedule) {
+      refs.andWhere((k2: any) => {
+        k2.where("c.visibleFrom", "<=", new Date()).orWhereNull(
+          "c.visibleFrom"
+        );
+      });
+      refs.andWhere((k2: any) => {
+        k2.where("c.visibleUntil", ">=", new Date()).orWhereNull(
+          "c.visibleUntil"
+        );
+      });
+    }
+
     return refs;
   }
 
-  loadInverseRefs(ids: string[], types: string[] | false, published?: boolean) {
+  loadInverseRefs(
+    ids: string[],
+    types: string[] | false,
+    previewOpts: Cotype.PreviewOpts = {}
+  ) {
     const refs = this.knex
       .distinct(["crv.data", "c.id", "c.type"])
       .from("content_references as cr")
@@ -443,11 +470,26 @@ export default class KnexContent implements ContentAdapter {
       })
       .innerJoin("content_revisions as crv", j => {
         j.on("crv.id", "c.id");
-        j.andOn("crv.rev", published ? "c.published_rev" : "c.latest_rev");
+        j.andOn(
+          "crv.rev",
+          previewOpts.publishedOnly ? "c.published_rev" : "c.latest_rev"
+        );
       });
 
     if (types) {
       refs.whereIn("c.type", types);
+    }
+    if (previewOpts.publishedOnly && !previewOpts.ignoreSchedule) {
+      refs.andWhere((k2: any) => {
+        k2.where("c.visibleFrom", "<=", new Date()).orWhereNull(
+          "c.visibleFrom"
+        );
+      });
+      refs.andWhere((k2: any) => {
+        k2.where("c.visibleUntil", ">=", new Date()).orWhereNull(
+          "c.visibleUntil"
+        );
+      });
     }
     return refs;
   }
@@ -456,12 +498,12 @@ export default class KnexContent implements ContentAdapter {
     id: string[],
     model: Cotype.Model,
     models: Cotype.Model[],
-    published?: boolean,
+    previewOpts: Cotype.PreviewOpts = {},
     joins: Cotype.Join[] = [{}]
   ) {
     let fullData: Cotype.Data[] = [];
 
-    const getLinkableModelNames = (checkModels: string[]) => {
+    const getModelNames = (checkModels: string[]) => {
       const foundModels: string[] = [];
       checkModels.forEach(name => {
         const foundModel = getModel(name, models);
@@ -495,7 +537,7 @@ export default class KnexContent implements ContentAdapter {
             // No types means this data is only needed to populate _urls in refs
             if (types.length === 0) {
               implicitTypes = implicitTypes.concat(
-                getLinkableModelNames([value.model!])
+                getModelNames([value.model!])
               );
             }
           }
@@ -504,7 +546,7 @@ export default class KnexContent implements ContentAdapter {
             // No types means this data is only needed to populate _urls in refs
             if (types.length === 0) {
               implicitTypes = implicitTypes.concat(
-                getLinkableModelNames(value.models || [value.model!])
+                getModelNames(value.models || [value.model!])
               );
             }
           }
@@ -518,10 +560,10 @@ export default class KnexContent implements ContentAdapter {
       const refTypes = !!types.length ? types : implicitTypes;
 
       const refs = hasInverseRefs
-        ? this.loadRefs(ids, !first && refTypes, published)
+        ? this.loadRefs(ids, !first && refTypes, previewOpts)
         : [];
       const inverseRefs = hasRefs
-        ? this.loadInverseRefs(ids, !first && refTypes, published)
+        ? this.loadInverseRefs(ids, !first && refTypes, previewOpts)
         : [];
 
       const [data, inverseData] = await Promise.all([refs, inverseRefs]);

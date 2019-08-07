@@ -64,7 +64,7 @@ export interface ContentAdapter {
     ids: string[],
     model: Cotype.Model,
     models: Cotype.Model[],
-    published?: boolean,
+    previewOpts?: Cotype.PreviewOpts,
     join?: Cotype.Join[]
   ): Promise<Cotype.Data[]>;
   loadMediaFromContents(

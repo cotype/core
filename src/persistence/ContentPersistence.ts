@@ -242,7 +242,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       ids,
       model,
       this.models,
-      previewOpts.publishedOnly,
+      previewOpts,
       getDeepJoins(join, this.models)
     );
 
