@@ -4,7 +4,7 @@ import * as Cotype from "../../typings";
  */
 import _ from "lodash";
 
-export const NO_STORE_VALUE = Symbol("NoStore");
+export const NO_STORE_VALUE = Symbol();
 
 type Visitor = {
   [key: string]: (
@@ -79,7 +79,7 @@ export default function visit(
       );
       if (typeof ret !== "undefined") {
         if (parent && key) {
-          if (typeof ret === "string" && ret === NO_STORE_VALUE) {
+          if (ret === NO_STORE_VALUE) {
             return _.set(parent, key, undefined);
           }
           _.set(parent, key, ret);

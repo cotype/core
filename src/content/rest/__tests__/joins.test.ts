@@ -43,6 +43,8 @@ describe("joins", () => {
   let headers: object;
   let find: ReturnType<typeof createApiReadHelpers>["find"];
   let create: ReturnType<typeof createApiWriteHelpers>["create"];
+  let schedule: ReturnType<typeof createApiWriteHelpers>["schedule"];
+  let publish: ReturnType<typeof createApiWriteHelpers>["publish"];
 
   let a: any;
   let b: any;
@@ -73,7 +75,7 @@ describe("joins", () => {
     ));
 
     ({ find } = createApiReadHelpers(server));
-    ({ create } = createApiWriteHelpers(server, headers));
+    ({ create, schedule, publish } = createApiWriteHelpers(server, headers));
 
     c = await create(modelC.name, {
       title: faker.lorem.slug()
@@ -177,6 +179,58 @@ describe("joins", () => {
           }
         },
         media: {}
+      }
+    });
+  });
+
+  it("should not include expired refs", async () => {
+    await publish(modelC.name, c.id);
+    await publish(modelB.name, b.id);
+    await publish(modelA.name, a.id);
+
+    await schedule(modelC.name, c.id, {
+      visibleUntil: new Date(Date.now() - 1)
+    });
+
+    const resp1 = await find(
+      modelA.name,
+      a.id,
+      { join: { B: ["refC"] } },
+      true
+    );
+
+    await expect(resp1).toStrictEqual({
+      ...expectedResponse,
+      _refs: {
+        ...expectedResponse._refs,
+        content: {
+          [modelB.name]: {
+            [b.id]: {
+              _id: b.id,
+              _type: modelB.name
+            }
+          }
+        }
+      }
+    });
+
+    await schedule(modelB.name, b.id, {
+      visibleUntil: new Date(Date.now() - 1)
+    });
+
+    const resp2 = await find(
+      modelA.name,
+      a.id,
+      { join: { B: ["refC"] } },
+      true
+    );
+
+    await expect(resp2).toStrictEqual({
+      _id: a.id,
+      title: expectedResponse.title,
+      _refs: {
+        media: {},
+        content: {}
       }
     });
   });

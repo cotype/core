@@ -7,21 +7,18 @@ import {
   PreviewOpts,
   ContentFormat
 } from "../../typings";
-import visit from "../model/visit";
+import visit, { NO_STORE_VALUE } from "../model/visit";
 import formatQuillDelta from "./formatQuillDelta";
 import getRefUrl from "./getRefUrl";
 
 /**
  * Converts a content from its internal representation to a format
  * requested by the client.
- *
- * NOTE: Currently `richtext` is the only type that gets converted.
- * This could also be a good place to convert `media` ids to full URLs.
  */
 
 type ConvertProps = {
   content: Data;
-  contentRefs?: ContentRefs;
+  contentRefs: ContentRefs;
   contentModel: Model;
   allModels: Model[];
   contentFormat: ContentFormat;
@@ -106,24 +103,35 @@ export default function convert({
           _content: ref.model
         };
 
+        // Refs can only contain an id but no model,
+        // this means the ref is not actually a ref but a string
         const isAbsoluteRef = !ref.model;
-
         if (isAbsoluteRef) {
           convertedRef._url = ref.id;
           return convertedRef;
         }
 
-        // For external data sources content references don't exist
-        if (!contentRefs || !contentRefs[ref.model]) return convertedRef;
-
-        const refModel = allModels.find(
+        const referencedModel = allModels.find(
           m => m.name.toLowerCase() === ref.model.toLowerCase()
         );
-        if (!refModel || !refModel.urlPath) return convertedRef;
+
+        // For external data sources content references don't exist
+        if (referencedModel!.external) return convertedRef;
+
+        // No content for the ref was provided,
+        // this means the referenced content does not exists anymore.
+        // This happens when content get deleted or is scheduled
+        if (!referencedModel || !contentRefs[ref.model]) return NO_STORE_VALUE;
+
+        // If the referenced content has no `urlPath`,
+        // we don't need to add the `_url`
+        if (!referencedModel.urlPath) return convertedRef;
 
         const allRefData = contentRefs[ref.model][ref.id];
-        const url = getRefUrl((allRefData || {}).data, refModel.urlPath);
-        convertedRef._url = url;
+        convertedRef._url = getRefUrl(
+          (allRefData || {}).data,
+          referencedModel.urlPath
+        );
 
         return convertedRef;
       }
