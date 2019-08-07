@@ -35,7 +35,7 @@ context("Settings", () => {
       frame.sidebarItem("Roles").click();
       roles.add();
       roles.setName(roleName);
-      roles.addContent("foos", "edit");
+      roles.addContent({ label: "Foo", value: "foos" }, "edit");
       roles.save();
       roles.listItem(roleName).should("have.length", 1);
     });

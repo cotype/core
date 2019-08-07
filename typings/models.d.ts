@@ -148,11 +148,13 @@ export type ObjectType = {
   modalView?: boolean;
 };
 
+export type MapKeyValue = { label: string; value: string } | string;
+
 export type MapType = {
   type: "map";
   keys: {
     fetch: string;
-    values?: string[];
+    values?: MapKeyValue[];
   };
   values: Type;
 };
