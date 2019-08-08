@@ -1,7 +1,7 @@
 import { Type, MapKeyValue } from "../../../../typings";
 import React, { Component } from "react";
 import { Field, FieldProps, getIn } from "formik";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import ActionButton from "../../common/ActionButton";
 import api from "../../api";
 import Fields from "../../common/Fields";

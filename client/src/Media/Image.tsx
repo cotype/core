@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import Icon from "../common/icons";
 import { testable } from "../utils/helper";
 

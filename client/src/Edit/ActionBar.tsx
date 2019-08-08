@@ -2,7 +2,7 @@ import * as Cotype from "../../../typings";
 import React, { Component, Fragment, version } from "react";
 import { withRouter } from "react-router-dom";
 import { RouteComponentProps } from "react-router";
-import styled, { css, cx } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import Button from "../common/Button";
 import { paths } from "../common/icons";
 import { withUser } from "../auth/UserContext";
@@ -187,7 +187,10 @@ class ActionBar extends Component<Props, State> {
     const actions: any = [];
 
     const buttonClass = isNew
-      ? cx(modelActionButtons, deactivatedModelAction)
+      ? css`
+          ${modelActionButtons};
+          ${deactivatedModelAction};
+        `
       : modelActionButtons;
 
     if (canEdit) {
@@ -195,7 +198,7 @@ class ActionBar extends Component<Props, State> {
         actions.push(
           <Button
             {...testable("delete")}
-            className={buttonClass}
+            css={buttonClass}
             icon={paths.Trash}
             type="button"
             onClick={!isNew ? onDelete : undefined}
@@ -206,7 +209,7 @@ class ActionBar extends Component<Props, State> {
       if (onDuplicate && !inSettings && !isSingleton) {
         actions.push(
           <Button
-            className={buttonClass}
+            css={buttonClass}
             icon={paths.Duplicate}
             type="button"
             onClick={!isNew ? onDuplicate : undefined}
@@ -218,10 +221,13 @@ class ActionBar extends Component<Props, State> {
       const hasVersions = versions ? versions.length > 1 : false;
       actions.push(
         <Button
-          className={
+          css={
             hasVersions
               ? buttonClass
-              : cx(modelActionButtons, deactivatedModelAction)
+              : css`
+                  ${modelActionButtons};
+                  ${deactivatedModelAction}
+                `
           }
           icon={paths.History}
           type="button"
@@ -275,7 +281,7 @@ class ActionBar extends Component<Props, State> {
           icon={hasSchedule ? paths.CalendarClock : paths.Calendar}
           type="button"
           onClick={onSchedule}
-          className={modelActionButtons}
+          css={modelActionButtons}
           disabled={false}
         />
       );
@@ -288,7 +294,7 @@ class ActionBar extends Component<Props, State> {
           icon={paths.Save}
           type="button"
           onClick={submitForm}
-          className={disabled ? deactivatedContentAction : undefined}
+          css={disabled ? deactivatedContentAction : undefined}
           disabled={disabled}
         >
           Save
@@ -299,7 +305,7 @@ class ActionBar extends Component<Props, State> {
       if (!isPublished) {
         actions.push(
           <Button
-            className={publishButtonClass}
+            css={publishButtonClass}
             icon={paths.Publish}
             type="button"
             onClick={this.onPublish}
@@ -311,7 +317,7 @@ class ActionBar extends Component<Props, State> {
       } else if (!isSingleton) {
         actions.push(
           <Button
-            className={unpublishButtonClass}
+            css={unpublishButtonClass}
             icon={paths.Publish}
             type="button"
             onClick={onUnpublish}
@@ -326,9 +332,12 @@ class ActionBar extends Component<Props, State> {
     if (showPreview) {
       actions.push(
         <Button
-          className={
+          css={
             isDirty || isNew
-              ? cx(previewButtonClass, deactivatedContentAction)
+              ? css`
+                  ${previewButtonClass};
+                  ${deactivatedModelAction};
+                `
               : previewButtonClass
           }
           disabled={isDirty || isNew}

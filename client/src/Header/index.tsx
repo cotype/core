@@ -1,6 +1,6 @@
 import { Principal, User, NavigationOpts } from "../../../typings";
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import { NavLink, NavLinkProps } from "react-router-dom";
 import basePath from "../basePath";
 import { withUser } from "../auth/UserContext";
@@ -26,7 +26,7 @@ const itemClass = css`
   align-items: center;
 `;
 
-const linkClass = css`
+const StyledNavLink = styled(NavLink)`
   ${itemClass} color: inherit;
   text-decoration: none;
   opacity: 0.7;
@@ -34,23 +34,22 @@ const linkClass = css`
   :hover {
     opacity: 1;
   }
+  &.active {
+    font-weight: bold;
+    opacity: 1;
+  }
 `;
 
-const activeClass = css`
-  font-weight: bold;
-  opacity: 1;
+const Item = styled.div`
+  ${itemClass}
 `;
-
-const Item = styled("div")(itemClass);
 
 const Items = styled("div")`
   display: flex;
   align-items: center;
 `;
 
-const ItemLink = (props: NavLinkProps) => (
-  <NavLink className={linkClass} activeClassName={activeClass} {...props} />
-);
+const ItemLink = (props: NavLinkProps) => <StyledNavLink {...props} />;
 
 type Props = {
   user: Principal & User;

@@ -1,10 +1,11 @@
 import { SearchResultItem } from "../../../typings";
 import React, { Component } from "react";
-import { css } from "react-emotion";
+import { css } from "styled-components/macro";
 import api from "../api";
 import Autocomplete from "../common/Autocomplete";
 import ResultItem from "../common/ResultItem";
 import orderSearchResults from "../utils/orderSearchResults";
+
 export const inputClass = css`
   background: rgba(255, 255, 255, 0.05);
   border: none;
@@ -63,7 +64,7 @@ export default class Search extends Component {
 
     return (
       <Autocomplete
-        inputClassName={inputClass}
+        inputElementCss={inputClass}
         inputValue={term}
         onInputValueChange={this.handleInput}
         onChange={this.handleChange}

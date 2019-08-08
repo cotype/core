@@ -1,5 +1,5 @@
 import React, { Component, Children } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 
 const Root = styled("div")`
   display: flex;

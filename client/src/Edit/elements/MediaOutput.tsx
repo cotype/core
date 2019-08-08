@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import api from "../../api";
 import Image from "../../Media/Image";
 import * as Cotype from "../../../../typings";

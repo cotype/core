@@ -1,6 +1,6 @@
 import * as Cotype from "../../../typings";
 import React from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import { Link } from "react-router-dom";
 import _escape from "lodash/escape";
 import basePath from "../basePath";

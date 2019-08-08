@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Popover, { Position, Align, ArrowContainer } from "react-tiny-popover";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 
 export const Menu = styled("div")`
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);

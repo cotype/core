@@ -1,10 +1,15 @@
 import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import ImageCircle from "../common/ImageCircle";
 import { testable } from "../utils/helper";
 
-const itemClass = css`
+const activeClass = css`
+  background-color: var(--accent-color) !important;
+  color: #fff;
+`;
+
+const StyledNavLink = styled(NavLink)`
   display: flex;
   width: 100%;
   position: relative;
@@ -19,6 +24,10 @@ const itemClass = css`
     background-color: var(--primary-color);
     color: #fff;
   }
+  &.active {
+    width: 100%;
+    ${activeClass}
+  }
 `;
 
 const Title = styled("span")`
@@ -30,18 +39,13 @@ const Title = styled("span")`
   text-overflow: ellipsis;
 `;
 
-const activeClass = css`
-  background-color: var(--accent-color) !important;
-  color: #fff;
-`;
-
 export type ItemProps = {
   index: number;
   id: string;
   title: string;
   image?: string | null | undefined;
   style?: object;
-  className?: object;
+  className?: string;
   small?: boolean;
   baseUrl: string;
 };
@@ -52,12 +56,11 @@ export default class Item extends Component<ItemProps> {
     const src =
       image && (image.includes("://") ? image : `/thumbs/square/${image}`);
     return (
-      <NavLink
+      <StyledNavLink
         to={`${baseUrl}/edit/${id}`}
         {...testable("list-item")}
         style={style}
-        className={itemClass + " " + className}
-        activeClassName={activeClass}
+        className={className}
       >
         <ImageCircle
           src={src ? src : null}
@@ -65,7 +68,7 @@ export default class Item extends Component<ItemProps> {
           size={small ? 12 : 24}
         />
         <Title>{title}</Title>
-      </NavLink>
+      </StyledNavLink>
     );
   }
 }

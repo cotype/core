@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled from "styled-components/macro";
 import { FieldProps } from "formik";
 import { inputClass } from "../../common/styles";
 import Autocomplete from "../../common/Autocomplete";
@@ -7,20 +7,11 @@ import ImageCircle from "../../common/ImageCircle";
 import api from "../../api";
 import { required } from "./validation";
 import { stringify } from "qs";
+import { borderlessCss } from "./ReferenceInput";
 
 const Root = styled("div")`
   ${inputClass} padding: 0;
   padding-left: 10px;
-`;
-
-const borderlessClass = css`
-  border: none;
-  box-sizing: border-box;
-  padding: 4px 10px;
-  flex: 1;
-  font-size: inherit;
-  height: 40px;
-  outline: none;
 `;
 
 const ImageItem = styled("div")`
@@ -130,7 +121,7 @@ export default class SingleReferenceInput extends Component<Props, State> {
       <Root>
         <Autocomplete
           toggleButton
-          inputClassName={borderlessClass}
+          inputElementCss={borderlessCss}
           selectedItem={value ? value : null}
           onInputValueChange={this.onInputValueChange}
           onChange={this.onChange}

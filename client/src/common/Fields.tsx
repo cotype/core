@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import { Error } from "../common/styles";
 import { errorClass } from "../Edit/Form";
 

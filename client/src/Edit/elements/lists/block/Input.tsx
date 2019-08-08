@@ -1,6 +1,6 @@
 import * as Cotype from "../../../../../../typings";
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import { FieldProps, FieldArray } from "formik";
 import _omit from "lodash/omit";
 import inputs from "../../inputs";
@@ -8,7 +8,7 @@ import serverSideProps from "../../serverSideProps";
 import ListButton from "../../../../common/ListButton";
 import MoreButton from "../../../../common/MoreButton";
 import Schedule from "../../../../common/Schedule";
-import SortableList from "./SortableList";
+import SortableList, { DRAG_HELPER_CLASS } from "./SortableList";
 
 export const ITEM_VALUE_KEY = "value";
 
@@ -156,7 +156,7 @@ export default class ListInput extends Component<Props, State> {
                 arrayHelpers={arrayHelpers}
                 name={name}
                 useDragHandle
-                helperClass={dragClass}
+                helperClass={DRAG_HELPER_CLASS}
                 onSortStart={() => this.setState({ isSorting: true })}
                 onSortEnd={({ oldIndex, newIndex }) => {
                   arrayHelpers.move(oldIndex, newIndex);

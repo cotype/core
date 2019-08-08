@@ -1,7 +1,7 @@
 import * as Cotype from "../../../../../../typings";
 import React from "react";
 import outputs from "../../outputs";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 
 const ItemField = styled("div")`
   background-color: var(--transparent-grey);

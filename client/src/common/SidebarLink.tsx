@@ -1,12 +1,12 @@
 import React from "react";
 import { NavLink, NavLinkProps } from "react-router-dom";
-import { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 
 const active = css`
   background-color: hsla(0, 0%, 100%, 0.1);
 `;
 
-const link = css`
+const StyledNavLink = styled(NavLink)`
   display: block;
   color: #e8e8e8;
   text-decoration: none;
@@ -14,8 +14,11 @@ const link = css`
   :hover {
     ${active};
   }
+  &.active {
+    ${active};
+  }
 `;
 
 export default function SidebarLink(props: NavLinkProps) {
-  return <NavLink className={link} activeClassName={active} {...props} />;
+  return <StyledNavLink {...props} />;
 }

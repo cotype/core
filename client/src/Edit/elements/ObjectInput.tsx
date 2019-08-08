@@ -8,7 +8,7 @@ import inputs from "./inputs";
 import ObjectOutput from "./ObjectOutput";
 import ModalDialog from "../../common/ModalDialog";
 import Button from "../../common/Button";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import { required } from "./validation";
 import { paths } from "../../common/icons";
 import { hasActuallyErrors } from "../formHelpers";

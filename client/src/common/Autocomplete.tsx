@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled, { css, CSSProp } from "styled-components/macro";
 import Downshift, { DownshiftProps } from "downshift";
-import { inputClass } from "./styles";
+import { inputClass, Input } from "./styles";
 
 type P = {
   isActive: boolean;
@@ -29,7 +29,7 @@ const Item = styled("div")`
   }
 `;
 
-const rootClass = css`
+const Root = styled("div")`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -108,7 +108,7 @@ type Props = Partial<DownshiftProps<any>> & {
   itemToString: (item: any) => string;
   renderItem: (item: any) => React.ReactNode;
   items: any[];
-  inputClassName?: string;
+  inputElementCss?: CSSProp;
   style?: any;
   name?: string;
 };
@@ -125,7 +125,7 @@ export default class Autocomplete extends Component<Props> {
       itemToString,
       renderItem = this.props.itemToString,
       items = [],
-      inputClassName = inputClass,
+      inputElementCss = inputClass,
       style,
       name,
       ...rest
@@ -140,16 +140,17 @@ export default class Autocomplete extends Component<Props> {
           toggleMenu,
           clearSelection,
           selectedItem,
-          highlightedIndex
+          highlightedIndex,
+          getRootProps
         }) => (
-          <div className={rootClass} style={style}>
+          <Root style={style} {...getRootProps()}>
             {selectedItem ? (
               renderItem(selectedItem)
             ) : (
-              <input
+              <Input
                 {...getInputProps()}
                 ref={this.setInput}
-                className={inputClassName}
+                css={inputElementCss}
                 placeholder={placeholder}
                 name={name}
                 onClick={() => {
@@ -192,7 +193,7 @@ export default class Autocomplete extends Component<Props> {
                 </ScrollList>
               </ListWrapper>
             )}
-          </div>
+          </Root>
         )}
       </Downshift>
     );

@@ -1,10 +1,8 @@
 import React, { Component } from "react";
-import { css } from "react-emotion";
-
-import { inputClass } from "./styles";
+import { css } from "styled-components/macro";
+import { Input } from "./styles";
 
 const timeInputClass = css`
-  ${inputClass}
   width: 5em;
   font-feature-settings: "tnum";
   font-variant-numeric: tabular-nums;
@@ -82,8 +80,8 @@ export default class TimeInput extends Component<Props, State> {
 
   render() {
     return (
-      <input
-        className={timeInputClass}
+      <Input
+        css={timeInputClass}
         type="tel"
         value={this.state.value}
         placeholder={this.props.placeholder}

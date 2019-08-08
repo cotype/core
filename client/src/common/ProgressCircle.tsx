@@ -1,5 +1,5 @@
 import React from "react";
-import { css } from "react-emotion";
+import { css } from "styled-components/macro";
 import { CircularProgressbar } from "react-circular-progressbar";
 
 const classes = {

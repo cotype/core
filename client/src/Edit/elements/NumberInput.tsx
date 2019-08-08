@@ -2,10 +2,10 @@ import React, { Component } from "react";
 import { FieldProps } from "formik";
 import "rc-input-number/assets/index.css";
 import NumericInput from "rc-input-number";
-import { css } from "react-emotion";
+import styled from "styled-components/macro";
 import { required } from "./validation";
 
-const style = css`
+const StyledNumericInput = styled(NumericInput)`
   border-radius: 0;
   border: 1px solid #f0f0f0;
   font-size: inherit;
@@ -83,8 +83,7 @@ export default class Number extends Component<Props> {
     const { value } = field;
 
     return (
-      <NumericInput
-        className={style}
+      <StyledNumericInput
         onChange={this.handleChange}
         value={value}
         min={min}

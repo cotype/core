@@ -1,13 +1,13 @@
 import * as Cotype from "../../../../../../typings";
 import React from "react";
 import { SortableElement, SortableHandle } from "react-sortable-hoc";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import { Field, ArrayHelpers, FormikProps, getIn } from "formik";
 import Icon from "../../../../common/icons";
 import { ITEM_VALUE_KEY } from "./Input";
 import { hasActuallyErrors } from "../../../formHelpers";
 
-const handleStyle = css`
+const DragHandleIcon = styled(Icon.DragHandle)`
   user-select: none;
   opacity: 0.8;
   cursor: move;
@@ -105,9 +105,7 @@ export const ItemAction = styled("button")`
   }
 `;
 
-const DragHandle = SortableHandle(() => (
-  <Icon.DragHandle className={handleStyle} />
-));
+const DragHandle = SortableHandle(() => <DragHandleIcon />);
 
 type SortableItem = {
   sortIndex: number;

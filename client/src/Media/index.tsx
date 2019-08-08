@@ -1,6 +1,6 @@
 import * as Cotype from "../../../typings";
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled from "styled-components/macro";
 import { RenderInfo } from "../common/ScrollList";
 import api from "../api";
 import UploadZone from "./UploadZone";
@@ -29,14 +29,14 @@ const Main = styled("div")`
   user-select: none;
 `;
 
-const className = css`
+const ACTIVE_CLASS = "activeClass-UploadZone";
+const StyledUploadZone = styled(UploadZone)`
   flex: 1;
   display: flex;
   flex-direction: column;
-`;
-
-const activeClass = css`
-  background: var(--light-color);
+  &.${ACTIVE_CLASS} {
+    background: var(--light-color);
+  }
 `;
 
 const FilterTypes = [
@@ -262,11 +262,7 @@ export default class Media extends Component<Props, State> {
     return Object.entries(nextState).some(([k, v]) => v !== this.state[k]);
   }
   render() {
-    const {
-      details,
-      conflictingItems,
-      filters
-    } = this.state;
+    const { details, conflictingItems, filters } = this.state;
     return (
       <Root {...testable("upload-zone")}>
         {conflictingItems && (
@@ -300,29 +296,23 @@ export default class Media extends Component<Props, State> {
           orderBys={OrderByTypes}
           onOrderChange={this.onOrderChange}
         />
-        <UploadZone
-          className={className}
-          activeClass={activeClass}
+        <StyledUploadZone
+          activeClass={ACTIVE_CLASS}
           onUpload={this.onUpload}
           render={({ progress }: any) => {
-            const {
-              total,
-              items,
-              editable,
-              topbarProgress
-            } = this.state;
+            const { total, items, editable, topbarProgress } = this.state;
             const isProgress =
               (progress && progress < 100) ||
               (topbarProgress && topbarProgress < 100);
             const itemCount = isProgress ? total + 1 : total;
             const data = isProgress
               ? [
-                {
-                  progress:
-                    progress && progress < 100 ? progress : topbarProgress
-                },
-                ...items
-              ]
+                  {
+                    progress:
+                      progress && progress < 100 ? progress : topbarProgress
+                  },
+                  ...items
+                ]
               : items;
             return (
               <Main>

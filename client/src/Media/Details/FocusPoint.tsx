@@ -2,7 +2,7 @@ import { Media } from "../../../../typings";
 import React, { Component } from "react";
 import Draggable from "react-draggable";
 import Icon, { paths } from "../../common/icons";
-import styled, { css } from "react-emotion";
+import styled from "styled-components/macro";
 import Button from "../../common/Button";
 
 const DEFAULT_PREVIEW_PATH = "/thumbs/preview/";
@@ -92,7 +92,7 @@ const FocusTarget = styled("div")`
   }
 `;
 
-const editButtonClass = css`
+const MoreIcon = styled(Icon.More)`
   position: absolute;
   top: 7px;
   right: 7px;
@@ -105,7 +105,7 @@ const editButtonClass = css`
   cursor: pointer;
 `;
 
-const imageCss = css`
+const Img = styled("img")`
   border-radius: 3px;
   max-height: 100%;
   max-width: 100%;
@@ -201,8 +201,7 @@ export default class ImageFocus extends Component<Props, State> {
       <Root>
         <EditRoot inEdit={inEdit}>
           {!inEdit && (
-            <Icon.More
-              className={editButtonClass}
+            <MoreIcon
               onClick={() => {
                 if (!this.state.ratio) this.getDimensions();
                 this.setState({ inEdit: true });
@@ -225,10 +224,9 @@ export default class ImageFocus extends Component<Props, State> {
                 </Button>
               </ActionsBar>
             )}
-            <img
+            <Img
               src={`${DEFAULT_PREVIEW_PATH}${id}`}
               ref={this.focusTarget}
-              className={imageCss}
               style={{
                 width: width! > height! ? width! : "unset",
                 height: width! < height! ? height! : "unset"

@@ -11,7 +11,7 @@ import Schedule from "../common/Schedule";
 import { Input } from "./elements";
 import titleCase from "title-case";
 import { getPreviewUrl } from "../utils/helper";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 
 export const errorClass = "error-field-label";
 

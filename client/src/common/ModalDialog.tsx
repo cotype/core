@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import Overlay from "./Overlay";
 import Icon from "./Icon";
 

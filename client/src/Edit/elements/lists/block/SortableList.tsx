@@ -3,6 +3,8 @@ import React from "react";
 import { ArrayHelpers, FormikProps } from "formik";
 import { SortableContainer } from "react-sortable-hoc";
 import SortableItem from "./SortableItem";
+import styled from "styled-components/macro";
+import { dragClass } from "./Input";
 
 type Item = {
   key: number | string;
@@ -23,32 +25,39 @@ type SortableList = {
   ) => React.ReactNode;
   isSorting: boolean;
 };
-const SortableList = SortableContainer(({ items, ...props }: SortableList) => {
-  const { types } = props.itemType;
-  return (
-    <div>
-      {items &&
-        items
-          // only show data for existing models
-          .filter(i => {
-            // no type check necessary
-            if (!types && !(i.value || {})._type) return true;
-            return i.value._type && i.value._type in types;
-          })
-          .map((item, index) => (
-            <SortableItem
-              disabled={props.sortable ? false : true}
-              key={item.key}
-              index={index}
-              length={items.length}
-              schedule={item}
-              // point to the index of the unfiltered array
-              sortIndex={items.findIndex(i => i.key === item.key)}
-              {...props}
-            />
-          ))}
-    </div>
-  );
-});
-
+const BasicSortableList = SortableContainer(
+  ({ items, ...props }: SortableList) => {
+    const { types } = props.itemType;
+    return (
+      <div>
+        {items &&
+          items
+            // only show data for existing models
+            .filter(i => {
+              // no type check necessary
+              if (!types && !(i.value || {})._type) return true;
+              return i.value._type && i.value._type in types;
+            })
+            .map((item, index) => (
+              <SortableItem
+                disabled={props.sortable ? false : true}
+                key={item.key}
+                index={index}
+                length={items.length}
+                schedule={item}
+                // point to the index of the unfiltered array
+                sortIndex={items.findIndex(i => i.key === item.key)}
+                {...props}
+              />
+            ))}
+      </div>
+    );
+  }
+);
+export const DRAG_HELPER_CLASS = "dragging-helper-class";
+const SortableList = styled(BasicSortableList)`
+  &.${DRAG_HELPER_CLASS} {
+    ${dragClass}
+  }
+`;
 export default SortableList;

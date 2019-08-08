@@ -1,5 +1,5 @@
 import React from "react";
-import { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import Loadable from "react-loadable";
 // import "react-quill/dist/quill.bubble.css";
 import "react-quill/dist/quill.snow.css";
@@ -84,23 +84,27 @@ const iconH4 = `
 </svg>`;
 
 // Quill is big, load it on demand ...
-const ReactQuill = Loadable({
-  loader: () => import("react-quill"),
-  loading: () => null,
-  render(loaded: any, { innerRef, ...props }: any) {
-    const Component = loaded.default;
-    const icons = loaded.Quill.import("ui/icons");
-    icons.header[3] = iconH3;
-    icons.header[4] = iconH4;
-    return <Component ref={innerRef} {...props} />;
-  }
-});
+const ReactQuill = styled(
+  Loadable({
+    loader: () => import("react-quill"),
+    loading: () => null,
+    render(loaded: any, { innerRef, ...props }: any) {
+      const Component = loaded.default;
+      const icons = loaded.Quill.import("ui/icons");
+      icons.header[3] = iconH3;
+      icons.header[4] = iconH4;
+      return <Component ref={innerRef} {...props} />;
+    }
+  })
+)<{ interactive: boolean }>`
+  ${p => editorClass({ interactive: p.interactive })}
+`;
 
 export default function Quill({ ...props }: any) {
   const interactive = props.theme !== null;
   return (
     <ReactQuill
-      className={editorClass({ interactive })}
+      interactive={interactive}
       style={{ padding: 0, margin: 0 }}
       {...props}
     />

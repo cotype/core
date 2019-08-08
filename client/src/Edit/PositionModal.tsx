@@ -7,7 +7,7 @@ import * as Cotype from "../../../typings";
 import api from "../api";
 import ScrollList, { RenderInfo } from "../common/ScrollList";
 import Item from "../List/Item";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 
 export const errorClass = "error-field-label";
 

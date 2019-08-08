@@ -1,13 +1,13 @@
 import * as Cotype from "../../../../../../typings";
 import React, { Component, Fragment } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import { FieldProps, FieldArray } from "formik";
 import inputs from "../../inputs";
 import Button from "../../../../common/Button";
 import ListButton from "../../../../common/ListButton";
 import SortableList from "./SortableList";
 import outputs from "../../outputs";
-import { dragClass } from "../block/Input";
+import { DRAG_HELPER_CLASS } from "../block/SortableList";
 
 export const ITEM_VALUE_KEY = "value";
 
@@ -143,7 +143,7 @@ export default class ChipListInput extends Component<Props, State> {
               removeItem={index => arrayHelpers.remove(index)}
               arrayHelpers={arrayHelpers}
               name={name}
-              helperClass={dragClass}
+              helperClass={DRAG_HELPER_CLASS}
               onSortStart={() => this.setState({ isSorting: true })}
               onSortEnd={({ oldIndex, newIndex }) => {
                 arrayHelpers.move(oldIndex, newIndex);
