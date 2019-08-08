@@ -234,7 +234,7 @@ export default class KnexContent implements ContentAdapter {
                   ) {
                     if (items.items[1]) {
                       // get next one and middle it
-                      visit(items.items[0].data, model, {
+                      visit(items.items[1].data, model, {
                         position(nextPosition: string, g, h, nextStringPath) {
                           if (nextStringPath === fieldPath) {
                             data = setPosition(
