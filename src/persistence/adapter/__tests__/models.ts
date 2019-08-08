@@ -9,9 +9,9 @@ const models: ModelOpts[] = [
       image: { type: "media" },
       text: { type: "richtext" },
       inverseRef: {
-        type:'references',
-        model:'pages',
-        fieldName:'optionalNews'
+        type: "references",
+        model: "pages",
+        fieldName: "optionalNews"
       }
     }
   },
@@ -36,7 +36,7 @@ const models: ModelOpts[] = [
           type: "string",
           index: true
         }
-      },
+      }
     }
   },
   {
@@ -57,6 +57,17 @@ const models: ModelOpts[] = [
       },
       slug: { type: "string", input: "slug" },
       test: { type: "string" }
+    }
+  },
+  {
+    name: "positionContent",
+    singular: "Content with position Field",
+    orderBy: "posit",
+    fields: {
+      name: {
+        type: "string"
+      },
+      posit: { type: "position" }
     }
   }
 ];

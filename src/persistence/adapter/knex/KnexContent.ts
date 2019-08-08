@@ -130,6 +130,7 @@ export default class KnexContent implements ContentAdapter {
     models: Cotype.Model[],
     author: string
   ) {
+
     await this.testUniqueFields(model, models, storeData);
 
     const [id] = await this.knex("contents")
@@ -137,6 +138,8 @@ export default class KnexContent implements ContentAdapter {
         type: model.name
       })
       .returning("id");
+
+    storeData = await this.testPositionFields(model, models, storeData, id);
 
     await this.createRev(storeData, indexData, model, models, id, 1, author);
     return id;
