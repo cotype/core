@@ -20,6 +20,7 @@ const news = models.content[0];
 const pages = models.content[1];
 const uniqueContent = models.content[2];
 const indexContent = models.content[3];
+const positionContent = models.content[4];
 
 const implementations = [
   [
@@ -68,6 +69,23 @@ describe.each(implementations)("%s adapter", (_, impl) => {
     settings = adapter.settings;
     content = adapter.content;
     media = adapter.media;
+    expect.extend({
+      toBeGreaterThanString(received: string, expected: string) {
+        const pass = received > expected;
+        if (pass) {
+          return {
+            message: () => `expected ${received} to be lower than ${expected}`,
+            pass: true
+          };
+        } else {
+          return {
+            message: () =>
+              `expected ${received} to be greater than ${expected}`,
+            pass: false
+          };
+        }
+      }
+    });
   });
 
   afterAll(() => adapter.shutdown());
@@ -225,6 +243,20 @@ describe.each(implementations)("%s adapter", (_, impl) => {
               { ...d },
               { ...d },
               indexContent,
+              models.content,
+              author
+            ) as Promise<string>
+        )
+      );
+    };
+    const createPositionContent = (...data: object[]) => {
+      return Promise.all(
+        data.map(
+          d =>
+            content.create(
+              { ...d },
+              { ...d },
+              positionContent,
               models.content,
               author
             ) as Promise<string>
@@ -1289,26 +1321,85 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         const c = await content.load(news, ids[0]);
         expect(c).toMatchObject({ data: { title: "NEWS 1" } });
       });
-    });
 
-    it("should perform a migration only once", async () => {
-      const execute = jest.fn();
-      const callback = jest.fn();
-      await content.migrate([{ name: "aaa", execute }], callback);
-      await content.migrate([{ name: "aaa", execute }], callback);
-      expect(callback).toBeCalledTimes(1);
-    });
+      it("should perform a migration only once", async () => {
+        const execute = jest.fn();
+        const callback = jest.fn();
+        await content.migrate([{ name: "aaa", execute }], callback);
+        await content.migrate([{ name: "aaa", execute }], callback);
+        expect(callback).toBeCalledTimes(1);
+      });
 
-    it("should wait for migrations to finish", async () => {
-      const execute = jest.fn();
-      const callback = jest.fn<Promise<void>, any>(
-        () => new Promise(resolve => setTimeout(resolve, 1000))
-      );
-      await Promise.all([
-        content.migrate([{ name: "bbb", execute }], callback),
-        content.migrate([{ name: "bbb", execute }], callback)
-      ]);
-      expect(callback).toBeCalledTimes(1);
+      it("should wait for migrations to finish", async () => {
+        const execute = jest.fn();
+        const callback = jest.fn<Promise<void>, any>(
+          () => new Promise(resolve => setTimeout(resolve, 1000))
+        );
+        await Promise.all([
+          content.migrate([{ name: "bbb", execute }], callback),
+          content.migrate([{ name: "bbb", execute }], callback)
+        ]);
+        expect(callback).toBeCalledTimes(1);
+      });
+    });
+    describe("positions", () => {
+      let ids: string[] = [];
+      beforeAll(async () => {
+        ids = await createPositionContent(
+          { title: "A", posit: "A" },
+          { title: "B", posit: "B" }
+        );
+      });
+      it("should add position field, onCreate", async () => {
+        const i = await createPositionContent({ title: "C" });
+        const c = (await content.load(positionContent, i[0])) as any;
+        (expect(c.data.posit) as any).toBeGreaterThanString("B");
+      });
+      it("should add position field, onUpdate", async () => {
+        const data = { title: "B" };
+        await content.createRevision(
+          data,
+          data,
+          positionContent,
+          models.content,
+          ids[1],
+          author
+        );
+
+        const c = (await content.load(positionContent, ids[1])) as any;
+        (expect(c.data.posit) as any).toBeGreaterThanString("B");
+      });
+      it("should change position field when value exists", async () => {
+        const i = await createPositionContent({ title: "D", posit: "A" });
+        const c = (await content.load(positionContent, i[0])) as any;
+        (expect(c.data.posit) as any).toBeGreaterThanString("A");
+
+        const data = { title: "D", posit: "A" };
+        await content.createRevision(
+          data,
+          data,
+          positionContent,
+          models.content,
+          i[0],
+          author
+        );
+        const c2 = (await content.load(positionContent, i[0])) as any;
+        (expect(c2.data.posit) as any).toBeGreaterThanString("A");
+      });
+      it("should keep position field when value exists on same id", async () => {
+        const data = { title: "ABC", posit: "A" };
+        await content.createRevision(
+          data,
+          data,
+          positionContent,
+          models.content,
+          ids[0],
+          author
+        );
+        const c = (await content.load(positionContent, ids[0])) as any;
+        (expect(c.data.title) as any).toBe("ABC");
+        (expect(c.data.posit) as any).toBe("A");
+      });
     });
   });
 
