@@ -272,9 +272,13 @@ export async function init(opts: Opts) {
     });
   });
 
+  // This routes purpose is to provide all content options
+  // for the MapInput inside the built-in roles models
   router.get("/admin/rest/info/content", (req, res) => {
     const filteredModels = filterModels(models, req.principal);
-    res.json(filteredModels.content.map(m => m.name));
+    res.json(
+      filteredModels.content.map(m => ({ value: m.name, label: m.singular }))
+    );
   });
   router.get("/admin/rest/info/settings", (req, res) => {
     const filteredModels = filterModels(models, req.principal);
