@@ -26,6 +26,7 @@ import Login from "./auth/Login";
 import UserContext from "./auth/UserContext";
 import IconGallery from "./IconGallery";
 import List from "./List";
+import Dashboard from "./Dashboard";
 import SplitPane from "./common/SplitPane";
 import ErrorBoundary from "./ErrorBoundary";
 
@@ -100,6 +101,10 @@ class App extends React.Component<{}, State> {
                   <ErrorBoundary>
                     <Main>
                       <Switch>
+                        <Route
+                          path={`${basePath}/dashboard`}
+                          render={props => <Dashboard />}
+                        />
                         {navigation.map(item => (
                           <Route
                             key={item.path}
@@ -161,11 +166,7 @@ class App extends React.Component<{}, State> {
                           component={IconGallery}
                         />
                         <Route exact path={basePath}>
-                          <Redirect
-                            to={`${basePath}${
-                              navigation[0] ? navigation[0].path! : "/media"
-                            }`}
-                          />
+                          <Redirect to={`${basePath}/dashboard`} />
                         </Route>
                       </Switch>
                     </Main>

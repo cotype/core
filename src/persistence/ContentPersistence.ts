@@ -22,7 +22,9 @@ import {
   Model,
   ContentRefs,
   Content,
-  Principal
+  Principal,
+  ListOpts,
+  ListChunk
 } from "../../typings";
 import extractMatch from "../model/extractMatch";
 import extractText from "../model/extractText";
@@ -30,6 +32,7 @@ import log from "../log";
 import visit, { NO_STORE_VALUE } from "../model/visit";
 import setPosition from "../model/setPosition";
 import MigrationContext from "./MigrationContext";
+import { createModelFilter } from "../model/filterModels";
 
 export type Migration = {
   name: string;
@@ -634,6 +637,43 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
         await m.execute(ctx);
       }
     });
+  }
+
+  createItemsWithAuthorAndDate = (listChunk: ListChunk<Content>) => {
+    return this.createItems(listChunk.items).map((i, idx) => {
+      const { date, author } = listChunk.items[idx];
+      return { ...i, date, author_name: author };
+    });
+  };
+
+  async listLastUpdatedContent(
+    principal: Cotype.Principal,
+    opts: ListOpts = { limit: 50, offset: 0 },
+    byUser?: boolean
+  ) {
+    const filteredModels = this.models.filter(createModelFilter(principal));
+    const listChunk = await this.adapter.listLastUpdatedContent(
+      filteredModels.map(m => m.name),
+      opts,
+      byUser ? principal.id! : undefined
+    );
+
+    return {
+      total: listChunk.total,
+      items: this.createItemsWithAuthorAndDate(listChunk)
+    };
+  }
+  async listUnpublishedContent(principal: Cotype.Principal, opts: ListOpts) {
+    const filteredModels = this.models.filter(createModelFilter(principal));
+    const listChunk = await this.adapter.listUnpublishedContent(
+      filteredModels.map(m => m.name),
+      opts
+    );
+
+    return {
+      total: listChunk.total,
+      items: this.createItemsWithAuthorAndDate(listChunk)
+    };
   }
 
   private processReferenceConflictError = (principal: Principal, err: any) => {

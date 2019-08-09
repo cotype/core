@@ -59,6 +59,7 @@ context("Settings", () => {
     cy.withContext(({ userEmail, password, userName }) => {
       cy.login({ email: userEmail, password, name: userName });
       frame.navigation("Settings").should("not.exist");
+      frame.navigation("Content").click();
       frame.sidebarItems().should("have.length", 1);
       frame.sidebarItem("Foos").should("have.length", 1);
     });

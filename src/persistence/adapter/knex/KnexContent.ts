@@ -18,7 +18,7 @@ import getInverseReferenceFields from "../../../model/getInverseReferenceFields"
 import log from "../../../log";
 import visitModel from "../../../model/visitModel";
 import { Migration } from "../../ContentPersistence";
-import { Model } from "../../../../typings";
+import { Model, ListOpts } from "../../../../typings";
 import visit from "../../../model/visit";
 
 const ops: any = {
@@ -1443,6 +1443,80 @@ export default class KnexContent implements ContentAdapter {
         poll();
       });
     }
+  }
+
+  async listLastUpdatedContent(
+    models: string[],
+    opts: ListOpts,
+    user?: string
+  ) {
+    const k = this.knex("contents")
+      .select([
+        "contents.id",
+        "contents.type",
+        "cr.data",
+        "cr.date",
+        "users.name as author"
+      ])
+      .join("content_revisions as cr", join => {
+        join.on(`contents.id`, "cr.id");
+        join.on("contents.latest_rev", "cr.rev");
+      })
+      .join("users", "users.id", "cr.author")
+      .whereIn("type", models);
+    if (user) {
+      k.andWhere("cr.author", user);
+    }
+
+    const [count] = await k.clone().count("contents.id as total");
+
+    const total = Number(count.total);
+    if (total === 0) return { total, items: [] };
+
+    k.orderBy("cr.date", "desc");
+    k.offset(Number(opts.offset)).limit(Number(opts.limit));
+
+    const items = await k;
+    return {
+      total,
+      items: items.map((i: any) => this.parseData(i))
+    };
+  }
+
+  async listUnpublishedContent(models: string[], opts: ListOpts) {
+    const k = this.knex("contents")
+      .select([
+        "contents.id",
+        "contents.type",
+        "cr.data",
+        "cr.date",
+        "users.name as author"
+      ])
+      .join("content_revisions as cr", join => {
+        join.on(`contents.id`, "cr.id");
+        join.on("contents.latest_rev", "cr.rev");
+      })
+      .join("users", "users.id", "cr.author")
+      .where(
+        "contents.latest_rev",
+        "<>",
+        this.knex.raw("contents.published_rev")
+      )
+      .orWhere("contents.published_rev", null)
+      .whereIn("type", models);
+
+    const [count] = await k.clone().count("contents.id as total");
+    const total = Number(count.total);
+    if (total === 0) return { total, items: [] };
+
+    k.orderBy("cr.date", "desc");
+    k.offset(Number(opts.offset)).limit(Number(opts.limit));
+
+    const items = await k;
+    return {
+      total,
+      items: items.map((i: any) => this.parseData(i))
+    };
   }
 
   private aggregateRefs(idCol: string, typeCol: string, fieldNamesCol: string) {
