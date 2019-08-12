@@ -18,7 +18,7 @@ import styled from "react-emotion";
 import { UploadProvider, createXhrClient } from "react-use-upload";
 import basePath from "./basePath";
 import api from "./api";
-import Header from "./Header";
+import Header, { HEIGHT } from "./Header";
 import Models from "./Models";
 import ModelPathsContext from "./ModelPathsContext";
 import Media from "./Media";
@@ -39,6 +39,7 @@ const Main = styled("div")`
   position: relative;
   flex: 1;
   display: flex;
+  max-height: calc(100vh - ${HEIGHT});
 `;
 
 type State = {
