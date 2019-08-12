@@ -36,6 +36,21 @@ const modelC: ModelOpts = {
   }
 };
 
+const modelD: ModelOpts = {
+  name: "D",
+  urlPath: "/path/to/:title",
+  fields: {
+    title: { type: "string" },
+    refs: {
+      type: "list",
+      item: {
+        type: "content",
+        models: ["C"]
+      }
+    }
+  }
+};
+
 describe("joins", () => {
   let app: any;
   let persistence: Persistence;
@@ -56,7 +71,7 @@ describe("joins", () => {
     const storage = new FsStorage(uploadDir);
 
     ({ app, persistence } = await init({
-      models: [modelA, modelB, modelC],
+      models: [modelA, modelB, modelC, modelD],
       thumbnailProvider: new LocalThumbnailProvider(storage),
       storage,
       persistenceAdapter: knexAdapter({
@@ -231,6 +246,48 @@ describe("joins", () => {
       _refs: {
         media: {},
         content: {}
+      }
+    });
+
+    // Should also works with array of refs
+    const c2 = await create(modelC.name, {
+      title: faker.lorem.slug()
+    });
+    await publish(modelC.name, c2.id);
+
+    const d = await create(modelD.name, {
+      title: faker.lorem.slug(),
+      refs: [
+        { key: 1, value: { id: c.id, model: modelC.name } },
+        { key: 2, value: { id: c2.id, model: modelC.name } }
+      ]
+    });
+    await publish(modelD.name, d.id);
+
+    await expect(
+      await find(modelD.name, d.id, { join: { C: ["title"] } }, true)
+    ).toStrictEqual({
+      _id: d.id,
+      title: d.data.title,
+      refs: [
+        {
+          _id: c2.id,
+          _content: modelC.name,
+          _ref: "content",
+          _url: `/path/to/${c2.data.title}`
+        }
+      ],
+      _refs: {
+        media: {},
+        content: {
+          [modelC.name]: {
+            [c2.id]: {
+              _id: c2.id,
+              _type: modelC.name,
+              title: c2.data.title
+            }
+          }
+        }
       }
     });
   });

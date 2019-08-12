@@ -121,7 +121,12 @@ export default function convert({
         // No content for the ref was provided,
         // this means the referenced content does not exists anymore.
         // This happens when content get deleted or is scheduled
-        if (!referencedModel || !contentRefs[ref.model]) return NO_STORE_VALUE;
+        if (
+          !referencedModel ||
+          !contentRefs[ref.model] ||
+          !contentRefs[ref.model][ref.id]
+        )
+          return NO_STORE_VALUE;
 
         // If the referenced content has no `urlPath`,
         // we don't need to add the `_url`
