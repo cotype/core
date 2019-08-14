@@ -64,6 +64,12 @@ class Header extends Component<Props> {
     return (
       <Bar>
         <Items>
+          <ItemLink
+            {...testable("main-navigation-item")}
+            to={`${basePath}/dashboard`}
+          >
+            Dashboard
+          </ItemLink>
           {navigation.map(({ path, name }) => (
             <ItemLink
               {...testable("main-navigation-item")}

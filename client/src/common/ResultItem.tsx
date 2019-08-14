@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import _escape from "lodash/escape";
 import basePath from "../basePath";
 import ImageCircle from "../common/ImageCircle";
-
+import TimeAgo from "react-time-ago";
 import ColorHash from "color-hash";
 import { withModelPaths } from "../ModelPathsContext";
 const colorHash = new ColorHash({ saturation: 0.7, lightness: 0.6 });
@@ -56,6 +56,17 @@ const Kind = styled("div")`
   flex-shrink: 0;
 `;
 
+const ChangedBy = styled("span")`
+  color: var(--dark-grey);
+  font-size: 0.8em;
+`;
+
+const LastChangedBy = ({ author, date }: { author: string; date: string }) => (
+  <ChangedBy>
+    Updated by {author} <TimeAgo date={new Date(date)} />
+  </ChangedBy>
+);
+
 export const ResultTitle = ({
   title,
   term
@@ -105,6 +116,7 @@ export const BasicResultItem = ({ item, term }: BasicProps) => {
       <Wrapper>
         <TitleWrapper>
           <ResultTitle title={title} term={term}></ResultTitle>
+
           <Kind style={{ background: colorHash.hex(kind) }}>{kind}</Kind>
         </TitleWrapper>
         <DescriptionWrapper>
@@ -114,6 +126,9 @@ export const BasicResultItem = ({ item, term }: BasicProps) => {
             </Description>
           )}
         </DescriptionWrapper>
+        {"author_name" in item && "date" in item && (
+          <LastChangedBy date={item.date} author={item.author_name} />
+        )}
       </Wrapper>
     </ImageItem>
   );

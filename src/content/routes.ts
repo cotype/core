@@ -54,6 +54,42 @@ export default (
     res.json(items);
   });
 
+  /** Dashboard routes  */
+
+  router.get("/admin/rest/dashboard/unpublished", async (req, res) => {
+    const { principal, query } = req;
+    const { limit = 50, offset = 0 } = query;
+
+    const items = await content.listUnpublishedContent(principal, {
+      limit,
+      offset
+    });
+    res.json(items);
+  });
+
+  router.get("/admin/rest/dashboard/updated", async (req, res) => {
+    const { query, principal } = req;
+    const { limit = 50, offset = 0 } = query;
+
+    const items = await content.listLastUpdatedContent(principal, {
+      limit,
+      offset
+    });
+    res.json(items);
+  });
+
+  router.get("/admin/rest/dashboard/updated-by-user", async (req, res) => {
+    const { principal, query } = req;
+    const { limit = 50, offset = 0 } = query;
+
+    const items = await content.listLastUpdatedContent(
+      principal,
+      { limit, offset },
+      true
+    );
+    res.json(items);
+  });
+
   /** List  */
   router.get("/admin/rest/content/:modelName", async (req, res) => {
     const { principal, params, query } = req;
