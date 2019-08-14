@@ -6,6 +6,7 @@ import Button from "../common/Button";
 import ModalDialog from "../common/ModalDialog";
 import { paths } from "../common/icons";
 import { Fields } from "../../../typings";
+import { parse } from "qs";
 
 export const errorClass = "error-field-label";
 
@@ -42,12 +43,19 @@ class RichTextLinkModal extends Component<Props> {
       this.props.onSave(values.text.trim(), link);
     }
 
-    if (
-      values.link[0].value._type === "media" &&
-      values.link[0].value.media &&
-      values.link[0].value.media
-    ) {
+    if (values.link[0].value._type === "media" && values.link[0].value.media) {
       const link = "$media:" + values.link[0].value.media + "$";
+      this.props.onSave(values.text.trim(), link);
+    }
+    if (values.link[0].value._type === "mail" && values.link[0].value.email) {
+      const subject =
+        values.link[0].value.subject && values.link[0].value.subject.length > 0
+          ? values.link[0].value.subject
+          : null;
+      const link =
+        "mailto:" +
+        values.link[0].value.email +
+        (subject ? `?subject=${subject}` : "");
       this.props.onSave(values.text.trim(), link);
     }
   };
@@ -83,6 +91,24 @@ class RichTextLinkModal extends Component<Props> {
                   type: "media",
                   label: "Media",
                   required: true
+                }
+              }
+            },
+            mail: {
+              type: "object",
+              label: "E-Mail",
+              fields: {
+                email: {
+                  type: "string",
+                  label: "E-Mail Adresse",
+                  required: true,
+                  validationRegex:
+                    '^(([^<>()\\[\\]\\\\.,;:\\s@"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@"]+)*)|(".+"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$',
+                  regexError: "Has to be a valid e-mail address"
+                },
+                subject: {
+                  type: "string",
+                  label: "Betreff"
                 }
               }
             }
@@ -125,6 +151,24 @@ class RichTextLinkModal extends Component<Props> {
       link.value = {
         _type: "media",
         media: mediaMatch[1],
+        link: undefined
+      };
+    }
+    /* eslint-disable-next-line */
+    const mailMatch = /mailto:((([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/gm.exec(
+      initial.link
+    );
+
+    if (mailMatch) {
+      const more = initial.link.split("?");
+      let params: { subject?: string } = {};
+      if (more[1]) {
+        params = parse(more[1]);
+      }
+      link.value = {
+        _type: "mail",
+        email: mailMatch[1],
+        subject: params.subject || "",
         link: undefined
       };
     }
