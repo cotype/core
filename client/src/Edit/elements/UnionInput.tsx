@@ -1,7 +1,7 @@
 import * as Cotype from "../../../../typings";
 import React, { Component, Fragment } from "react";
 import { FieldProps } from "formik";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import titleCase from "title-case";
 import basePath from "../../basePath";
 import Button from "../../common/Button";
@@ -21,12 +21,11 @@ export const TypeLabel = styled("div")`
 type IconProps = {
   name: string;
 };
-const Icon = styled("div")`
+const Icon = styled("div")<IconProps>`
   display: inline-block;
   width: 24px;
   height: 24px;
-  mask-image: url(${({ name }: IconProps) =>
-    `${basePath}/rest/icons/${name}.svg`});
+  mask-image: url(${({ name }) => `${basePath}/rest/icons/${name}.svg`});
   background-color: var(--accent-color);
   margin-right: 4px;
 `;

@@ -1,6 +1,6 @@
 import { VersionItem } from "../../../typings";
 import React, { Component } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 
 import ModalDialog from "../common/ModalDialog";
 import ResultItem from "../common/ResultItem";

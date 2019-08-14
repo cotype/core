@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import Icon from "../common/icons";
 import { testable } from "../utils/helper";
 const Backdrop = styled("div")`

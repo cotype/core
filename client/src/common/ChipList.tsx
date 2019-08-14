@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled from "styled-components/macro";
 import ColorHash from "color-hash";
-import { inputClass } from "./styles";
+import { Input } from "./styles";
 import Button from "./Button";
 import Icon, { paths } from "./icons";
 import { testable } from "../utils/helper";
@@ -41,12 +41,12 @@ const StyledButton = styled("button")`
 const Root = styled("div")`
   margin: 10px 0;
 `;
-const Input = styled("form")`
+const Form = styled("form")`
   display: flex;
   width: 100%;
 `;
 
-const clearClass = css`
+const ClearCircleIcon = styled(Icon.ClearCircle)`
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 0 4px;
 `;
@@ -81,26 +81,25 @@ export default class ChipList extends Component<Props, State> {
             <Item key={index} style={{ background: colorHash.hex(v) }}>
               {v}
               <StyledButton type="button" onClick={() => onDelete(index)}>
-                <Icon.ClearCircle className={clearClass} />
+                <ClearCircleIcon />
               </StyledButton>
             </Item>
           ))}
-        <Input
+        <Form
           onSubmit={e => {
             e.preventDefault();
             this.onAdd();
           }}
         >
-          <input
+          <Input
             {...testable("chip-list-input")}
-            className={inputClass}
             value={newValue}
             onChange={e => this.setState({ newValue: e.target.value })}
           />
           <Button icon={paths.Plus} light type="submit">
             Add
           </Button>
-        </Input>
+        </Form>
       </Root>
     );
   }

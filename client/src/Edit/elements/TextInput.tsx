@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { FieldProps } from "formik";
-import { inputClass } from "../../common/styles";
 import { required as validateRequired } from "./validation";
+import { Input } from "../../common/styles";
 
 type Props = FieldProps<any> & {
   required?: boolean;
@@ -47,9 +47,8 @@ export default class TextInput extends Component<Props> {
     const { field, maxLength, readOnly, placeholder, minLength } = this.props;
     const { value, ...props } = field;
     return (
-      <input
+      <Input
         readOnly={readOnly}
-        className={inputClass}
         value={value || ""}
         minLength={minLength}
         maxLength={maxLength}

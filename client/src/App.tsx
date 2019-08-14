@@ -14,7 +14,7 @@ import {
   Route,
   Redirect
 } from "react-router-dom";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import { UploadProvider, createXhrClient } from "react-use-upload";
 import basePath from "./basePath";
 import api from "./api";

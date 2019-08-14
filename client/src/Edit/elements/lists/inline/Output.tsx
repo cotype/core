@@ -1,7 +1,7 @@
 import { Type } from "../../../../../../typings";
 import React from "react";
 import outputs from "../../outputs";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import { Item } from "./SortableItem";
 
 const ItemField = styled("div")`

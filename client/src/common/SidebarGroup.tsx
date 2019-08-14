@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import Icon from "../common/icons";
 import { testable } from "../utils/helper";
 
@@ -24,10 +24,10 @@ const GroupHeader = styled("div")`
 type Icon = {
   expanded: boolean;
 };
-const iconClass = (p: Icon) => css`
+const ChevronRightIcon = styled(Icon.ChevronRight)<Icon>`
   margin-left: -10px;
   margin-right: 2px;
-  transform: ${p.expanded ? "rotate(90deg)" : "none"};
+  transform: ${p => (p.expanded ? "rotate(90deg)" : "none")};
 `;
 
 type P = {
@@ -76,7 +76,7 @@ export default class SidebarGroup extends Component<Props, State> {
           onClick={this.toggleOpen}
           level={level}
         >
-          <Icon.ChevronRight className={iconClass({ expanded: open })} />
+          <ChevronRightIcon expanded={open} />
           {group}
         </GroupHeader>
         {open && <GroupChildren level={level + 1}>{children}</GroupChildren>}

@@ -1,6 +1,6 @@
 import * as Cotype from "../../../typings";
 import React, { Component } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import moment from "moment";
 import ModalDialog from "./ModalDialog";
 import Button from "./Button";

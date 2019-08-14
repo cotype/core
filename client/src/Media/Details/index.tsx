@@ -1,6 +1,6 @@
 import * as Cotype from "../../../../typings";
 import React, { Component } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import TimeAgo from "react-time-ago";
 import { formatBytes, testable } from "../../utils/helper";
 import ModalDialog from "../../common/ModalDialog";
@@ -10,7 +10,7 @@ import Button from "../../common/Button";
 import { paths } from "../../common/icons";
 import ChipList from "../../common/ChipList";
 import api from "../../api";
-import { inputClass } from "../../common/styles";
+import { Input } from "../../common/styles";
 
 const MetaInput = styled("div")`
   margin-bottom: 10px;
@@ -198,17 +198,15 @@ export default class Details extends Component<Props, State> {
               <MetaData>
                 <MetaInput>
                   <MetaItemLabel>Alt</MetaItemLabel>
-                  <input
+                  <Input
                     {...testable("meta-data-alt")}
-                    className={inputClass}
                     value={alt || ""}
                     onChange={e => this.setState({ alt: e.target.value })}
                   />
                 </MetaInput>
                 <MetaInput>
                   <MetaItemLabel>Credit</MetaItemLabel>
-                  <input
-                    className={inputClass}
+                  <Input
                     value={credit || ""}
                     onChange={e => this.setState({ credit: e.target.value })}
                   />
@@ -216,8 +214,7 @@ export default class Details extends Component<Props, State> {
                 <MetaInput>
                   <MetaItemLabel>URL</MetaItemLabel>
                   <FlexRow>
-                    <input
-                      className={inputClass}
+                    <Input
                       value={window.location.origin + "/media/" + id}
                       readOnly
                     />

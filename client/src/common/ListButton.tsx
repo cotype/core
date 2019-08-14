@@ -1,5 +1,5 @@
 import React from "react";
-import styled, { css } from "react-emotion";
+import styled from "styled-components/macro";
 import Icon from "./icons";
 
 export const StyledButton = styled("button")`
@@ -29,7 +29,7 @@ export const StyledButton = styled("button")`
   }
 `;
 
-const iconClass = css`
+const PlusIcon = styled(Icon.Plus)`
   color: white;
   width: 100%;
   height: 100%;
@@ -59,7 +59,7 @@ export default function Button({ icon, children, disabled, ...props }: Props) {
   return (
     <StyledButton type="button" {...props} disabled={disabled}>
       <IconWrapper disabled={disabled}>
-        <Icon.Plus className={iconClass} />
+        <PlusIcon />
       </IconWrapper>
       {children}
     </StyledButton>

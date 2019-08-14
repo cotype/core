@@ -1,6 +1,10 @@
 import React, { Component } from "react";
 import { outputClass } from "../../common/styles";
+import styled from "styled-components/macro";
 
+const Container = styled("div")`
+  ${outputClass}
+`;
 type Props = {
   value?: any;
   "data-name"?: string;
@@ -17,9 +21,7 @@ export default class TextOutput extends Component<Props> {
 
     return (
       // eslint-disable-next-line
-      <div data-name={dataName} className={outputClass}>
-        {value}
-      </div>
+      <Container data-name={dataName}>{value}</Container>
     );
   }
 }

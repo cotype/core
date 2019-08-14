@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Formik, FormikActions, FormikProps } from "formik";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 
 import api from "../api";
 import { Field, Label, Input, Error, Button } from "../common/styles";

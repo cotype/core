@@ -1,5 +1,5 @@
 import React from "react";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import Icon from "./Icon";
 
 type P = {
@@ -43,16 +43,32 @@ type Props = {
   icon?: string;
   children?: any;
   light?: boolean;
+  css?: any;
 } & (
   | React.ButtonHTMLAttributes<HTMLButtonElement> & { asLink?: false }
   | React.AnchorHTMLAttributes<HTMLAnchorElement> & { asLink: true });
 
-export default function Button({ icon, children, asLink, ...props }: Props) {
-  const Element: any = asLink ? StyledLink : StyledButton;
-  return (
-    <Element type={!asLink ? "button" : undefined} {...props}>
+export default function Button({
+  icon,
+  children,
+  asLink,
+  css: style,
+  ...props
+}: Props) {
+  const renderMutualContent = (
+    <>
       {icon && <Icon path={icon} />}
-      <span>{children && children}</span>
-    </Element>
+      {children && <span>{children}</span>}
+    </>
+  );
+
+  return asLink ? (
+    <StyledLink css={style} {...(props as any)}>
+      {renderMutualContent}
+    </StyledLink>
+  ) : (
+    <StyledButton type="button" css={style} {...(props as any)}>
+      {renderMutualContent}
+    </StyledButton>
   );
 }

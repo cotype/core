@@ -7,7 +7,7 @@ import useValidation from "./useValidation";
 export type Props = {
   render: any;
   onUpload: any;
-  className: string;
+  className?: string;
   activeClass: string;
   multiple?: boolean;
   mediaType?: string;

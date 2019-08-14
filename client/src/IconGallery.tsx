@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import api from "./api";
 import Icon from "./common/Icon";
 import { Page } from "./common/page";

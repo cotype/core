@@ -1,12 +1,15 @@
 import React from "react";
-
+import styled from "styled-components/macro";
 export type Props = React.SVGProps<SVGSVGElement> & {
   path: string;
+  ref?: any;
 };
+
+const SVG = styled("svg")``;
 
 export default function Icon({ path, ...props }: Props) {
   return (
-    <svg
+    <SVG
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
@@ -14,6 +17,6 @@ export default function Icon({ path, ...props }: Props) {
       {...props}
     >
       <path d={path} fill="currentColor" />
-    </svg>
+    </SVG>
   );
 }

@@ -3,7 +3,11 @@ import { FieldProps } from "formik";
 import { inputClass } from "../../common/styles";
 import { required as validateRequired } from "./validation";
 import Textarea from "react-textarea-autosize";
+import styled from "styled-components/macro";
 
+const StyledTextarea = styled(Textarea)`
+  ${inputClass}
+`;
 type Props = FieldProps<any> & {
   required?: boolean;
   readOnly?: boolean;
@@ -48,13 +52,12 @@ export default class TextInput extends Component<Props> {
     } = this.props;
     const { value, ...props } = field;
     return (
-      <Textarea
+      <StyledTextarea
         readOnly={readOnly}
         minLength={minLength}
         maxLength={maxLength}
         maxRows={maxRows}
         minRows={minRows}
-        className={inputClass}
         value={value || ""}
         {...props}
       />

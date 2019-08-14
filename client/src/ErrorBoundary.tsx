@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled from "styled-components/macro";
 import Button from "./common/Button";
 import { paths } from "./common/icons";
 import { HEIGHT as HEADER_HEIGHT } from "./Header";
@@ -13,7 +13,7 @@ const Container = styled("div")`
   margin: 1em;
 `;
 
-const ButtonStyle = css`
+const StyledButton = styled(Button)`
   margin-top: 13rem;
 `;
 
@@ -44,13 +44,12 @@ export default class ErrorBoundary extends Component<{}, State> {
             If you encounter this problem more then once, please let the IT guy
             know!
           </p>
-          <Button
+          <StyledButton
             icon={paths.Reload}
             onClick={() => window.location.reload()}
-            className={ButtonStyle}
           >
             Reload
-          </Button>
+          </StyledButton>
         </Container>
       );
     }
