@@ -3,4 +3,3 @@ jest.mock("./src/basePath", () => "");
 jest.mock("styled-components/macro", () => require("styled-components"));
 
 import "@testing-library/jest-dom/extend-expect";
-import "@testing-library/react/cleanup-after-each";

@@ -11,6 +11,7 @@ const models: ModelOpts[] = [
       slug: { type: "string", input: "slug" },
       date: { type: "string" },
       image: { type: "media" },
+      imageList: { type: "list", item: { type: "media" } },
       text: { type: "richtext" },
       ref: { type: "content", models: ["products"] }
     }

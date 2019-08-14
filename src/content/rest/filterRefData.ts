@@ -1,6 +1,7 @@
 import * as Cotype from "../../../typings";
 import pick = require("lodash/pick");
 import visit from "../../model/visit";
+import visitConvertedRestContent from "./visit";
 import { Field } from "../../../typings";
 
 const getModelsFromFieldType = (field: Field): string[] =>
@@ -124,7 +125,7 @@ export const getContainingMedia = (
 ) => {
   const containingMedia: Cotype.MediaRefs = {};
   if (model && content) {
-    visit(content, model, {
+    visitConvertedRestContent(content, model, {
       media(m: { _id: string } | null) {
         if (!m) return;
         if (media[m._id]) containingMedia[m._id] = media[m._id];

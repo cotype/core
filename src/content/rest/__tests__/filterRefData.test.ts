@@ -6,6 +6,7 @@ import removeUnnecessaryRefData, {
 } from "../filterRefData";
 import models from "./models";
 import { Model, Content, Refs } from "../../../../typings";
+import faker from "faker";
 
 describe("removeUnnecessaryRefData", () => {
   const join = {
@@ -16,10 +17,11 @@ describe("removeUnnecessaryRefData", () => {
 
   const newsData = {
     data: {
-      title: "Hello World",
-      slug: "Slug That",
-      date: "Some Date",
-      image: { _id: "image.exe" },
+      title: faker.random.words(4),
+      slug: faker.lorem.slug(3),
+      date: new Date().toString(),
+      image: { _id: faker.system.fileName() },
+      imageList: [{ key: 1, value: { _id: faker.system.fileName() } }],
       refs: {
         _id: 2,
         _ref: "content",
@@ -34,10 +36,10 @@ describe("removeUnnecessaryRefData", () => {
 
   const productData = {
     data: {
-      title: "title",
-      ean: "ean",
-      description: "description",
-      image: "image"
+      title: faker.lorem.words(4),
+      ean: faker.random.number(),
+      description: faker.lorem.words(4),
+      image: faker.system.fileName()
     },
     id: "2",
     type: "products",
@@ -48,7 +50,7 @@ describe("removeUnnecessaryRefData", () => {
   it("createJoin", async () => {
     const createdJoin = createJoin(join, models as Model[]);
 
-    await expect(createdJoin).toEqual({
+    await expect(createdJoin).toStrictEqual({
       news: ["title", "slug"],
       articlenews: ["title", "slug"],
       products: ["ean"]
@@ -60,8 +62,8 @@ describe("removeUnnecessaryRefData", () => {
 
     const filteredContent = filterContentData(newsData, createdJoin);
     await expect(filteredContent).toMatchObject({
-      title: "Hello World",
-      slug: "Slug That",
+      title: newsData.data.title,
+      slug: newsData.data.slug,
       _id: "1",
       _type: "news"
     });
@@ -69,8 +71,10 @@ describe("removeUnnecessaryRefData", () => {
 
   it("getContainingMedia", async () => {
     const mediaRefs = {
-      "image.exe": { someCrazyProps: "forBar" },
-      "image2.exe": { someCrazyProps: "forBar2" }
+      [newsData.data.image._id]: { someCrazyProps: "forBar" },
+      [newsData.data.imageList[0]._id]: { someCrazyProps: "forBar2" },
+      [faker.random.image()]: { someCrazyProps: "forBar3" },
+      [faker.random.image()]: { someCrazyProps: "forBar4" }
     } as any;
 
     const containingMedia = getContainingMedia(
@@ -79,8 +83,9 @@ describe("removeUnnecessaryRefData", () => {
       mediaRefs
     );
 
-    await expect(containingMedia).toEqual({
-      "image.exe": { someCrazyProps: "forBar" }
+    await expect(containingMedia).toStrictEqual({
+      [newsData.data.image._id]: { someCrazyProps: "forBar" },
+      [newsData.data.imageList[0]._id]: { someCrazyProps: "forBar2" }
     });
   });
 
@@ -109,8 +114,8 @@ describe("removeUnnecessaryRefData", () => {
         }
       },
       media: {
-        "image.exe": { ...meta, id: "image.exe" },
-        "image2.exe": { ...meta, id: "image2.exe" }
+        [newsData.data.image._id]: { ...meta, id: newsData.data.image._id },
+        [faker.system.fileName()]: { ...meta, id: "image2.exe" }
       }
     };
     const cleanRefs = removeUnnecessaryRefData(
@@ -120,20 +125,22 @@ describe("removeUnnecessaryRefData", () => {
       models as Model[]
     );
 
-    await expect(cleanRefs).toEqual({
+    await expect(cleanRefs).toStrictEqual({
       content: {
         news: {
           "1": {
             _id: "1",
             _type: "news",
-            slug: "Slug That",
-            title: "Hello World"
+            slug: newsData.data.slug,
+            title: newsData.data.title
           }
         },
-        products: { "2": { ean: "ean", _id: "2", _type: "products" } }
+        products: {
+          "2": { ean: productData.data.ean, _id: "2", _type: "products" }
+        }
       },
       media: {
-        "image.exe": { ...meta, id: "image.exe" }
+        [newsData.data.image._id]: { ...meta, id: newsData.data.image._id }
       }
     });
   });
@@ -148,7 +155,7 @@ describe("convertDeepJons", () => {
       models as Model[]
     );
 
-    await expect(deepJoins).toEqual([
+    await expect(deepJoins).toStrictEqual([
       {
         news: ["title", "ref"]
       },
@@ -165,7 +172,7 @@ describe("convertDeepJons", () => {
       models as Model[]
     );
 
-    await expect(deepJoins).toEqual([
+    await expect(deepJoins).toStrictEqual([
       {
         products: ["title", "sections"]
       },
@@ -182,7 +189,7 @@ describe("convertDeepJons", () => {
       models as Model[]
     );
 
-    await expect(deepJoins).toEqual([
+    await expect(deepJoins).toStrictEqual([
       {
         news: ["title", "ref"]
       },
