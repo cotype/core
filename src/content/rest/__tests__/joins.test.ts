@@ -32,7 +32,8 @@ const modelC: ModelOpts = {
   name: "C",
   urlPath: "/path/to/:title",
   fields: {
-    title: { type: "string" }
+    title: { type: "string" },
+    reverseRef: { type: "references", model: "B", fieldName: "refC" }
   }
 };
 
@@ -65,7 +66,7 @@ describe("joins", () => {
   let b: any;
   let c: any;
 
-  let expectedResponse: any;
+  let expectedResponseForA: any;
 
   beforeAll(async () => {
     const storage = new FsStorage(uploadDir);
@@ -106,7 +107,7 @@ describe("joins", () => {
       refB: { id: b.id, model: modelB.name }
     });
 
-    expectedResponse = {
+    expectedResponseForA = {
       _id: a.id,
       _refs: {
         content: {
@@ -155,7 +156,7 @@ describe("joins", () => {
       false
     );
 
-    await expect(resp).toStrictEqual(expectedResponse);
+    await expect(resp).toStrictEqual(expectedResponseForA);
   });
 
   it("should join content with wrong casing", async () => {
@@ -166,7 +167,7 @@ describe("joins", () => {
       false
     );
 
-    await expect(resp).toStrictEqual(expectedResponse);
+    await expect(resp).toStrictEqual(expectedResponseForA);
   });
 
   it("should join refs with urls when model is containing an urlPath", async () => {
@@ -198,7 +199,7 @@ describe("joins", () => {
     });
   });
 
-  it("should not include expired refs", async () => {
+  it("should not include reverse refs", async () => {
     await publish(modelC.name, c.id);
     await publish(modelB.name, b.id);
     await publish(modelA.name, a.id);
@@ -215,9 +216,9 @@ describe("joins", () => {
     );
 
     await expect(resp1).toStrictEqual({
-      ...expectedResponse,
+      ...expectedResponseForA,
       _refs: {
-        ...expectedResponse._refs,
+        ...expectedResponseForA._refs,
         content: {
           [modelB.name]: {
             [b.id]: {
@@ -242,7 +243,7 @@ describe("joins", () => {
 
     await expect(resp2).toStrictEqual({
       _id: a.id,
-      title: expectedResponse.title,
+      title: expectedResponseForA.title,
       _refs: {
         media: {},
         content: {}
@@ -289,6 +290,43 @@ describe("joins", () => {
           }
         }
       }
+    });
+  });
+  it("should not include expired refs", async () => {
+    const contentC = await create(modelC.name, {
+      title: faker.lorem.slug()
+    });
+    const contentB = await create(modelB.name, {
+      title: faker.lorem.slug(),
+      refC: { id: contentC.id, model: modelC.name }
+    });
+
+    await publish(modelC.name, contentC.id);
+    await publish(modelB.name, contentB.id);
+
+    expect(await find(modelC.name, contentC.id, {}, true)).toStrictEqual({
+      _id: contentC.id,
+      _refs: { content: {}, media: {} },
+      reverseRef: [
+        {
+          _content: modelB.name,
+          _id: contentB.id,
+          _ref: "content",
+          _url: `/path/to/${contentB.data.title}`
+        }
+      ],
+      title: contentC.data.title
+    });
+
+    await schedule(modelB.name, contentB.id, {
+      visibleUntil: new Date(Date.now() - 1)
+    });
+
+    await expect(await find(modelC.name, contentC.id, {}, true)).toStrictEqual({
+      _id: contentC.id,
+      _refs: { content: {}, media: {} },
+      reverseRef: [],
+      title: contentC.data.title
     });
   });
 });
