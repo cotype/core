@@ -169,6 +169,7 @@ describe("rest api", () => {
           _ref: "media",
           _src: `/media/${mediaFile.id}`
         },
+        imageList: [],
         ref: {
           _content: "products",
           _id: product.id,
