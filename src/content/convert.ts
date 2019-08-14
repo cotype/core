@@ -63,7 +63,7 @@ export default function convert({
       // this means the ref is not actually a ref but a string
       const isAbsoluteRef = !convertedRef._content;
       if (isAbsoluteRef) {
-        convertedRef._url = convertedRef._content._id;
+        convertedRef._url = convertedRef._id;
         return convertedRef;
       }
 
