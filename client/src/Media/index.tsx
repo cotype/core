@@ -6,7 +6,6 @@ import api from "../api";
 import UploadZone from "./UploadZone";
 import Gallery from "./Gallery";
 import Details from "./Details";
-import ConflictDialog from "../common/ConflictDialog";
 import Topbar from "./Topbar";
 import { MediaType } from "../../../typings";
 import ModalDialog from "../common/ModalDialog";
@@ -58,7 +57,6 @@ type State = {
   total: number;
   lastRequestedIndex: number;
   editable: boolean;
-  conflictingItems: object[] | any;
   duplicates: Cotype.MediaType[] | null;
   fileType?: string;
   orderBy?: string;
@@ -89,7 +87,6 @@ export default class Media extends Component<Props, State> {
     items: [],
     lastRequestedIndex: 0,
     details: null,
-    conflictingItems: null,
     duplicates: null,
     editable: false,
     orderBy: "created_at",
@@ -163,7 +160,7 @@ export default class Media extends Component<Props, State> {
   };
 
   /**
-   * @description Delete file if possible, otherwise show conflict dialog
+   * @description Delete file if possible
    */
   deleteMedia = (media: Cotype.Media) => {
     api
@@ -177,8 +174,13 @@ export default class Media extends Component<Props, State> {
         }
       })
       .catch(err => {
-        if (err.status === 400)
-          this.setState({ conflictingItems: err.body, details: null });
+        if (err.status === 400) {
+          const conflictingRefs = err.body;
+          this.setState(() => {
+            err.body = { conflictingRefs, conflictType: "media" };
+            throw err;
+          });
+        }
       });
   };
 
@@ -232,10 +234,6 @@ export default class Media extends Component<Props, State> {
     this.setState({ details: null });
   };
 
-  closeConflict = () => {
-    this.setState({ conflictingItems: null });
-  };
-
   renderDuplicatesDialog() {
     const { duplicates } = this.state;
     if (duplicates === null) return null;
@@ -262,19 +260,9 @@ export default class Media extends Component<Props, State> {
     return Object.entries(nextState).some(([k, v]) => v !== this.state[k]);
   }
   render() {
-    const { details, conflictingItems, filters } = this.state;
+    const { details, filters } = this.state;
     return (
       <Root {...testable("upload-zone")}>
-        {conflictingItems && (
-          <ConflictDialog
-            onClose={this.closeConflict}
-            items={conflictingItems}
-            type="media"
-            title="File in use"
-            description="The file you're trying to delete is still in use. Please remove or
-            replace the file in following locations:"
-          />
-        )}
         {this.renderDuplicatesDialog()}
         {details && (
           <Details
