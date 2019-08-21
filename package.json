@@ -117,7 +117,7 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-react": "^4.0.0",
     "typescript": "^3.5.2",
-    "typescript-json-schema": "^0.39.0",
+    "typescript-json-schema": "^0.40.0",
     "wait-for-expect": "^1.2.0",
     "with-server": "^1.0.0"
   },
