@@ -11,6 +11,10 @@ export default class FsStorage implements Storage {
   }
 
   getFile(id: string) {
+    const normalizedId = path.normalize(id);
+    if (normalizedId.startsWith(".")) {
+      throw new Error("Invalid id.");
+    }
     return path.resolve(this.uploadDir, id);
   }
 
