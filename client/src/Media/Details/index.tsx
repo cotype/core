@@ -94,18 +94,22 @@ type State = {
   tags: string[];
   alt: string | null;
   credit: string | null;
+  originalname: string | null;
 };
 export default class Details extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    const [{ focusX, focusY, tags, credit, alt }] = this.props.data;
+    const [
+      { focusX, focusY, tags, credit, alt, originalname }
+    ] = this.props.data;
 
     this.state = {
       x: focusX,
       y: focusY,
       tags: tags ? tags : [],
       alt,
-      credit
+      credit,
+      originalname
     };
   }
 
@@ -114,7 +118,7 @@ export default class Details extends Component<Props, State> {
   };
 
   onSave = () => {
-    const { x, y, tags, credit, alt } = this.state;
+    const { x, y, tags, credit, alt, originalname } = this.state;
     const [media] = this.props.data;
 
     api
@@ -123,7 +127,8 @@ export default class Details extends Component<Props, State> {
         focusY: y,
         tags,
         credit,
-        alt
+        alt,
+        originalname
       })
       .then(() => {
         this.props.fetchMediaItem(media);
@@ -146,13 +151,12 @@ export default class Details extends Component<Props, State> {
   render() {
     const { onClose, data } = this.props;
 
-    const { x, y, tags, credit, alt } = this.state;
+    const { x, y, tags, credit, alt, originalname } = this.state;
     if (!data) return null;
 
     const [media] = this.props.data;
 
     const {
-      originalname,
       imagetype,
       created_at,
       size,
@@ -205,6 +209,16 @@ export default class Details extends Component<Props, State> {
                   />
                 </MetaInput>
                 <MetaInput>
+                  <MetaItemLabel>File Name</MetaItemLabel>
+                  <Input
+                    {...testable("meta-data-originalname")}
+                    value={originalname || ""}
+                    onChange={e =>
+                      this.setState({ originalname: e.target.value })
+                    }
+                  />
+                </MetaInput>
+                <MetaInput>
                   <MetaItemLabel>Credit</MetaItemLabel>
                   <Input
                     value={credit || ""}
@@ -239,7 +253,6 @@ export default class Details extends Component<Props, State> {
               </MetaData>
               <MetaData style={{ marginTop: "1em" }}>
                 <Grid>
-                  <MetaItem label="File name" value={originalname} />
                   <MetaItem label="File type" value={imagetype} />
                   <MetaItem label="File size" value={formatBytes(size)} />
                   <MetaItem

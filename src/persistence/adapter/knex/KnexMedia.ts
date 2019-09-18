@@ -91,7 +91,7 @@ export default class KnexMedia implements MediaAdapter {
   }
 
   async update(id: string, data: any) {
-    const args = pick(data, ["focusX", "focusY", "tags", "alt", "credit"]);
+    const args = pick(data, ["focusX", "focusY", "tags", "alt", "credit","originalname"]);
 
     const [media] = await this.knex("media").where({ id });
     if (!media) return false;
@@ -102,7 +102,7 @@ export default class KnexMedia implements MediaAdapter {
     if (typeof args.focusY !== undefined && args.focusY !== null)
       args.focusY = parseInt(args.focusY, 10);
 
-    const search = this.createSearchString(media.originalname, args.tags);
+    const search = this.createSearchString(args.originalname, args.tags);
 
     if (typeof args.tags !== undefined) {
       args.tags = JSON.stringify(args.tags);
