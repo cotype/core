@@ -211,6 +211,7 @@ export default class Details extends Component<Props, State> {
                 <MetaInput>
                   <MetaItemLabel>File Name</MetaItemLabel>
                   <Input
+                    {...testable("meta-data-originalname")}
                     value={originalname || ""}
                     onChange={e =>
                       this.setState({ originalname: e.target.value })
