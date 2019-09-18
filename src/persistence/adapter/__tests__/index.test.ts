@@ -1496,19 +1496,20 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         focusY: 10,
         tags: ["foo", "bar", "baz"],
         credit: "Mother of Dragons",
-        alt: "Winter is coming"
+        alt: "Winter is coming",
+        originalname: "foo.jpg"
       } as Media);
 
       expect(await media.load([image.id])).toMatchObject([
         {
           id: "updateMe.exe",
           size: 1000,
-          originalname: "world.jpg",
+          originalname: "foo.jpg",
           mimetype: "image/jpeg",
           imagetype: "jpeg",
           width: 800,
           height: 600,
-          search: "foo bar baz world.jpg",
+          search: "foo bar baz foo.jpg",
           hash: null,
           focusX: 10,
           focusY: 10,
