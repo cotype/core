@@ -5,8 +5,10 @@ import media from "../pages/media";
 
 import mockedModels from "../mocks/models";
 const models = mockedModels(10);
-const image1Name = "cy.png";
-const image2Name = "cx.png";
+const image1BaseName = "cy";
+const image1Name = image1BaseName+".png";
+const image2BaseName = "cx";
+const image2Name = image2BaseName+".png";
 
 context("Media", () => {
   let image1Content: string;
@@ -93,10 +95,10 @@ context("Media", () => {
     });
 
     const details = media.details(image1Name);
-    details.name().should("have.value", image1Name);
+    details.name().should("have.value", image1BaseName);
     details.should("have.length", 1);
     details.setAlt(altText);
-    details.setName(image2Name);
+    details.setName(image2BaseName);
     details.addTag(tags[0]);
     details.addTag(tags[1]);
     details.deleteTag(tags[0]);
@@ -105,7 +107,7 @@ context("Media", () => {
     cy.reload();
 
     const details2 = media.details(image2Name);
-    details2.name().should("have.value", image2Name);
+    details2.name().should("have.value", image2BaseName);
     details2.alt().should("have.value", altText);
     details2.tag(tags[0]).should("have.length", 0);
     details2.tag(tags[1]).should("have.length", 1);
