@@ -102,14 +102,16 @@ export default class Details extends Component<Props, State> {
     const [
       { focusX, focusY, tags, credit, alt, originalname }
     ] = this.props.data;
-
+    const n = originalname.split(".");
+    n.pop();
+    const nameWithoutExt = n.join(".");
     this.state = {
       x: focusX,
       y: focusY,
       tags: tags ? tags : [],
       alt,
       credit,
-      originalname
+      originalname: nameWithoutExt
     };
   }
 
@@ -120,7 +122,8 @@ export default class Details extends Component<Props, State> {
   onSave = () => {
     const { x, y, tags, credit, alt, originalname } = this.state;
     const [media] = this.props.data;
-
+    const n = this.props.data[0].originalname.split(".");
+    const ext = n.pop();
     api
       .updateMedia(media.id, {
         focusX: x,
@@ -128,7 +131,7 @@ export default class Details extends Component<Props, State> {
         tags,
         credit,
         alt,
-        originalname
+        originalname: originalname + "." + ext
       })
       .then(() => {
         this.props.fetchMediaItem(media);
