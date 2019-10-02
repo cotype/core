@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "styled-components/macro";
+
 export type Props = React.SVGProps<SVGSVGElement> & {
   path: string;
   ref?: any;
