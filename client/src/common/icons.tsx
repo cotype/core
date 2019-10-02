@@ -70,7 +70,7 @@ export const paths = {
 
 type Props = Partial<IconProps>;
 
-const icons: { [index: string]: React.ComponentType<Props> } = {};
+const icons: { [index: string]: React.FC<Props> } = {};
 
 Object.entries(paths).forEach(([name, path]) => {
   icons[name] = (props: Props) => <Icon {...props} path={path} />;

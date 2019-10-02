@@ -69,9 +69,9 @@ export default function Dashboard() {
     <Container>
       {totalCount && (
         <Title>
-          There exist <b>{totalCount.total.toLocaleString()}</b> contents and
-          you already worked on <b>{totalCount.totalByUser.toLocaleString()}</b>{" "}
-          of them
+          There are already <b>{totalCount.total.toLocaleString()}</b> items and
+          you worked on <b>{totalCount.totalByUser.toLocaleString()}</b> of
+          them.
         </Title>
       )}
       <Flex>

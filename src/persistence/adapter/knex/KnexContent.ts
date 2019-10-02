@@ -130,7 +130,6 @@ export default class KnexContent implements ContentAdapter {
     models: Cotype.Model[],
     author: string
   ) {
-
     await this.testUniqueFields(model, models, storeData);
 
     const [id] = await this.knex("contents")
@@ -1463,7 +1462,8 @@ export default class KnexContent implements ContentAdapter {
         join.on("contents.latest_rev", "cr.rev");
       })
       .join("users", "users.id", "cr.author")
-      .whereIn("type", models);
+      .whereIn("type", models)
+      .andWhere("contents.deleted", false);
     if (user) {
       k.andWhere("cr.author", user);
     }
@@ -1503,7 +1503,8 @@ export default class KnexContent implements ContentAdapter {
         this.knex.raw("contents.published_rev")
       )
       .orWhere("contents.published_rev", null)
-      .whereIn("type", models);
+      .whereIn("type", models)
+      .andWhere("contents.deleted", false);
 
     const [count] = await k.clone().count("contents.id as total");
     const total = Number(count.total);
