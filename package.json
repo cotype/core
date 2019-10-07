@@ -94,7 +94,7 @@
     "@types/tough-cookie": "^2.3.5",
     "@xiphe/cypress-parcel-preprocessor": "1.0.1-RC.1",
     "codecov": "3.5.0",
-    "concurrently": "^4.1.1",
+    "concurrently": "^5.0.0",
     "cypress": "^3.3.2",
     "cypress-file-upload": "^3.3.3",
     "faker": "^4.1.0",
