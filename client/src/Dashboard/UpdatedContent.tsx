@@ -27,8 +27,12 @@ export default function UpdatedContent() {
       </Header>
       <ItemList
         key={byUser ? 0 : 1}
-        fetchItems={() =>
-          api.get(`/dashboard/${byUser ? "updated-by-user" : "updated"}`)
+        fetchItems={(offset, limit) =>
+          api.get(
+            `/dashboard/${
+              byUser ? "updated-by-user" : "updated"
+            }?limit=${limit}&offset=${offset}`
+          )
         }
         noResultText="There is no updated content"
       />

@@ -1450,13 +1450,6 @@ export default class KnexContent implements ContentAdapter {
     user?: string
   ) {
     const k = this.knex("contents")
-      .select([
-        "contents.id",
-        "contents.type",
-        "cr.data",
-        "cr.date",
-        "users.name as author"
-      ])
       .join("content_revisions as cr", join => {
         join.on(`contents.id`, "cr.id");
         join.on("contents.latest_rev", "cr.rev");
@@ -1473,6 +1466,13 @@ export default class KnexContent implements ContentAdapter {
     const total = Number(count.total);
     if (total === 0) return { total, items: [] };
 
+    k.select([
+      "contents.id",
+      "contents.type",
+      "cr.data",
+      "cr.date",
+      "users.name as author"
+    ]);
     k.orderBy("cr.date", "desc");
     k.offset(Number(opts.offset)).limit(Number(opts.limit));
 
@@ -1485,24 +1485,20 @@ export default class KnexContent implements ContentAdapter {
 
   async listUnpublishedContent(models: string[], opts: ListOpts) {
     const k = this.knex("contents")
-      .select([
-        "contents.id",
-        "contents.type",
-        "cr.data",
-        "cr.date",
-        "users.name as author"
-      ])
       .join("content_revisions as cr", join => {
         join.on(`contents.id`, "cr.id");
         join.on("contents.latest_rev", "cr.rev");
       })
       .join("users", "users.id", "cr.author")
-      .where(
-        "contents.latest_rev",
-        "<>",
-        this.knex.raw("contents.published_rev")
-      )
-      .orWhere("contents.published_rev", null)
+
+      .where(w => {
+        w.where(
+          "contents.latest_rev",
+          "<>",
+          this.knex.raw("contents.published_rev")
+        ).orWhere("contents.published_rev", null);
+      })
+
       .whereIn("type", models)
       .andWhere("contents.deleted", false);
 
@@ -1510,6 +1506,13 @@ export default class KnexContent implements ContentAdapter {
     const total = Number(count.total);
     if (total === 0) return { total, items: [] };
 
+    k.select([
+      "contents.id",
+      "contents.type",
+      "cr.data",
+      "cr.date",
+      "users.name as author"
+    ]);
     k.orderBy("cr.date", "desc");
     k.offset(Number(opts.offset)).limit(Number(opts.limit));
 
