@@ -8,7 +8,9 @@ export default function UnpublishedContent() {
     <>
       <Header>Unpublished changes</Header>
       <ItemList
-        fetchItems={() => api.get("/dashboard/unpublished")}
+        fetchItems={(offset, limit) =>
+          api.get(`/dashboard/unpublished?limit=${limit}&offset=${offset}`)
+        }
         noResultText="There are no unpublished changes"
       ></ItemList>
     </>
