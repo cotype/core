@@ -8,7 +8,6 @@ import ToggleSwitch from "./ToggleSwitch";
 import { paths } from "./icons";
 import DatePicker from "./DatePicker";
 import TimeInput from "./TimeInput";
-import ConflictDialog from "./ConflictDialog";
 
 const modalStyle = {
   width: 750,
@@ -101,22 +100,11 @@ export default class ScheduleModal extends Component<Props, State> {
         visibleUntil
       })
       .catch(err => {
-        const { body } = err;
-        this.setState({
-          conflictingRefs: body.conflictingRefs
+        this.setState(() => {
+          Object.assign(err.body, { conflictType: "schedule" });
+          throw err;
         });
       });
-  };
-  renderErrors = () => {
-    const { conflictingRefs } = this.state;
-    if (!conflictingRefs) return null;
-    return (
-      <ConflictDialog
-        onClose={() => this.setState({ conflictingRefs: null })}
-        items={conflictingRefs!}
-        type="schedule"
-      />
-    );
   };
 
   render() {
@@ -143,7 +131,6 @@ export default class ScheduleModal extends Component<Props, State> {
         style={modalStyle}
         actionButtons={actionButtons}
       >
-        {this.renderErrors()}
         <Row>
           <Half>
             <Row>

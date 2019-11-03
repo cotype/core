@@ -8,10 +8,9 @@ import { paths } from "../common/icons";
 import { withUser } from "../auth/UserContext";
 import { isAllowed, Permission } from "../auth/acl";
 
-import api from "../api";
-import { conflictTypes } from ".";
-import ConflictDialog from "../common/ConflictDialog";
+import api, { ApiError } from "../api";
 import { testable } from "../utils/helper";
+import ContentConstraintsErrorBoundary from "./ContentConstraintsErrorBoundary";
 
 const { edit, publish } = Permission;
 
@@ -114,16 +113,7 @@ type Props = RouteComponentProps<any> & {
   errors?: { key: string };
 };
 
-type State = {
-  conflictingRefs: Cotype.VersionItem[] | null;
-  conflictType: conflictTypes;
-};
-
-class ActionBar extends Component<Props, State> {
-  state: State = {
-    conflictingRefs: null,
-    conflictType: "publish"
-  };
+class ActionBar extends Component<Props> {
   get activeVersion() {
     const { versions, activeVersion } = this.props;
     if (versions && activeVersion) {
@@ -143,30 +133,13 @@ class ActionBar extends Component<Props, State> {
         .then(() => {
           if (onPublishChange) onPublishChange();
         })
-        .catch(err => {
-          if (err.status === 400) {
-            const { body } = err;
-            if (body.conflictingRefs) {
-              this.setState({
-                conflictingRefs: body.conflictingRefs,
-                conflictType: "publish"
-              });
-            }
-          }
+        .catch((err: ApiError) => {
+          this.setState(() => {
+            Object.assign(err.body, { conflictType: "publish" });
+            throw err;
+          });
         });
     }
-  };
-
-  renderErrors = () => {
-    const { conflictingRefs, conflictType } = this.state;
-    if (!conflictingRefs || !conflictType) return null;
-    return (
-      <ConflictDialog
-        onClose={() => this.setState({ conflictingRefs: null })}
-        items={conflictingRefs!}
-        type={conflictType}
-      />
-    );
   };
 
   renderModelActions = () => {
@@ -358,12 +331,13 @@ class ActionBar extends Component<Props, State> {
 
   render() {
     return (
-      <Root>
-        {this.renderErrors()}
-        {this.renderModelActions()}
-        <div style={{ flex: 1 }} />
-        {this.renderContentActions()}
-      </Root>
+      <ContentConstraintsErrorBoundary>
+        <Root>
+          {this.renderModelActions()}
+          <div style={{ flex: 1 }} />
+          {this.renderContentActions()}
+        </Root>
+      </ContentConstraintsErrorBoundary>
     );
   }
 }

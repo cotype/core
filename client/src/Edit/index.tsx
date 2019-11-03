@@ -1,5 +1,5 @@
 import * as Cotype from "../../../typings";
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import { match, Redirect, RouteComponentProps } from "react-router-dom";
 
 import api from "../api";
@@ -7,11 +7,9 @@ import Form from "./Form";
 import ReadOnlyHistory from "./History/ReadOnly";
 import { withUser } from "../auth/UserContext";
 import { isAllowed, Permission } from "../auth/acl";
-import ConflictDialog from "../common/ConflictDialog";
-import { VersionItem } from "../../../typings";
 import basePath from "../basePath";
 import { withModelPaths } from "../ModelPathsContext";
-
+import ContentConstraintsErrorBoundary from "./ContentConstraintsErrorBoundary";
 type Props = RouteComponentProps & {
   user: Cotype.Principal & Cotype.User;
   id: string;
@@ -22,18 +20,13 @@ type Props = RouteComponentProps & {
   modelPaths: Cotype.ModelPaths;
   baseUrls: Cotype.BaseUrls;
 };
-export type conflictTypes = "publish" | "unpublish" | "delete" | "media";
 type State = {
   versions?: Cotype.VersionItem[];
   itemNotFoundError: boolean;
-  conflictingRefs: VersionItem[] | null;
-  conflictType: conflictTypes;
 };
 class Edit extends Component<Props, State> {
   state: State = {
-    itemNotFoundError: false,
-    conflictingRefs: null,
-    conflictType: "delete"
+    itemNotFoundError: false
   };
 
   componentDidMount() {
@@ -51,22 +44,6 @@ class Edit extends Component<Props, State> {
     const { onSave } = this.props;
     this.fetchVersions();
     if (onSave) onSave(record);
-  };
-
-  onDelete = (record: any) => {
-    const { onDelete } = this.props;
-    onDelete(record).then(res => {
-      if (res && res.conflictingRefs) {
-        this.onConflict(res.conflictingRefs, "delete");
-      }
-    });
-  };
-
-  onConflict = (refs: VersionItem[], type: conflictTypes) => {
-    this.setState({
-      conflictingRefs: refs,
-      conflictType: type
-    });
   };
 
   fetchVersions = () => {
@@ -93,26 +70,12 @@ class Edit extends Component<Props, State> {
           this.fetchVersions();
         })
         .catch(err => {
-          if (err.status === 400) {
-            const { body } = err;
-            if (body && body.conflictingRefs) {
-              this.onConflict(body.conflictingRefs, "unpublish");
-            }
-          }
+          this.setState(() => {
+            Object.assign(err.body, { conflictType: "unpublish" });
+            throw err;
+          });
         });
     }
-  };
-
-  renderErrors = () => {
-    const { conflictingRefs, conflictType } = this.state;
-    if (!conflictingRefs || !conflictType) return null;
-    return (
-      <ConflictDialog
-        onClose={() => this.setState({ conflictingRefs: null })}
-        items={conflictingRefs!}
-        type={conflictType}
-      />
-    );
   };
 
   render() {
@@ -127,17 +90,16 @@ class Edit extends Component<Props, State> {
 
     if (canEdit && model.writable) {
       return (
-        <Fragment>
-          {this.renderErrors()}
+        <ContentConstraintsErrorBoundary>
           <Form
             versions={versions}
             {...this.props}
             onSave={this.onSave}
             onPublish={this.fetchVersions}
             onUnpublish={this.onUnpublish}
-            onDelete={this.onDelete}
+            onDelete={this.props.onDelete}
           />
-        </Fragment>
+        </ContentConstraintsErrorBoundary>
       );
     }
 

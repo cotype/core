@@ -79,9 +79,10 @@ class List extends Component<Props, State> {
           const { message } = err.body;
           alert(message);
         }
-        if (err.status === 400) {
-          return err.body;
-        }
+        this.setState(() => {
+          Object.assign(err.body, { conflictType: "delete" });
+          throw err;
+        });
       });
   };
 

@@ -29,6 +29,7 @@ import List from "./List";
 import Dashboard from "./Dashboard";
 import SplitPane from "./common/SplitPane";
 import ErrorBoundary from "./ErrorBoundary";
+import ContentConstraintsErrorBoundary from "./Edit/ContentConstraintsErrorBoundary";
 
 const Root = styled("div")`
   height: 100%;
@@ -139,7 +140,9 @@ class App extends React.Component<{}, State> {
                         <Route
                           path={`${basePath}/media`}
                           render={props => (
-                            <Media {...props} model={models.media} />
+                            <ContentConstraintsErrorBoundary>
+                              <Media {...props} model={models.media} />
+                            </ContentConstraintsErrorBoundary>
                           )}
                         />
                         <Route

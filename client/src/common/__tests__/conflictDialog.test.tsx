@@ -5,6 +5,8 @@ import React from "react";
 import { render, fireEvent, waitForElement } from "@testing-library/react";
 import ScheduleModal from "../Schedule";
 import ModelPathsContext from "../../ModelPathsContext";
+import ContentConstraintsErrorBoundary from "../../Edit/ContentConstraintsErrorBoundary";
+import { ApiError } from "../../api";
 
 const conflictingRef = {
   id: 117,
@@ -14,13 +16,20 @@ const conflictingRef = {
   kind: "Startseite"
 };
 
+beforeEach(() => {
+  // when the error's thrown a bunch of console.errors are called even though
+  // the error boundary handles the error. This makes the test output noisy,
+  // so we'll mock out console.error
+  jest.spyOn(console, "error").mockImplementation(() => undefined);
+});
+
 it("should display ConflictDialog on schedule error", async () => {
   const onSchedule = jest.fn(async () =>
-    Promise.reject({
-      body: {
+    Promise.reject(
+      new ApiError({ status: 400 } as Response, {
         conflictingRefs: [conflictingRef]
-      }
-    })
+      })
+    )
   );
   const { findByText } = render(
     <ModelPathsContext.Provider
@@ -29,11 +38,13 @@ it("should display ConflictDialog on schedule error", async () => {
         baseUrls: {} as any
       }}
     >
-      <ScheduleModal
-        schedule={{ visibleFrom: null, visibleUntil: null }}
-        onClose={jest.fn()}
-        onSchedule={onSchedule}
-      />
+      <ContentConstraintsErrorBoundary>
+        <ScheduleModal
+          schedule={{ visibleFrom: null, visibleUntil: null }}
+          onClose={jest.fn()}
+          onSchedule={onSchedule}
+        />
+      </ContentConstraintsErrorBoundary>
     </ModelPathsContext.Provider>
   );
 

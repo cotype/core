@@ -7,9 +7,9 @@ import ResultItem from "../common/ResultItem";
 
 const defaultValues = {
   publish: {
-    title: "Unpublished references",
+    title: "Unpublished or timed references",
     description:
-      "The content you're trying to publish contains references to other unpublished content. Please publish following content: "
+      "The content you're trying to publish contains references to other unpublished or timed content. Please publish or untime following content: "
   },
   schedule: {
     title: "Content in use",
@@ -27,7 +27,7 @@ const defaultValues = {
       "The content you're trying to delete is still in use. Please remove or replace references in following content first:"
   },
   media: {
-    title: "File in user",
+    title: "File in use",
     description:
       "The file you're trying to delete is still in use. Please remove or replace the file in following locations:"
   }
@@ -50,12 +50,18 @@ const Item = styled("div")`
   }
 `;
 
+export type ConflictTypes =
+  | "publish"
+  | "unpublish"
+  | "delete"
+  | "media"
+  | "schedule";
 type Props = {
   onClose: () => void;
   items: VersionItem[];
   title?: string;
   description?: string;
-  type: "publish" | "unpublish" | "delete" | "media" | "schedule";
+  type: ConflictTypes;
 };
 
 export default class ConflictDialog extends Component<Props> {

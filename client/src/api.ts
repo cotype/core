@@ -6,7 +6,7 @@ import { stringify } from "qs";
 
 type Opts = RequestInit & { query?: object };
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
   body: any;
   constructor(res: Response, body: any) {
