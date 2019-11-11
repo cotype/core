@@ -230,6 +230,7 @@ export type ModelOpts = {
   notSearchAble?: boolean;
   orderBy?: string;
   order?: "asc" | "desc";
+  readOnly?: boolean;
 };
 
 export interface GroupItemOpts {

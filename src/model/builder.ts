@@ -11,7 +11,7 @@ export default function modelBuilder(
   externalDataSources?: Cotype.ExternalDataSource[]
 ) {
   const model = (opts: Cotype.ModelOpts): Cotype.Model => {
-    const { name, fields, title } = opts;
+    const { name, fields, title, readOnly } = opts;
     if (!name) {
       throw new Error("Model must have a `name` property.");
     }
@@ -44,6 +44,10 @@ export default function modelBuilder(
           externalDataProps.writable = false;
         }
       }
+    }
+    if (readOnly) {
+      externalDataProps.versioned = false;
+      externalDataProps.writable = false;
     }
 
     return {
