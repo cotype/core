@@ -44,7 +44,10 @@ export default class History extends Component<Props, State> {
           .then(version => this.setState({ compareTo: version.data }));
       }
     } else if (id !== undefined) {
-      api.load(model, id).then(version => this.setState(version));
+      api.load(model, id).then(version => {
+        this.setState(version);
+        if (onReceiveData) onReceiveData(version);
+      });
     }
   };
 
