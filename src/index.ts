@@ -52,6 +52,7 @@ import logResponseTime from "./responseTimeLogger";
 import MigrationContext from "./persistence/MigrationContext";
 import proxyMiddleware from "http-proxy-middleware";
 import { spawn } from "child_process";
+import SettingsPersistence from "./persistence/SettingsPersistence";
 
 type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
 
@@ -86,7 +87,11 @@ export type Opts = {
   thumbnailProvider: ThumbnailProvider;
   clientMiddleware?: RequestHandler | RequestHandler[];
   anonymousPermissions?: AnonymousPermissions;
-  customSetup?: (app: Express, contentPersistence: ContentPersistence) => void;
+  customSetup?: (
+    app: Express,
+    contentPersistence: ContentPersistence,
+    settingsPersistence: SettingsPersistence
+  ) => void;
   contentHooks?: ContentHooks;
   migrationDir?: string;
 };
@@ -314,7 +319,7 @@ export async function init(opts: Opts) {
   router.use(opts.clientMiddleware || clientMiddleware);
 
   if (opts.customSetup) {
-    opts.customSetup(app, p.content);
+    opts.customSetup(app, p.content, p.settings);
   }
 
   app.get(basePath, (_, res) =>
