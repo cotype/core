@@ -35,7 +35,7 @@
     "react-use-upload": "^0.5.9",
     "react-virtualized": "^9.21.1",
     "styled-components": "^5.0.0-beta.8",
-    "title-case": "^2.1.1"
+    "title-case": "^3.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^4.1.1",
