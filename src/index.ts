@@ -80,7 +80,7 @@ export type Opts = {
   sessionOpts?: SessionOpts;
   responseHeaders?: ResponseHeaders;
   thumbnailProvider: ThumbnailProvider;
-  clientMiddleware?: RequestHandler | RequestHandler[];
+  clientMiddleware?: (basePath: string) => RequestHandler | RequestHandler[];
   anonymousPermissions?: AnonymousPermissions;
   customSetup?: (
     app: Express,
@@ -130,41 +130,45 @@ const startDevServer = () => {
   process.on("beforeExit", code => child.kill());
 };
 
-export const clientMiddleware = process.env.DEVCLIENT // Use Proxy to Dev Server
-  ? [
-      proxyMiddleware("/static", {
-        target: `http://localhost:4001`,
-        logLevel: "error",
-        changeOrigin: true
-      }),
-      proxyMiddleware("/admin", {
-        target: `http://localhost:4001`,
-        logLevel: "error",
-        changeOrigin: true
-      })
-    ]
-  : promiseRouter()
-      .use(
-        "/admin",
-        express.static(root, {
-          maxAge: "1y", // cache all static resources for a year ...
-          immutable: true, // which is fine, as all resource URLs contain a hash
-          index: false // index.html will be served by the fallback middleware
+export const clientMiddleware = (basePath: string) =>
+  process.env.DEVCLIENT // Use Proxy to Dev Server
+    ? [
+        proxyMiddleware("/static", {
+          target: `http://localhost:4001`,
+          logLevel: "error",
+          changeOrigin: true
         }),
-        (_: Request, res: Response, next: NextFunction) => {
-          res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-          next();
-        }
-      )
-      .use("/admin", (req, res, next) => {
-        if (
-          (req.method === "GET" || req.method === "HEAD") &&
-          req.accepts("html")
-        ) {
-          const basePath = req.originalUrl.replace(/^(.*\/admin).*/, "$1");
-          res.send(getIndexHtml(basePath));
-        } else next();
-      });
+        proxyMiddleware(urlJoin(basePath, "/admin"), {
+          target: `http://localhost:4001`,
+          logLevel: "error",
+          changeOrigin: true,
+          pathRewrite: { [`^/${basePath}/`]: "/" }
+        })
+      ]
+    : promiseRouter()
+        .use(
+          urlJoin(basePath, "/admin"),
+          express.static(root, {
+            maxAge: "1y", // cache all static resources for a year ...
+            immutable: true, // which is fine, as all resource URLs contain a hash
+            index: false // index.html will be served by the fallback middleware
+          }),
+          (_: Request, res: Response, next: NextFunction) => {
+            res.setHeader(
+              "Cache-Control",
+              "no-cache, no-store, must-revalidate"
+            );
+            next();
+          }
+        )
+        .use(urlJoin(basePath, "/admin"), (req, res, next) => {
+          if (
+            (req.method === "GET" || req.method === "HEAD") &&
+            req.accepts("html")
+          ) {
+            res.send(getIndexHtml(basePath));
+          } else next();
+        });
 
 function getModels(opts: Pick<Opts, "externalDataSources" | "models">) {
   const externalDataSources = (opts.externalDataSources || []).map(withAuth);
@@ -299,7 +303,10 @@ export async function init(opts: Opts) {
     startDevServer();
   }
 
-  router.use(opts.clientMiddleware || clientMiddleware);
+  app.use(
+    (opts.clientMiddleware && opts.clientMiddleware(basePath)) ||
+      clientMiddleware(basePath)
+  );
 
   if (opts.customSetup) {
     opts.customSetup(app, persistence.content, persistence.settings);
