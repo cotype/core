@@ -130,7 +130,7 @@ const startDevServer = () => {
   process.on("beforeExit", code => child.kill());
 };
 
-export const clientMiddleware = (basePath: string) =>
+export const clientMiddleware = (basePath: string = "/") =>
   process.env.DEVCLIENT // Use Proxy to Dev Server
     ? [
         proxyMiddleware("/static", {
@@ -190,7 +190,7 @@ export async function getRestApiBuilder(
 export async function init(opts: Opts) {
   const { models, externalDataSources } = getModels(opts);
   const {
-    basePath = "",
+    basePath = "/",
     mediaUrl = "/media",
     storage,
     thumbnailProvider,
@@ -198,7 +198,6 @@ export async function init(opts: Opts) {
     contentHooks,
     migrationDir
   } = opts;
-
   const persistence = await createPersistence(
     models,
     await opts.persistenceAdapter,
