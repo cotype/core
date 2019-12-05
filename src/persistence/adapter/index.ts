@@ -1,6 +1,6 @@
 import * as Cotype from "../../../typings";
 import { Migration } from "../ContentPersistence";
-import { Data, MetaData } from "../../../typings";
+import { Data, MetaData, ListOpts } from "../../../typings";
 
 type StoreAndSearchData = {
   storeData: Data;
@@ -64,7 +64,7 @@ export interface ContentAdapter {
     ids: string[],
     model: Cotype.Model,
     models: Cotype.Model[],
-    published?: boolean,
+    previewOpts?: Cotype.PreviewOpts,
     join?: Cotype.Join[]
   ): Promise<Cotype.Data[]>;
   loadMediaFromContents(
@@ -110,6 +110,15 @@ export interface ContentAdapter {
       outstanding: Migration[]
     ) => Promise<void>
   ): Promise<any>;
+  listLastUpdatedContent(
+    models: string[],
+    opts: ListOpts,
+    user?: string
+  ): Promise<Cotype.ListChunk<Cotype.Content>>;
+  listUnpublishedContent(
+    models: string[],
+    opts: ListOpts
+  ): Promise<Cotype.ListChunk<Cotype.Content>>;
 }
 
 export interface MediaAdapter {

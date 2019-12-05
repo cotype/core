@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 
 import ColorHash from "color-hash";
 const colorHash = new ColorHash({ saturation: 0.7, lightness: 0.6 });

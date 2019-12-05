@@ -1,6 +1,6 @@
 import * as Cotype from "../../../../typings";
 import React, { Component } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import TimeAgo from "react-time-ago";
 import { formatBytes, testable } from "../../utils/helper";
 import ModalDialog from "../../common/ModalDialog";
@@ -10,7 +10,7 @@ import Button from "../../common/Button";
 import { paths } from "../../common/icons";
 import ChipList from "../../common/ChipList";
 import api from "../../api";
-import { inputClass } from "../../common/styles";
+import { Input } from "../../common/styles";
 
 const MetaInput = styled("div")`
   margin-bottom: 10px;
@@ -94,18 +94,24 @@ type State = {
   tags: string[];
   alt: string | null;
   credit: string | null;
+  originalname: string | null;
 };
 export default class Details extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    const [{ focusX, focusY, tags, credit, alt }] = this.props.data;
-
+    const [
+      { focusX, focusY, tags, credit, alt, originalname }
+    ] = this.props.data;
+    const n = originalname.split(".");
+    n.pop();
+    const nameWithoutExt = n.join(".");
     this.state = {
       x: focusX,
       y: focusY,
       tags: tags ? tags : [],
       alt,
-      credit
+      credit,
+      originalname: nameWithoutExt
     };
   }
 
@@ -114,16 +120,18 @@ export default class Details extends Component<Props, State> {
   };
 
   onSave = () => {
-    const { x, y, tags, credit, alt } = this.state;
+    const { x, y, tags, credit, alt, originalname } = this.state;
     const [media] = this.props.data;
-
+    const n = this.props.data[0].originalname.split(".");
+    const ext = n.pop();
     api
       .updateMedia(media.id, {
         focusX: x,
         focusY: y,
         tags,
         credit,
-        alt
+        alt,
+        originalname: originalname + "." + ext
       })
       .then(() => {
         this.props.fetchMediaItem(media);
@@ -146,13 +154,12 @@ export default class Details extends Component<Props, State> {
   render() {
     const { onClose, data } = this.props;
 
-    const { x, y, tags, credit, alt } = this.state;
+    const { x, y, tags, credit, alt, originalname } = this.state;
     if (!data) return null;
 
     const [media] = this.props.data;
 
     const {
-      originalname,
       imagetype,
       created_at,
       size,
@@ -198,17 +205,25 @@ export default class Details extends Component<Props, State> {
               <MetaData>
                 <MetaInput>
                   <MetaItemLabel>Alt</MetaItemLabel>
-                  <input
+                  <Input
                     {...testable("meta-data-alt")}
-                    className={inputClass}
                     value={alt || ""}
                     onChange={e => this.setState({ alt: e.target.value })}
                   />
                 </MetaInput>
                 <MetaInput>
+                  <MetaItemLabel>File Name</MetaItemLabel>
+                  <Input
+                    {...testable("meta-data-originalname")}
+                    value={originalname || ""}
+                    onChange={e =>
+                      this.setState({ originalname: e.target.value })
+                    }
+                  />
+                </MetaInput>
+                <MetaInput>
                   <MetaItemLabel>Credit</MetaItemLabel>
-                  <input
-                    className={inputClass}
+                  <Input
                     value={credit || ""}
                     onChange={e => this.setState({ credit: e.target.value })}
                   />
@@ -216,8 +231,7 @@ export default class Details extends Component<Props, State> {
                 <MetaInput>
                   <MetaItemLabel>URL</MetaItemLabel>
                   <FlexRow>
-                    <input
-                      className={inputClass}
+                    <Input
                       value={window.location.origin + "/media/" + id}
                       readOnly
                     />
@@ -242,7 +256,6 @@ export default class Details extends Component<Props, State> {
               </MetaData>
               <MetaData style={{ marginTop: "1em" }}>
                 <Grid>
-                  <MetaItem label="File name" value={originalname} />
                   <MetaItem label="File type" value={imagetype} />
                   <MetaItem label="File size" value={formatBytes(size)} />
                   <MetaItem

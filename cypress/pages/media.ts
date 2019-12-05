@@ -2,10 +2,17 @@ import { testableSelector } from "../support/commands";
 
 function details(fileName: string) {
   const element = () => {
-    return cy.testableContains("overlay", fileName);
+    return cy.testableContains("overlay", "Details");
   };
   return {
     should: element().should,
+    name() {
+      return element().find(testableSelector("meta-data-originalname"));
+    },
+    setName(text: string) {
+      this.name().clear();
+      this.name().type(text);
+    },
     alt() {
       return element().find(testableSelector("meta-data-alt"));
     },

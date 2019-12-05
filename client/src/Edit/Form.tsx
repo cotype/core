@@ -11,7 +11,7 @@ import Schedule from "../common/Schedule";
 import { Input } from "./elements";
 import titleCase from "title-case";
 import { getPreviewUrl } from "../utils/helper";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 
 export const errorClass = "error-field-label";
 
@@ -247,8 +247,9 @@ class Form extends Component<Props, State> {
                   schedule={this.state.schedule}
                   onClose={() => this.setState({ modal: null })}
                   onSchedule={schedule => {
-                    api.schedule(model, id, schedule);
-                    this.setState({ modal: null, schedule });
+                    return api.schedule(model, id, schedule).then(() => {
+                      this.setState({ modal: null, schedule });
+                    });
                   }}
                 />
               )}

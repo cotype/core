@@ -1,6 +1,6 @@
 import * as Cotype from "../../../typings";
-import React, { Component, Fragment } from "react";
-import styled, { css } from "react-emotion";
+import React, { Component } from "react";
+import styled from "styled-components/macro";
 import { RenderInfo } from "../common/ScrollList";
 import api from "../api";
 import UploadZone from "./UploadZone";
@@ -29,14 +29,14 @@ const Main = styled("div")`
   user-select: none;
 `;
 
-const className = css`
+const ACTIVE_CLASS = "activeClass-UploadZone";
+const StyledUploadZone = styled(UploadZone)`
   flex: 1;
   display: flex;
   flex-direction: column;
-`;
-
-const activeClass = css`
-  background: var(--light-color);
+  &.${ACTIVE_CLASS} {
+    background: var(--light-color);
+  }
 `;
 
 const FilterTypes = [
@@ -104,12 +104,16 @@ export default class Media extends Component<Props, State> {
     if (!props.onSelect) {
       this.state.editable = true;
     }
-    if (props.mediaType && typeof props.mediaType === 'string' && props.mediaType !== "all") {
+    if (
+      props.mediaType &&
+      typeof props.mediaType === "string" &&
+      props.mediaType !== "all"
+    ) {
       this.state.filters = this.state.filters.filter(el =>
         el.value.includes(props.mediaType as string)
       );
-      if(this.state.filters.length >0){
-        this.state.fileType = this.state.filters[0].value
+      if (this.state.filters.length > 0) {
+        this.state.fileType = this.state.filters[0].value;
       }
     }
   }
@@ -258,16 +262,7 @@ export default class Media extends Component<Props, State> {
     return Object.entries(nextState).some(([k, v]) => v !== this.state[k]);
   }
   render() {
-    const {
-      total,
-      items,
-      details,
-      editable,
-      conflictingItems,
-      filters,
-      topbarProgress,
-      fileType
-    } = this.state;
+    const { details, conflictingItems, filters } = this.state;
     return (
       <Root {...testable("upload-zone")}>
         {conflictingItems && (
@@ -301,32 +296,36 @@ export default class Media extends Component<Props, State> {
           orderBys={OrderByTypes}
           onOrderChange={this.onOrderChange}
         />
-        <UploadZone
-          className={className}
-          activeClass={activeClass}
+        <StyledUploadZone
+          activeClass={ACTIVE_CLASS}
           onUpload={this.onUpload}
-          render={({ progress, onFiles }: any) => {
-            const itemCount =
-              !!progress || !!topbarProgress ? total + 1 : total;
-            const data =
-              !!progress || !!topbarProgress
-                ? [{ progress: progress || topbarProgress }, ...items]
-                : items;
+          render={({ progress }: any) => {
+            const { total, items, editable, topbarProgress } = this.state;
+            const isProgress =
+              (progress && progress < 100) ||
+              (topbarProgress && topbarProgress < 100);
+            const itemCount = isProgress ? total + 1 : total;
+            const data = isProgress
+              ? [
+                  {
+                    progress:
+                      progress && progress < 100 ? progress : topbarProgress
+                  },
+                  ...items
+                ]
+              : items;
             return (
-              <Fragment>
-                <Main>
-                  <Gallery
-                    key={fileType}
-                    count={itemCount}
-                    data={data}
-                    editable={editable}
-                    onSelect={this.onSelect}
-                    onDelete={this.deleteMedia}
-                    onRowsRendered={this.onRowsRendered}
-                    mediaFilter={this.props.mediaFilter}
-                  />
-                </Main>
-              </Fragment>
+              <Main>
+                <Gallery
+                  count={itemCount}
+                  data={data}
+                  editable={editable}
+                  onSelect={this.onSelect}
+                  onDelete={this.deleteMedia}
+                  onRowsRendered={this.onRowsRendered}
+                  mediaFilter={this.props.mediaFilter}
+                />
+              </Main>
             );
           }}
         />

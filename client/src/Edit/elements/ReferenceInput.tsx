@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-import styled, { css, cx } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import { FieldProps } from "formik";
 import orderSearchResults from "../../utils/orderSearchResults";
 import { stringify } from "qs";
-import { inputClass } from "../../common/styles";
+import { inputClass, Input } from "../../common/styles";
 import Autocomplete from "../../common/Autocomplete";
 import api from "../../api";
 import { required } from "./validation";
@@ -14,11 +14,12 @@ import { ControllerStateAndHelpers } from "downshift";
 const validationRegex = "W*(http:|https:)W*|^/.*$";
 
 const Root = styled("div")`
-  ${inputClass} padding: 0;
+  ${inputClass};
+  padding: 0;
   min-width: 0;
 `;
 
-const borderlessClass = css`
+export const borderlessCss = css`
   border: none;
   box-sizing: border-box;
   padding: 4px 10px 4px 0;
@@ -26,6 +27,11 @@ const borderlessClass = css`
   font-size: inherit;
   height: 40px;
   outline: none;
+  :focus,
+  :active {
+    border-color: none;
+    box-shadow: none;
+  }
 `;
 
 const Select = styled("select")`
@@ -194,7 +200,7 @@ export default class ReferenceInput extends Component<Props, State> {
           <Root>
             <Autocomplete
               toggleButton
-              inputClassName={borderlessClass}
+              inputElementCss={borderlessCss}
               selectedItem={value ? value : null}
               onInputValueChange={this.onInputValueChange}
               onChange={this.onChange}
@@ -207,13 +213,10 @@ export default class ReferenceInput extends Component<Props, State> {
             />
           </Root>
         ) : (
-          <input
-            className={cx([
-              inputClass,
-              css`
-                min-height: 44px;
-              `
-            ])}
+          <Input
+            css={css`
+              min-height: 44px;
+            `}
             value={value ? value.id : ""}
             placeholder="/path/to/page or https://site.de/path/to/page"
             onChange={e => {

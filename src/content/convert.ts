@@ -7,10 +7,19 @@ import {
   ContentFormat
 } from "../../typings";
 import urlJoin from "url-join";
-import visit from "../model/visit";
+import visit, { NO_STORE_VALUE } from "../model/visit";
 import formatQuillDelta from "./formatQuillDelta";
 import getRefUrl from "./getRefUrl";
 
+type ContentRef = {
+  id: string;
+  model: string;
+};
+type ReverseRef = {
+  _id: string;
+  _ref: string;
+  _content: string;
+};
 /**
  * Converts a content from its internal representation to a format
  * requested by the client.
@@ -18,7 +27,7 @@ import getRefUrl from "./getRefUrl";
 
 type ConvertProps = {
   content: Data;
-  contentRefs?: ContentRefs;
+  contentRefs: ContentRefs;
   contentModel: Model;
   allModels: Model[];
   contentFormat: ContentFormat;
@@ -34,6 +43,64 @@ export default function convert({
   mediaUrl,
   previewOpts = {}
 }: ConvertProps) {
+  /**
+   * Converts content-references of type content
+   * and reverse-references of type references
+   */
+  const convertReferences = (ref: ContentRef | ReverseRef, field: any) => {
+
+    if (ref) {
+      const convertedRef: any =
+        "_id" in ref
+          ? ref
+          : {
+              _id: ref.id,
+              _ref: field.type,
+              _content: ref.model
+            };
+
+      // ONLY RELEVANT FOR CONTENT-REFERENCES:
+      // Refs can only contain an id but no model,
+      // this means the ref is not actually a ref but a string
+      const isAbsoluteRef = !convertedRef._content;
+      if (isAbsoluteRef) {
+        convertedRef._url = convertedRef._id;
+        return convertedRef;
+      }
+
+      const referencedModel = allModels.find(
+        m => m.name.toLowerCase() === convertedRef._content.toLowerCase()
+      );
+
+      // ONLY RELEVANT FOR CONTENT-REFERENCES:
+      // For external data sources content references don't exist
+      if (referencedModel!.external) return convertedRef;
+
+      // No content for the ref was provided,
+      // this means the referenced content does not exists anymore.
+      // This happens when content get deleted or is scheduled
+      if (
+        !referencedModel ||
+        !contentRefs[convertedRef._content] ||
+        !contentRefs[convertedRef._content][convertedRef._id]
+      ) {
+        return NO_STORE_VALUE;
+      }
+
+      // If the referenced content has no `urlPath`,
+      // we don't need to add the `_url`
+      if (!referencedModel.urlPath) return convertedRef;
+
+      const allRefData = contentRefs[convertedRef._content][convertedRef._id];
+      convertedRef._url = getRefUrl(
+        (allRefData || {}).data,
+        referencedModel.urlPath
+      );
+
+      return convertedRef;
+    }
+  };
+
   visit(content, contentModel, {
     richtext(delta: QuillDelta) {
       if (delta && delta.ops) {
@@ -93,37 +160,12 @@ export default function convert({
             })
         : [];
     },
-    content(ref: { id: string; model: string }, field) {
-      if (ref) {
-        const convertedRef: any = {
-          _id: ref.id,
-          _ref: field.type,
-          _content: ref.model
-        };
-
-        const isAbsoluteRef = !ref.model;
-
-        if (isAbsoluteRef) {
-          convertedRef._url = ref.id;
-          return convertedRef;
-        }
-
-        // For external data sources content references don't exist
-        if (!contentRefs || !contentRefs[ref.model]) return convertedRef;
-
-        const refModel = allModels.find(
-          m => m.name.toLowerCase() === ref.model.toLowerCase()
-        );
-        if (!refModel || !refModel.urlPath) return convertedRef;
-
-        const allRefData = contentRefs[ref.model][ref.id];
-        convertedRef._url = getRefUrl(
-          (allRefData || {}).data,
-          refModel.urlPath
-        );
-
-        return convertedRef;
-      }
+    content: convertReferences,
+    references(refs, field) {
+      if (Array.isArray(refs))
+        return refs
+          .map(r => convertReferences(r, field))
+          .filter(r => r !== NO_STORE_VALUE);
     },
     media(media: string) {
       if (media)

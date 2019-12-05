@@ -7,7 +7,7 @@ import { Link, match as Match } from "react-router-dom";
 import ScrollList from "../common/ScrollList";
 import Item from "./Item";
 import FilterModal, { FilterValue } from "./FilterModal";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 import { paths } from "../common/icons";
 import Icon from "../common/Icon";
 import Button from "../common/Button";
@@ -86,7 +86,7 @@ const modelActionButtons = css`
   }
 `;
 
-const addButtonClass = css`
+const StyledLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   padding: 0.7em 1em;
@@ -267,33 +267,29 @@ export default class ListWithItems extends Component<Props, State> {
       <>
         <FilterBar>
           {edit && (
-            <Link
-              {...testable("add-button")}
-              className={addButtonClass}
-              to={`${match.url}/edit`}
-            >
+            <StyledLink {...testable("add-button")} to={`${match.url}/edit`}>
               <Icon path={paths.BigPlus} />
               Add
-            </Link>
+            </StyledLink>
           )}
           <form onSubmit={this.onSearch}>
             <InvisibleInput
               type="text"
               name="searchTerm"
-              innerRef={this.searchRef}
+              ref={this.searchRef}
               autoComplete="off"
               defaultValue={searchTerm}
               hasValue={!!searchTerm.trim()}
             />
             <Button
-              className={modelActionButtons}
+              css={modelActionButtons}
               icon={paths.Search}
               type="submit"
             />
           </form>
           {Object.keys(filter).length > 0 && (
             <Button
-              className={modelActionButtons}
+              css={modelActionButtons}
               icon={
                 filterValues.field === "none"
                   ? paths.Filter

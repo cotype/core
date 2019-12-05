@@ -13,12 +13,15 @@ import { createApiReadHelpers, createApiWriteHelpers } from "./apiHelper";
 
 const uploadDir = path.join(__dirname, ".uploads");
 
-const buildProduct = () => ({
+const buildProduct = (p: { articleNewsId?: string }) => ({
   title: faker.lorem.slug(4),
   ean: faker.lorem.words(),
   description: {
     ops: [{ insert: faker.lorem.paragraph(5) }]
-  }
+  },
+  ref: p.articleNewsId
+    ? { id: p.articleNewsId, model: "articleNews" }
+    : undefined
 });
 
 const buildNews = (
@@ -44,6 +47,7 @@ describe("rest api", () => {
   let mediaFile: Meta;
   let product: { id: string; data: ReturnType<typeof buildProduct> };
   let news: { id: string; data: ReturnType<typeof buildNews> };
+  let articleNews: { id: string; data: ReturnType<typeof buildNews> };
   let updatedNews: { id: string; data: ReturnType<typeof buildNews> };
   let find: ReturnType<typeof createApiReadHelpers>["find"];
   let list: ReturnType<typeof createApiReadHelpers>["list"];
@@ -92,29 +96,33 @@ describe("rest api", () => {
       .attach("file", mediaBuffer, faker.system.commonFileName("txt"))
       .expect(200));
 
-    product = await create("products", buildProduct());
+    articleNews = await create("articleNews", buildNews({}));
+
+    product = await create(
+      "products",
+      buildProduct({ articleNewsId: articleNews.id })
+    );
 
     news = await create(
       "news",
       buildNews({ productId: product.id, mediaId: mediaFile.id })
     );
 
-    await server
-      .post(`/admin/rest/content/products/${product.id}/publish`)
-      .set(headers)
-      .send({ rev: 1 })
-      .expect(204);
+    const publish = async (type: string, id: string) =>
+      server
+        .post(`/admin/rest/content/${type}/${id}/publish`)
+        .set(headers)
+        .send({ rev: 1 })
+        .expect(204);
 
-    await server
-      .post(`/admin/rest/content/news/${news.id}/publish`)
-      .set(headers)
-      .send({ rev: 1 })
-      .expect(204);
+    await publish("articleNews", articleNews.id);
+    await publish("products", product.id);
+    await publish("news", news.id);
 
     updatedNews = await update(
       "news",
       news.id,
-      buildNews({ productId: product.id, mediaId: mediaFile.id })
+      buildNews({ mediaId: mediaFile.id })
     );
   });
 
@@ -161,6 +169,7 @@ describe("rest api", () => {
           _ref: "media",
           _src: `/media/${mediaFile.id}`
         },
+        imageList: [],
         ref: {
           _content: "products",
           _id: product.id,
@@ -178,6 +187,7 @@ describe("rest api", () => {
         title: updatedNews.data.title,
         slug: updatedNews.data.slug
       };
+      delete expectedDraftsContent.ref;
     });
 
     describe("list contents", () => {
@@ -236,7 +246,7 @@ describe("rest api", () => {
       });
 
       it("should get published news by id", async () => {
-        await expect(await find("news", news.id, {}, true)).toEqual({
+        await expect(await find("news", news.id, {}, true)).toStrictEqual({
           ...expectedPublishedContent,
           _id: news.id.toString(),
           _refs: {
@@ -247,7 +257,7 @@ describe("rest api", () => {
       });
 
       it("should get drafts news id", async () => {
-        await expect(await find("news", news.id, {}, false)).toEqual({
+        await expect(await find("news", news.id, {}, false)).toStrictEqual({
           ...expectedDraftsContent,
           _id: news.id.toString(),
           _refs: {
@@ -260,7 +270,7 @@ describe("rest api", () => {
       it("should get published news by unique field", async () => {
         await expect(
           await findByField("news", "slug", news.data.slug, {}, true)
-        ).toEqual({
+        ).toStrictEqual({
           ...expectedPublishedContent,
           _id: news.id.toString(),
           _refs: {
@@ -271,7 +281,7 @@ describe("rest api", () => {
 
         await expect(
           await findByField("news", "title", news.data.title, {}, true)
-        ).toEqual({
+        ).toStrictEqual({
           ...expectedPublishedContent,
           _id: news.id.toString(),
           _refs: {
@@ -284,7 +294,7 @@ describe("rest api", () => {
       it("should get drafts news by unique field", async () => {
         await expect(
           await findByField("news", "slug", updatedNews.data.slug, {}, false)
-        ).toEqual({
+        ).toStrictEqual({
           ...expectedDraftsContent,
           _id: news.id.toString(),
           _refs: {
@@ -295,7 +305,7 @@ describe("rest api", () => {
 
         await expect(
           await findByField("news", "title", updatedNews.data.title, {}, false)
-        ).toEqual({
+        ).toStrictEqual({
           ...expectedDraftsContent,
           _id: news.id.toString(),
           _refs: {
@@ -310,7 +320,7 @@ describe("rest api", () => {
       it("should only return selected fields when loading content", async () => {
         await expect(
           await find("news", news.id, { fields: ["title"] }, true)
-        ).toEqual({
+        ).toStrictEqual({
           title: expectedPublishedContent.title,
           _id: news.id.toString(),
           _refs: {
@@ -320,7 +330,7 @@ describe("rest api", () => {
         });
         await expect(
           await find("news", news.id, { fields: ["title", "image"] }, true)
-        ).toEqual({
+        ).toStrictEqual({
           title: expectedPublishedContent.title,
           image: expectedPublishedContent.image,
           _id: news.id.toString(),
@@ -336,7 +346,7 @@ describe("rest api", () => {
             { fields: ["title", "image", "ref"], join: { products: ["ean"] } },
             true
           )
-        ).toEqual({
+        ).toStrictEqual({
           title: expectedPublishedContent.title,
           image: expectedPublishedContent.image,
           ref: expectedPublishedContent.ref,
@@ -348,7 +358,9 @@ describe("rest api", () => {
         });
       });
       it("should only return selected fields when listing content", async () => {
-        await expect(await list("news", { fields: ["title"] }, true)).toEqual({
+        await expect(
+          await list("news", { fields: ["title"] }, true)
+        ).toStrictEqual({
           total: 1,
           items: [
             { title: expectedPublishedContent.title, _id: news.id.toString() }
@@ -364,7 +376,7 @@ describe("rest api", () => {
             { fields: ["title"], slug: { eq: news.data.slug } },
             true
           )
-        ).toEqual({
+        ).toStrictEqual({
           total: 1,
           items: [
             { title: expectedPublishedContent.title, _id: news.id.toString() }
@@ -377,7 +389,7 @@ describe("rest api", () => {
 
         await expect(
           await list("news", { fields: ["title", "image"] }, true)
-        ).toEqual({
+        ).toStrictEqual({
           total: 1,
           items: [
             {
@@ -397,7 +409,7 @@ describe("rest api", () => {
             { fields: ["title", "image", "ref"], join: { products: ["ean"] } },
             true
           )
-        ).toEqual({
+        ).toStrictEqual({
           total: 1,
           items: [
             {
@@ -415,7 +427,7 @@ describe("rest api", () => {
 
         await expect(
           await list("news", { fields: ["title", "image"] }, true)
-        ).toEqual({
+        ).toStrictEqual({
           total: 1,
           items: [
             {
@@ -440,7 +452,7 @@ describe("rest api", () => {
             { fields: ["title"] },
             true
           )
-        ).toEqual({
+        ).toStrictEqual({
           title: expectedPublishedContent.title,
           _id: news.id.toString(),
           _refs: {
@@ -638,12 +650,57 @@ describe("rest api", () => {
             },
             true
           )
-        ).toEqual({
+        ).toStrictEqual({
           _refs: {
             content: contentRefs,
             media: mediaRefs
           },
           items: [{ _id: news.id.toString(), ...expectedPublishedContent }],
+          total: 1
+        });
+      });
+
+      it("should include deep joined references", async () => {
+        await expect(
+          await list(
+            "news",
+            {
+              join: { products: ["ean", "ref.title"] },
+              ["data.title"]: { eq: news.data.title }
+            },
+            true
+          )
+        ).toStrictEqual({
+          _refs: {
+            content: {
+              products: {
+                [product.id]: {
+                  _id: product.id,
+                  _type: "products",
+                  ean: product.data.ean,
+                  ref: {
+                    _content: "articleNews",
+                    _id: articleNews.id,
+                    _ref: "content"
+                  }
+                }
+              },
+              articleNews: {
+                [articleNews.id]: {
+                  _id: articleNews.id,
+                  _type: "articleNews",
+                  title: articleNews.data.title
+                }
+              }
+            },
+            media: mediaRefs
+          },
+          items: [
+            {
+              _id: news.id.toString(),
+              ...expectedPublishedContent
+            }
+          ],
           total: 1
         });
       });
@@ -658,7 +715,7 @@ describe("rest api", () => {
             },
             false
           )
-        ).toMatchObject({
+        ).toStrictEqual({
           _refs: {
             content: {},
             media: mediaRefs

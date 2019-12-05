@@ -1,4 +1,4 @@
-import styled, { css } from "react-emotion";
+import styled, { css, CSSProp } from "styled-components/macro";
 
 export const fieldGroupClass = css`
   box-sizing: border-box;
@@ -61,8 +61,21 @@ export const buttonClass = css`
   padding: 0.5em 2em;
 `;
 
-export const Input = styled("input")(inputClass);
-export const Field = styled("label")(fieldClass);
-export const Label = styled("div")(labelClass);
-export const Error = styled("div")(errorClass);
-export const Button = styled("button")(buttonClass);
+type Props = {
+  css?: CSSProp;
+};
+export const Input = styled.input<Props>`
+  ${inputClass}
+`;
+export const Field = styled.label`
+  ${fieldClass}
+`;
+export const Label = styled.div`
+  ${labelClass}
+`;
+export const Error = styled.div`
+  ${errorClass}
+`;
+export const Button = styled.button`
+  ${buttonClass}
+`;

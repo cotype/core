@@ -15,13 +15,24 @@ import getRefUrl from "../content/getRefUrl";
 import convert from "../content/convert";
 import { PersistenceConfig } from ".";
 import { getDeepJoins } from "../content/rest/filterRefData";
-import { ContentFormat, Data, MetaData } from "../../typings";
+import {
+  ContentFormat,
+  Data,
+  MetaData,
+  Model,
+  ContentRefs,
+  Content,
+  Principal,
+  ListOpts,
+  ListChunk
+} from "../../typings";
 import extractMatch from "../model/extractMatch";
 import extractText from "../model/extractText";
 import log from "../log";
 import visit, { NO_STORE_VALUE } from "../model/visit";
 import setPosition from "../model/setPosition";
 import MigrationContext from "./MigrationContext";
+import { createModelFilter } from "../model/filterModels";
 
 export type Migration = {
   name: string;
@@ -239,7 +250,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       ids,
       model,
       this.models,
-      previewOpts.publishedOnly,
+      previewOpts,
       getDeepJoins(join, this.models)
     );
 
@@ -249,32 +260,43 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       previewOpts.publishedOnly
     );
 
-    // sort and and convert loaded content into type categories
-    const sortedContentRefs: { [key: string]: any } = {};
+    // sort content into type categories
+    const sortedContentRefs: ContentRefs = {};
 
-    contentRefs.forEach(c => {
+    contentRefs.forEach(({ data, ...ref }) => {
       // ignore unknown content
-      const contentModel = this.getModel(c.type);
+      const contentModel = this.getModel(ref.type);
       if (!contentModel) return;
 
-      if (!sortedContentRefs[c.type]) {
-        sortedContentRefs[c.type] = {};
+      if (!sortedContentRefs[ref.type]) {
+        sortedContentRefs[ref.type] = {};
       }
 
-      // convert referenced data
-      const data = convert({
-        content: removeDeprecatedData(c.data, contentModel),
-        contentModel,
-        contentFormat,
-        allModels: this.models,
-        mediaUrl: this.config.mediaUrl,
-        previewOpts
-      });
-
-      sortedContentRefs[c.type][c.id] = {
-        ...c,
+      sortedContentRefs[ref.type][ref.id] = {
+        ...ref,
         data
-      };
+      } as Content;
+    });
+
+    // convert sorted references
+    // we need to separate the sorting step from the converting step
+    // because we need the whole refs object to convert correctly (urls)
+    Object.entries(sortedContentRefs).forEach(([type, items]) => {
+      const contentModel = this.getModel(type) as Model;
+      return Object.values(items).forEach(item => {
+        return {
+          ...item,
+          data: convert({
+            content: removeDeprecatedData(item.data, contentModel),
+            contentModel,
+            contentRefs: sortedContentRefs,
+            contentFormat,
+            allModels: this.models,
+            mediaUrl: this.config.mediaUrl,
+            previewOpts
+          })
+        };
+      });
     });
 
     // assign media refs to an object with it's ids as keys
@@ -395,7 +417,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     id: string,
     schedule: Cotype.Schedule
   ): Promise<void> {
-    await this.adapter.schedule(model, id, schedule);
+    await this.adapter
+      .schedule(model, id, schedule)
+      .catch(err => this.processReferenceConflictError(principal, err));
     const content = await this.adapter.load(model, id);
     if (content) {
       this.applyPostHooks("onSchedule", model, content);
@@ -409,39 +433,29 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     rev: number,
     models: Cotype.Model[]
   ): Promise<void> {
-    try {
-      const resp = await this.adapter.setPublishedRev(model, id, rev, models);
-      const content = await this.adapter.load(model, id);
-      if (content) {
-        this.applyPostHooks(
-          rev !== null ? "onPublish" : "onUnpublish",
-          model,
-          content
-        );
-      }
-      return resp;
-    } catch (err) {
-      if (err instanceof ReferenceConflictError && err.refs) {
-        err.refs = this.createItems(err.refs as any, principal);
-        throw err;
-      }
+    const resp = await this.adapter
+      .setPublishedRev(model, id, rev, models)
+      .catch(err => this.processReferenceConflictError(principal, err));
+    const content = await this.adapter.load(model, id);
+    if (content) {
+      this.applyPostHooks(
+        rev !== null ? "onPublish" : "onUnpublish",
+        model,
+        content
+      );
     }
+    return resp;
   }
 
   async delete(principal: Cotype.Principal, model: Cotype.Model, id: string) {
-    try {
-      const content = await this.adapter.load(model, id);
-      const resp = await this.adapter.delete(model, id);
-      if (content) {
-        this.applyPostHooks("onDelete", model, content);
-      }
-      return resp;
-    } catch (err) {
-      if (err instanceof ReferenceConflictError && err.refs) {
-        err.refs = this.createItems(err.refs as any, principal);
-        throw err;
-      }
+    const content = await this.adapter.load(model, id);
+    const resp = await this.adapter
+      .delete(model, id)
+      .catch(err => this.processReferenceConflictError(principal, err));
+    if (content) {
+      this.applyPostHooks("onDelete", model, content);
     }
+    return resp;
   }
 
   async list(
@@ -629,6 +643,50 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       }
     });
   }
+
+  createItemsWithAuthorAndDate = (listChunk: ListChunk<Content>) => {
+    return this.createItems(listChunk.items).map((i, idx) => {
+      const { date, author } = listChunk.items[idx];
+      return { ...i, date, author_name: author };
+    });
+  };
+
+  async listLastUpdatedContent(
+    principal: Cotype.Principal,
+    opts: ListOpts = { limit: 50, offset: 0 },
+    byUser?: boolean
+  ) {
+    const filteredModels = this.models.filter(createModelFilter(principal));
+    const listChunk = await this.adapter.listLastUpdatedContent(
+      filteredModels.map(m => m.name),
+      opts,
+      byUser ? principal.id! : undefined
+    );
+
+    return {
+      total: listChunk.total,
+      items: this.createItemsWithAuthorAndDate(listChunk)
+    };
+  }
+  async listUnpublishedContent(principal: Cotype.Principal, opts: ListOpts) {
+    const filteredModels = this.models.filter(createModelFilter(principal));
+    const listChunk = await this.adapter.listUnpublishedContent(
+      filteredModels.map(m => m.name),
+      opts
+    );
+
+    return {
+      total: listChunk.total,
+      items: this.createItemsWithAuthorAndDate(listChunk)
+    };
+  }
+
+  private processReferenceConflictError = (principal: Principal, err: any) => {
+    if (err instanceof ReferenceConflictError && err.refs) {
+      err.refs = this.createItems(err.refs as any, principal);
+      throw err;
+    }
+  };
 
   private async setOrderPosition(
     data: Cotype.Data,

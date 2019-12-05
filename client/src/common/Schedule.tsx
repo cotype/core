@@ -1,6 +1,6 @@
 import * as Cotype from "../../../typings";
 import React, { Component } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import moment from "moment";
 import ModalDialog from "./ModalDialog";
 import Button from "./Button";
@@ -8,6 +8,7 @@ import ToggleSwitch from "./ToggleSwitch";
 import { paths } from "./icons";
 import DatePicker from "./DatePicker";
 import TimeInput from "./TimeInput";
+import ConflictDialog from "./ConflictDialog";
 
 const modalStyle = {
   width: 750,
@@ -20,7 +21,7 @@ const modalStyle = {
 type Props = Cotype.Schedule & {
   schedule: Cotype.Schedule;
   onClose: () => void;
-  onSchedule: (schedule: Cotype.Schedule) => void;
+  onSchedule: (schedule: Cotype.Schedule) => Promise<void | any>;
 };
 
 type State = {
@@ -30,6 +31,7 @@ type State = {
   visibleUntil: boolean;
   visibleUntilDate: string;
   visibleUntilTime: string;
+  conflictingRefs: Cotype.VersionItem[] | null;
 };
 
 const Row = styled("div")`
@@ -65,7 +67,8 @@ export default class ScheduleModal extends Component<Props, State> {
       visibleFromTime: toTime(visibleFrom),
       visibleUntil: !!visibleUntil,
       visibleUntilDate: toIsoDate(visibleUntil),
-      visibleUntilTime: toTime(visibleUntil)
+      visibleUntilTime: toTime(visibleUntil),
+      conflictingRefs: null
     };
   }
 
@@ -91,10 +94,29 @@ export default class ScheduleModal extends Component<Props, State> {
 
   onSchedule = () => {
     const { visibleFrom, visibleUntil } = this;
-    this.props.onSchedule({
-      visibleFrom,
-      visibleUntil
-    });
+
+    this.props
+      .onSchedule({
+        visibleFrom,
+        visibleUntil
+      })
+      .catch(err => {
+        const { body } = err;
+        this.setState({
+          conflictingRefs: body.conflictingRefs
+        });
+      });
+  };
+  renderErrors = () => {
+    const { conflictingRefs } = this.state;
+    if (!conflictingRefs) return null;
+    return (
+      <ConflictDialog
+        onClose={() => this.setState({ conflictingRefs: null })}
+        items={conflictingRefs!}
+        type="schedule"
+      />
+    );
   };
 
   render() {
@@ -121,6 +143,7 @@ export default class ScheduleModal extends Component<Props, State> {
         style={modalStyle}
         actionButtons={actionButtons}
       >
+        {this.renderErrors()}
         <Row>
           <Half>
             <Row>

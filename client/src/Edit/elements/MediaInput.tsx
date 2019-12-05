@@ -1,6 +1,6 @@
 import { Media as MediaType, UnionType } from "../../../../typings";
 import React, { Component } from "react";
-import styled, { css } from "react-emotion";
+import styled, { CSSProp } from "styled-components/macro";
 import { FieldProps } from "formik";
 import api from "../../api";
 import Media from "../../Media";
@@ -8,7 +8,7 @@ import Image from "../../Media/Image";
 import Button, { StyledButton } from "../../common/Button";
 import ModalDialog from "../../common/ModalDialog";
 import ProgressCircle from "../../common/ProgressCircle";
-import { inputClass } from "../../common/styles";
+import { inputClass, Input } from "../../common/styles";
 import UploadZone from "../../Media/UploadZone";
 import UploadField from "../../Media/UploadField";
 import { required } from "./validation";
@@ -19,6 +19,15 @@ const Root = styled("div")`
   display: flex;
   flex: 1;
   align-items: center;
+`;
+
+const ACTIVE_CLASS = "active-upload-zone";
+
+const StyledUploadZone = styled(UploadZone)<{ css: CSSProp }>`
+  &.${ACTIVE_CLASS} {
+    border-color: var(--accent-color);
+    outline: 1px solid var(--accent-color);
+  }
 `;
 
 const Chooser = styled("div")`
@@ -41,11 +50,6 @@ const EmptyTile = styled("div")`
   width: 150px;
   height: 150px;
   border: 1px dashed var(--dark-grey);
-`;
-
-const activeClass = css`
-  border-color: var(--accent-color);
-  outline: 1px solid var(--accent-color);
 `;
 
 const modalDialogStyle = {
@@ -96,7 +100,14 @@ export default class MediaInput extends Component<Props, State> {
   }
 
   static getHint(model) {
-    const { minHeight, minWidth, maxHeight, maxWidth, maxSize, mimeType } = model;
+    const {
+      minHeight,
+      minWidth,
+      maxHeight,
+      maxWidth,
+      maxSize,
+      mimeType
+    } = model;
     const str: string[] = [];
 
     if (minHeight) {
@@ -115,7 +126,7 @@ export default class MediaInput extends Component<Props, State> {
       str.push("Max Größe: " + sizeFormat(maxSize, 2));
     }
     if (mimeType) {
-      str.push("Erlaubtes Dateiformat: "+mimeType);
+      str.push("Erlaubtes Dateiformat: " + mimeType);
     }
     if (str.length > 0) {
       return `(${str.join(", ")})`;
@@ -232,10 +243,10 @@ export default class MediaInput extends Component<Props, State> {
     } = this.props;
 
     return (
-      <UploadZone
+      <StyledUploadZone
         multiple={false}
-        className={inputClass}
-        activeClass={activeClass}
+        css={inputClass}
+        activeClass={ACTIVE_CLASS}
         onUpload={this.onUpload}
         mediaType={mediaType}
         mediaFilter={{
@@ -298,8 +309,7 @@ export default class MediaInput extends Component<Props, State> {
                 title="External Media Reference"
                 style={modalDialogStyle}
               >
-                <input
-                  className={inputClass}
+                <Input
                   value={this.state.externalRefVal || ""}
                   onChange={this.setExternalRef}
                 />

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { FieldProps } from "formik";
 import { slugify } from "../../utils/helper";
-import { inputClass } from "../../common/styles";
+import { Input } from "../../common/styles";
 import { required } from "./validation";
 
 type Props = FieldProps<any> & { required?: boolean };
@@ -24,12 +24,7 @@ export default class SlugInput extends Component<Props> {
     const { field } = this.props;
     const { value = "", ...props } = field;
     return (
-      <input
-        className={inputClass}
-        value={value || ""}
-        {...props}
-        onChange={this.handleChange}
-      />
+      <Input value={value || ""} {...props} onChange={this.handleChange} />
     );
   }
 }

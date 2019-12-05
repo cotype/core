@@ -3,6 +3,7 @@
  * routed through this class and handed over to an adapter.
  * NOTE: Currently there is only an adapter for relational databases.
  * Adding other storage backends like elasticsearch or mongodb is possible.
+ *
  */
 
 import fs from "fs";
@@ -57,8 +58,8 @@ export class Persistence {
     const files = fs.readdirSync(dir).sort();
     const migrations = files
       .map(f => {
-        const ext = path.extname(f);
-        if (ext.match(/^\.(js|ts)$/)) {
+        if (f.match(/(?<!\.d)\.(js|ts)$/)) {
+          const ext = path.extname(f);
           const name = path.basename(f, ext);
           return {
             name,

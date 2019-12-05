@@ -1,4 +1,4 @@
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 
 const Sidebar = styled("div")`
   height: 100%;

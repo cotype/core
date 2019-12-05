@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import PopoverMenu, { Menu, Item } from "./PopoverMenu";
 import Icon from "./icons";
 import { testable } from "../utils/helper";

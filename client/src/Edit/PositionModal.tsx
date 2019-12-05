@@ -7,7 +7,7 @@ import * as Cotype from "../../../typings";
 import api from "../api";
 import ScrollList, { RenderInfo } from "../common/ScrollList";
 import Item from "../List/Item";
-import styled, { css } from "react-emotion";
+import styled, { css } from "styled-components/macro";
 
 export const errorClass = "error-field-label";
 
@@ -124,7 +124,8 @@ class PositionModal extends Component<Props, State> {
     if (this.props.model.order !== "asc") {
       [prev, post] = [post, prev];
     }
-    this.props.onSave(middleString(prev, post));
+
+    this.props.onSave(middleString(prev, prev !== post ? post : undefined));
   };
   render() {
     let { items } = this.state;

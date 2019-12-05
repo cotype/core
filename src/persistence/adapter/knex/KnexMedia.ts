@@ -47,23 +47,24 @@ export default class KnexMedia implements MediaAdapter {
       }
     }
 
-    if(unUsed){
-      q.leftJoin('content_references',(join)=>{
-        join.on("media.id", "content_references.media");
-      })
-      q.leftJoin('contents',(join)=>{
-        join.on("content_references.id", "contents.id");
-        join.andOn((innerjoin)=>{
-          innerjoin.on("content_references.rev","contents.latest_rev")
-          innerjoin.orOn("content_references.rev","contents.published_rev")
+    if (unUsed) {
+      q.whereNotIn("media.id", subquery => {
+        subquery.select("media.id").from("media");
+        subquery.join("content_references", join => {
+          join.on("media.id", "content_references.media");
         });
-      })
-      q.whereNull('contents.id')
+        subquery.join("contents", join => {
+          join.on("contents.id", "content_references.id");
+          join.on(j => {
+            j.on("contents.latest_rev", "=", "content_references.rev");
+            j.orOn("contents.published_rev", "=", "content_references.rev");
+          });
+        });
+      });
     }
-
     const [count] = await q.clone().countDistinct("media.id as total");
     const items = await q
-      .distinct('media.*')
+      .distinct("media.*")
       .offset(Number(offset || 0))
       .limit(Number(limit || 50))
       .orderBy(orderBy || "created_at", order || "desc");
@@ -90,7 +91,7 @@ export default class KnexMedia implements MediaAdapter {
   }
 
   async update(id: string, data: any) {
-    const args = pick(data, ["focusX", "focusY", "tags", "alt", "credit"]);
+    const args = pick(data, ["focusX", "focusY", "tags", "alt", "credit","originalname"]);
 
     const [media] = await this.knex("media").where({ id });
     if (!media) return false;
@@ -101,7 +102,7 @@ export default class KnexMedia implements MediaAdapter {
     if (typeof args.focusY !== undefined && args.focusY !== null)
       args.focusY = parseInt(args.focusY, 10);
 
-    const search = this.createSearchString(media.originalname, args.tags);
+    const search = this.createSearchString(args.originalname, args.tags);
 
     if (typeof args.tags !== undefined) {
       args.tags = JSON.stringify(args.tags);

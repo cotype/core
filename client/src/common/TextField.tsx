@@ -1,5 +1,5 @@
 import React from "react";
-import { inputClass, labelClass } from "./styles";
+import { Input, Label } from "./styles";
 
 type Props = {
   label: string;
@@ -10,13 +10,8 @@ export default function(props: Props) {
   const { label, field, style } = props;
   return (
     <div style={style}>
-      <label className={labelClass}>{label}</label>
-      <input
-        type="text"
-        {...field}
-        className={inputClass}
-        placeholder={label}
-      />
+      <Label>{label}</Label>
+      <Input type="text" {...field} placeholder={label} />
     </div>
   );
 }

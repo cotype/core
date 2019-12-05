@@ -35,7 +35,7 @@ context("Settings", () => {
       frame.sidebarItem("Roles").click();
       roles.add();
       roles.setName(roleName);
-      roles.addContent("foos", "edit");
+      roles.addContent({ label: "Foo", value: "foos" }, "edit");
       roles.save();
       roles.listItem(roleName).should("have.length", 1);
     });
@@ -59,6 +59,7 @@ context("Settings", () => {
     cy.withContext(({ userEmail, password, userName }) => {
       cy.login({ email: userEmail, password, name: userName });
       frame.navigation("Settings").should("not.exist");
+      frame.navigation("Content").click();
       frame.sidebarItems().should("have.length", 1);
       frame.sidebarItem("Foos").should("have.length", 1);
     });

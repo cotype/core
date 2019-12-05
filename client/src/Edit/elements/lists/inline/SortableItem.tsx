@@ -1,5 +1,5 @@
 import React from "react";
-import styled, { css } from "react-emotion";
+import styled from "styled-components/macro";
 import { Field, ArrayHelpers, FormikProps } from "formik";
 import Icon from "../../../../common/icons";
 import { SortableElement } from "react-sortable-hoc";
@@ -42,7 +42,8 @@ const StyledButton = styled("button")`
     outline: 0;
   }
 `;
-const clearClass = css`
+
+const ClearCircleIcon = styled(Icon.ClearCircle)`
   color: rgba(0, 0, 0, 0.26);
   margin: 0 4px;
 `;
@@ -90,7 +91,7 @@ const SortableItem = SortableElement(
           }}
         />
         <StyledButton type="button" onClick={() => removeItem(sortIndex)}>
-          <Icon.ClearCircle className={clearClass} />
+          <ClearCircleIcon />
         </StyledButton>
       </Item>
     );

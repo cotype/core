@@ -2,6 +2,7 @@ import React from "react";
 
 export type Props = React.SVGProps<SVGSVGElement> & {
   path: string;
+  ref?: any;
 };
 
 export default function Icon({ path, ...props }: Props) {

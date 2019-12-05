@@ -14,11 +14,11 @@ import {
   Route,
   Redirect
 } from "react-router-dom";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import { UploadProvider, createXhrClient } from "react-use-upload";
 import basePath from "./basePath";
 import api from "./api";
-import Header from "./Header";
+import Header, { HEIGHT } from "./Header";
 import Models from "./Models";
 import ModelPathsContext from "./ModelPathsContext";
 import Media from "./Media";
@@ -26,6 +26,7 @@ import Login from "./auth/Login";
 import UserContext from "./auth/UserContext";
 import IconGallery from "./IconGallery";
 import List from "./List";
+import Dashboard from "./Dashboard";
 import SplitPane from "./common/SplitPane";
 import ErrorBoundary from "./ErrorBoundary";
 
@@ -39,6 +40,7 @@ const Main = styled("div")`
   position: relative;
   flex: 1;
   display: flex;
+  max-height: calc(100vh - ${HEIGHT});
 `;
 
 type State = {
@@ -99,6 +101,10 @@ class App extends React.Component<{}, State> {
                   <ErrorBoundary>
                     <Main>
                       <Switch>
+                        <Route
+                          path={`${basePath}/dashboard`}
+                          render={props => <Dashboard />}
+                        />
                         {navigation.map(item => (
                           <Route
                             key={item.path}
@@ -160,11 +166,7 @@ class App extends React.Component<{}, State> {
                           component={IconGallery}
                         />
                         <Route exact path={basePath}>
-                          <Redirect
-                            to={`${basePath}${
-                              navigation[0] ? navigation[0].path! : "/media"
-                            }`}
-                          />
+                          <Redirect to={`${basePath}/dashboard`} />
                         </Route>
                       </Switch>
                     </Main>

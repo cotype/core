@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import ButtonImport from "../common/Button";
 import Icon from "../common/icons";
 import MoreButton from "../common/MoreButton";
@@ -146,6 +146,7 @@ export default function Topbar(props: Props) {
   });
 
   useEffect(() => {
+    if (!progress) return;
     onUploadProgress(progress || 0);
   }, [progress, onUploadProgress]);
 

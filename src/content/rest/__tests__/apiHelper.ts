@@ -145,5 +145,30 @@ export function createApiWriteHelpers(
 
     return body;
   };
-  return { create, update };
+
+  const schedule = async (
+    type: string,
+    id: string,
+    data: {
+      visibleFrom?: Date | string | null;
+      visibleUntil?: Date | string | null;
+    }
+  ) => {
+    const { body } = await server
+      .post(`/admin/rest/content/${type}/${id}/schedule`)
+      .set(headers)
+      .send(data)
+      .expect(204);
+
+    return body;
+  };
+
+  const publish = async (type: string, id: string) =>
+    server
+      .post(`/admin/rest/content/${type}/${id}/publish`)
+      .set(headers)
+      .send({ rev: 1 })
+      .expect(204);
+
+  return { create, update, schedule, publish };
 }

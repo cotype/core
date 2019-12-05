@@ -74,6 +74,7 @@ export type ImageMeta = {
   tags: string[] | null;
   credit: string | null;
   alt: string | null;
+  originalname: string | null;
 };
 
 export type Media = Meta &

@@ -32,6 +32,7 @@ context("Access Control", () => {
 
   describe("for view", () => {
     it("does not show edit buttons", () => {
+      frame.navigation("Content").click();
       frame.sidebarItem("Bars").click();
       content.addButton().should("have.length", 0);
       content.listItem("Test Bar").click();
@@ -49,6 +50,7 @@ context("Access Control", () => {
 
   describe("for edit", () => {
     it("allows content creation", () => {
+      frame.navigation("Content").click();
       cy.withContext(({ bazName }) => {
         frame.sidebarItem("Bazs").click();
         content.add();
@@ -81,6 +83,7 @@ context("Access Control", () => {
 
     it("allows content deletion", () => {
       cy.withContext(({ bazName }) => {
+        frame.navigation("Content").click();
         frame.sidebarItem("Bazs").click();
         content.listItem(bazName).click();
         content.delete();
@@ -98,6 +101,7 @@ context("Access Control", () => {
 
   describe("for publish", () => {
     it("allows content publishing", () => {
+      frame.navigation("Content").click();
       frame.sidebarItem("Quxes").click();
       content.listItem("Test Qux").click();
       // Assert it's published

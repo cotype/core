@@ -1,7 +1,7 @@
 import * as Cotype from "../../../typings";
 import React from "react";
 import TimeAgo from "react-time-ago";
-import styled, { css } from "react-emotion";
+import styled, { css, CSSProp } from "styled-components/macro";
 import StatusLight from "../common/StatusLight";
 import MoreButton from "../common/MoreButton";
 import { withUser } from "../auth/UserContext";
@@ -30,14 +30,7 @@ const Status = styled("div")`
   align-items: center;
 `;
 
-const linkClass = css`
-  display: block;
-  position: relative;
-  text-decoration: none;
-  color: inherit;
-`;
-
-const Version = styled("div")`
+const Version = styled.div<{ css: CSSProp }>`
   display: flex;
   width: 100%;
   position: relative;
@@ -50,6 +43,10 @@ const Version = styled("div")`
   align-items: center;
   background: #fff;
   cursor: pointer;
+  display: block;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
 `;
 
 const activeClass = css`
@@ -91,9 +88,7 @@ function VersionList({
       {versions.map(v => (
         <Version
           key={v.rev}
-          className={
-            activeVersion === v.rev ? css([linkClass, activeClass]) : linkClass
-          }
+          css={activeVersion === v.rev ? activeClass : ""}
           onClick={() => onSelectVersion(v)}
         >
           <TimeAgo className={dateClass} date={new Date(new Date(v.date))} />

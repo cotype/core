@@ -1,7 +1,7 @@
-import { Type } from "../../../../typings";
+import { Type, MapKeyValue } from "../../../../typings";
 import React, { Component } from "react";
 import { Field, FieldProps, getIn } from "formik";
-import styled from "react-emotion";
+import styled from "styled-components/macro";
 import ActionButton from "../../common/ActionButton";
 import api from "../../api";
 import Fields from "../../common/Fields";
@@ -25,7 +25,7 @@ const Action = styled("span")`
 type Props = FieldProps<any> & {
   values: Type;
   keys: {
-    values?: string[];
+    values?: MapKeyValue[];
     fetch: string;
   };
 };
@@ -44,11 +44,13 @@ export default class MapInput extends Component<Props> {
   };
 
   componentDidMount() {
-    api
-      .get(this.props.keys.fetch)
-      .then(fetched =>
-        this.setState({ options: this.state.options.concat(fetched) })
-      );
+    if (this.props.keys.fetch) {
+      api
+        .get(this.props.keys.fetch)
+        .then(fetched =>
+          this.setState({ options: [...this.state.options, ...fetched] })
+        );
+    }
   }
 
   add(key: string) {
@@ -66,16 +68,29 @@ export default class MapInput extends Component<Props> {
     form.setFieldValue(field.name, value);
   }
 
+  getValue(v: MapKeyValue) {
+    return typeof v === "object" ? v.value : v;
+  }
+
+  getLabel(v: MapKeyValue) {
+    return typeof v === "object" ? v.label : v;
+  }
+
   render() {
     const { field, values, form } = this.props;
     const { options } = this.state;
+
     if (!options) return null;
     const component = inputs.get(values);
     const prefix = field ? `${field.name}.` : "";
     const { value } = field;
 
-    const existingKeys = options.filter(k => value && k in value);
-    const remainingKeys = options.filter(k => value && !(k in value));
+    const existingKeys = options.filter(
+      k => value && this.getValue(k) in value
+    );
+    const remainingKeys = options.filter(
+      k => value && !(this.getValue(k) in value)
+    );
 
     return (
       <div>
@@ -84,11 +99,13 @@ export default class MapInput extends Component<Props> {
           fields={existingKeys.map(key => {
             const label = (
               <div style={{ display: "flex" }}>
-                {key}
-                <Action onClick={() => this.remove(key)}>remove</Action>
+                {this.getLabel(key)}
+                <Action onClick={() => this.remove(this.getValue(key))}>
+                  remove
+                </Action>
               </div>
             );
-
+            key = this.getValue(key);
             const name = `${prefix}${key}`;
             const error = getIn(form.errors, name);
 
@@ -112,9 +129,9 @@ export default class MapInput extends Component<Props> {
           label="Add …"
           disabled={!remainingKeys.length}
           actions={remainingKeys.map(label => ({
-            label,
+            label: this.getLabel(label),
             onClick: () => {
-              this.add(label);
+              this.add(this.getValue(label));
             }
           }))}
         />
