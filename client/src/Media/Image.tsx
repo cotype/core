@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import styled, { css } from "styled-components/macro";
 import Icon from "../common/icons";
 import { testable } from "../utils/helper";
-import basePath, { mediaBasePath } from "../basePath";
+import { mediaBasePath } from "../basePath";
 
 type P = {
   onClick?: (ev: any) => void;

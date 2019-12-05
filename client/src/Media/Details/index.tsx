@@ -10,7 +10,7 @@ import Button from "../../common/Button";
 import { paths } from "../../common/icons";
 import ChipList from "../../common/ChipList";
 import api from "../../api";
-import basePath, { mediaBasePath } from "../../basePath";
+import { mediaBasePath } from "../../basePath";
 import { Input } from "../../common/styles";
 
 const MetaInput = styled("div")`
