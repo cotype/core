@@ -1,12 +1,12 @@
 import {
   Model,
   QuillDelta,
-  BaseUrls,
   Data,
   ContentRefs,
   PreviewOpts,
   ContentFormat
 } from "../../typings";
+import urlJoin from "url-join";
 import visit, { NO_STORE_VALUE } from "../model/visit";
 import formatQuillDelta from "./formatQuillDelta";
 import getRefUrl from "./getRefUrl";
@@ -31,7 +31,7 @@ type ConvertProps = {
   contentModel: Model;
   allModels: Model[];
   contentFormat: ContentFormat;
-  baseUrls?: BaseUrls;
+  mediaUrl: string;
   previewOpts?: PreviewOpts;
 };
 export default function convert({
@@ -40,7 +40,7 @@ export default function convert({
   contentModel,
   allModels,
   contentFormat = "html",
-  baseUrls,
+  mediaUrl,
   previewOpts = {}
 }: ConvertProps) {
   /**
@@ -48,6 +48,7 @@ export default function convert({
    * and reverse-references of type references
    */
   const convertReferences = (ref: ContentRef | ReverseRef, field: any) => {
+
     if (ref) {
       const convertedRef: any =
         "_id" in ref
@@ -129,9 +130,7 @@ export default function convert({
                 el.attributes.link
               );
               if (mediaMatch) {
-                el.attributes.link =
-                  (baseUrls && baseUrls.media ? baseUrls.media : "/media/") +
-                  mediaMatch[1];
+                el.attributes.link = urlJoin(mediaUrl, mediaMatch[1]);
               }
             }
           }
@@ -173,9 +172,7 @@ export default function convert({
         return {
           _id: media,
           _ref: "media",
-          _src: `${
-            baseUrls && baseUrls.media ? baseUrls.media : "/media/"
-          }${media}`
+          _src: urlJoin(mediaUrl, media)
         };
     },
     union(

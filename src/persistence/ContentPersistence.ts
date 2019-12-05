@@ -13,7 +13,7 @@ import ReferenceConflictError from "./errors/ReferenceConflictError";
 import { isAllowed, Permission } from "../auth/acl";
 import getRefUrl from "../content/getRefUrl";
 import convert from "../content/convert";
-import { Config } from ".";
+import { PersistenceConfig } from ".";
 import { getDeepJoins } from "../content/rest/filterRefData";
 import {
   ContentFormat,
@@ -60,11 +60,16 @@ function findValueByPath(path: string | undefined, data: Cotype.Data) {
 export default class ContentPersistence implements Cotype.VersionedDataSource {
   adapter: ContentAdapter;
   models: Cotype.Model[];
+  config: PersistenceConfig;
+
   /** contentTypes is empty since this is the default/fallback implementation */
   contentTypes: string[] = [];
-  config: Config = {};
 
-  constructor(adapter: ContentAdapter, models: Cotype.Model[], config: Config) {
+  constructor(
+    adapter: ContentAdapter,
+    models: Cotype.Model[],
+    config: PersistenceConfig
+  ) {
     this.adapter = adapter;
     this.models = models;
     this.config = config;
@@ -287,7 +292,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
             contentRefs: sortedContentRefs,
             contentFormat,
             allModels: this.models,
-            baseUrls: this.config.baseUrls,
+            mediaUrl: this.config.mediaUrl,
             previewOpts
           })
         };
@@ -328,7 +333,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       contentModel: model,
       contentFormat,
       allModels: this.models,
-      baseUrls: this.config.baseUrls,
+      mediaUrl: this.config.mediaUrl,
       previewOpts
     });
 
@@ -518,7 +523,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
           contentModel: model,
           contentFormat,
           allModels: this.models,
-          baseUrls: this.config.baseUrls,
+          mediaUrl: this.config.mediaUrl,
           previewOpts
         })
       }))

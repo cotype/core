@@ -9,7 +9,7 @@
 import fs from "fs";
 import path from "path";
 
-import { Models, BaseUrls, ContentHooks } from "../../typings";
+import { Models, ContentHooks } from "../../typings";
 import { PersistenceAdapter } from "./adapter";
 import init from "./init";
 import withAuth from "../auth/withAuth";
@@ -19,8 +19,9 @@ import ContentPersistence, { Migration } from "./ContentPersistence";
 import MediaPersistence from "./MediaPersistence";
 import MigrationContext from "./MigrationContext";
 
-export type Config = {
-  baseUrls?: BaseUrls;
+export type PersistenceConfig = {
+  basePath: string;
+  mediaUrl: string;
   contentHooks?: ContentHooks;
   migrationDir?: string;
 };
@@ -31,7 +32,11 @@ export class Persistence {
   content: ContentPersistence;
   media: MediaPersistence;
 
-  constructor(models: Models, adapter: PersistenceAdapter, config: Config) {
+  constructor(
+    models: Models,
+    adapter: PersistenceAdapter,
+    config: PersistenceConfig
+  ) {
     this.adapter = adapter;
     this.settings = new SettingsPersistence(adapter.settings, models.settings);
     this.content = (withAuth(
@@ -78,15 +83,15 @@ export class Persistence {
   }
 }
 
-export default async (
+export default async function createPersistence(
   models: Models,
   adapter: PersistenceAdapter,
-  config: Config
-) => {
+  config: PersistenceConfig
+) {
   const p = new Persistence(models, adapter, config);
   await p.init();
   if (config.migrationDir) {
     await p.migrate(config.migrationDir);
   }
   return p;
-};
+}

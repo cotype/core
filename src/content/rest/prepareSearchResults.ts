@@ -1,9 +1,10 @@
-import { ListChunk, Model, SearchResultItem, BaseUrls } from "../../../typings";
+import urlJoin from "url-join";
+import { ListChunk, Model, SearchResultItem } from "../../../typings";
 
-export default function(
+export default function prepareSearchResults(
   results: ListChunk<SearchResultItem>,
   models: Model[],
-  baseUrls?: BaseUrls
+  mediaUrl: string
 ): { items: any[]; mediaIds: string[] } {
   const mediaIds: string[] = [];
   const items = results.items
@@ -22,11 +23,7 @@ export default function(
         image: {
           _id: i.image,
           _ref: "media",
-          _src: i.image
-            ? `${baseUrls && baseUrls.media ? baseUrls.media : "/media/"}${
-                i.image
-              }`
-            : null
+          _src: i.image ? urlJoin(mediaUrl, i.image) : null
         },
         title: i.title,
         url: i.url

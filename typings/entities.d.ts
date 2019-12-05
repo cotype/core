@@ -336,37 +336,6 @@ export type QuillDelta = {
   ops: any[];
 };
 
-export type MediaHelper = {
-  original(image: string): string;
-  fromOriginal(image: string): string;
-};
-
-export type CONVERTER_SPREAD_INSTRUCTION = "$$CONVERTER_SPREAD";
-
-export type ConverterInstructions<From, To> = {
-  $$CONVERTER_SPREAD?: (input: From) => Partial<To> | Promise<Partial<To>>;
-} & { [key in keyof To]?: (input: From) => To[key] | Promise<To[key]> };
-
-export interface Converter<ApiDataSet, HubDataSet> {
-  fromHub(input: HubDataSet): Promise<ApiDataSet>;
-  toHub(input: ApiDataSet): Promise<HubDataSet>;
-}
-
-export interface ConverterConstructor {
-  SPREAD: CONVERTER_SPREAD_INSTRUCTION;
-  new <ApiDataSet, HubDataSet>(
-    passThrough: Array<keyof ApiDataSet>,
-    toHub?: ConverterInstructions<ApiDataSet, HubDataSet>,
-    fromHub?: ConverterInstructions<HubDataSet, ApiDataSet>
-  ): Converter<ApiDataSet, HubDataSet>;
-}
-
-export type ExternalDataSourceHelper = {
-  richtextToHtml: (delta: QuillDelta) => string;
-  media: MediaHelper;
-  Converter: ConverterConstructor;
-};
-
 export interface ThumbnailProvider {
   getThumbUrl(id: string, format: string): Promise<string | null>;
 }

@@ -1,13 +1,15 @@
-import { Models } from "../../../typings";
+import { Models, ExternalDataSource } from "../../../typings";
 // import { buildSchema } from "./schema";
 import { Router } from "express";
 import { Persistence } from "../../persistence";
 
-export default function graphql(
-  router: Router,
-  persistence: Persistence,
-  models: Models
-) {
+type Opts = {
+  persistence: Persistence;
+  models: Models;
+  externalDataSources: ExternalDataSource[];
+};
+
+export default function graphql(router: Router, { persistence, models }: Opts) {
   /*
   var schema = buildSchema(models);
   const server = new ApolloServer({

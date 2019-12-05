@@ -1,41 +1,46 @@
-import {
-  Models,
-  ExternalDataSource,
-  BaseUrls,
-  ResponseHeaders
-} from "../../../typings";
+import { Models, ExternalDataSource, ResponseHeaders } from "../../../typings";
 import { OpenApiBuilder } from "openapi3-ts";
 import createApiBuilder from "./getApiBuilder";
 import routes from "./routes";
 import describe from "./describe";
 import swaggerUi from "../../api/swaggerUi";
 
-import { resolve } from "url";
+import urlJoin from "url-join";
 import { Router } from "express";
 import { Persistence } from "../../persistence";
 
 export function getApiBuilder(
   models: Models,
-  baseUrls: BaseUrls
+  basePath: string
 ): OpenApiBuilder {
-  const apiBuilder = createApiBuilder(baseUrls);
+  const apiBuilder = createApiBuilder(basePath);
   describe(apiBuilder, models);
 
   return apiBuilder;
 }
 
+type Opts = {
+  persistence: Persistence;
+  models: Models;
+  externalDataSources: ExternalDataSource[];
+  basePath: string;
+  mediaUrl: string;
+  responseHeaders?: ResponseHeaders;
+};
+
 export default function rest(
   router: Router,
-  persistence: Persistence,
-  models: Models,
-  externalDataSources: ExternalDataSource[],
-  baseUrls: BaseUrls,
-  responseHeaders?: ResponseHeaders["rest"]
+  {
+    persistence,
+    models,
+    externalDataSources,
+    basePath,
+    mediaUrl,
+    responseHeaders
+  }: Opts
 ) {
-  const apiBuilder = getApiBuilder(models, baseUrls);
-  router.get("/rest", (req, res) =>
-    res.redirect(resolve(baseUrls.cms, "docs/"))
-  );
+  const apiBuilder = getApiBuilder(models, basePath);
+  router.get("/rest", (req, res) => res.redirect(urlJoin(basePath, "docs/")));
   router.get("/rest/swagger.json", (req, res) => {
     res.json(apiBuilder.getSpec());
   });
@@ -44,15 +49,15 @@ export default function rest(
     persistence,
     models.content,
     externalDataSources,
-    baseUrls,
+    mediaUrl,
     responseHeaders
   );
 
   router.use(
     "/docs",
     swaggerUi(
-      resolve(baseUrls.cms, "docs/"),
-      resolve(baseUrls.cms, "rest/swagger.json")
+      urlJoin(basePath, "docs/"),
+      urlJoin(basePath, "rest/swagger.json")
     )
   );
 }

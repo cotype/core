@@ -1,39 +1,29 @@
-import {
-  Models,
-  ExternalDataSource,
-  BaseUrls,
-  ResponseHeaders
-} from "../../typings";
+import { Router } from "express";
+import { ResponseHeaders, ExternalDataSource, Models } from "../../typings";
+import { Persistence } from "../persistence";
 import routes from "./routes";
 import describe from "./describe";
 import graphql from "./graphql";
 import rest, { getApiBuilder as getRestApiBuilder } from "./rest";
 
-import { Router } from "express";
-import { Persistence } from "../persistence";
-
 export { getRestApiBuilder };
 
-export default (
-  persistence: Persistence,
-  models: Models,
-  externalDataSources: ExternalDataSource[],
-  baseUrls: BaseUrls,
-  responseHeaders?: ResponseHeaders
-) => {
+type Opts = {
+  persistence: Persistence;
+  models: Models;
+  externalDataSources: ExternalDataSource[];
+  basePath: string;
+  mediaUrl: string;
+  responseHeaders?: ResponseHeaders;
+};
+
+export default (opts: Opts) => {
   return {
     describe,
     routes(router: Router) {
-      routes(router, persistence, models, externalDataSources);
-      rest(
-        router,
-        persistence,
-        models,
-        externalDataSources,
-        baseUrls,
-        responseHeaders ? responseHeaders.rest : undefined
-      );
-      graphql(router, persistence, models);
+      routes(router, opts);
+      rest(router, opts);
+      graphql(router, opts);
     }
   };
 };

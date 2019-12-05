@@ -1,15 +1,14 @@
-import { BaseUrls } from "../../../typings";
 import { OpenApiBuilder } from "openapi3-ts";
-import { resolve } from "url";
+import urlJoin from "url-join";
 
-export default function getApiBuilder(baseUrls: BaseUrls) {
+export default function getApiBuilder(basePath: string) {
   const apiBuilder = OpenApiBuilder.create()
     .addServer({
-      url: resolve(baseUrls.cms || "", "rest/drafts"),
+      url: urlJoin(basePath, "rest/drafts"),
       description: "Drafted Contents"
     })
     .addServer({
-      url: resolve(baseUrls.cms || "", "rest/published"),
+      url: urlJoin(basePath, "rest/published"),
       description: "Published Contents"
     })
     .addResponse("notFound", {
