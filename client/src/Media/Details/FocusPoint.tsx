@@ -4,6 +4,7 @@ import Draggable from "react-draggable";
 import Icon, { paths } from "../../common/icons";
 import styled from "styled-components/macro";
 import Button from "../../common/Button";
+import { mediaBasePath } from "../../basePath";
 
 const DEFAULT_PREVIEW_PATH = "/thumbs/preview/";
 
@@ -225,7 +226,7 @@ export default class ImageFocus extends Component<Props, State> {
               </ActionsBar>
             )}
             <Img
-              src={`${DEFAULT_PREVIEW_PATH}${id}`}
+              src={`${mediaBasePath}${DEFAULT_PREVIEW_PATH}${id}`}
               ref={this.focusTarget}
               style={{
                 width: width! > height! ? width! : "unset",

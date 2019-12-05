@@ -10,6 +10,7 @@ import Button from "../../common/Button";
 import { paths } from "../../common/icons";
 import ChipList from "../../common/ChipList";
 import api from "../../api";
+import basePath, { mediaBasePath } from "../../basePath";
 import { Input } from "../../common/styles";
 
 const MetaInput = styled("div")`
@@ -232,13 +233,15 @@ export default class Details extends Component<Props, State> {
                   <MetaItemLabel>URL</MetaItemLabel>
                   <FlexRow>
                     <Input
-                      value={window.location.origin + "/media/" + id}
+                      value={
+                        window.location.origin + mediaBasePath + "/media/" + id
+                      }
                       readOnly
                     />
                     <Button
                       icon={paths.OpenInTab}
                       light
-                      href={"/media/" + id}
+                      href={mediaBasePath + "/media/" + id}
                       target="_blank"
                       asLink
                       title="open in new tab"

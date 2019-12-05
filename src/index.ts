@@ -96,7 +96,7 @@ let index: string;
 
 function getIndexHtml(basePath: string) {
   if (!index) index = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  return index.replace(/"src\./g, `"${basePath}/static/src.`);
+  return index.replace(/\/admin\//g, `${urlJoin(basePath, "/admin")}/`);
 }
 
 const startDevServer = () => {
@@ -191,7 +191,7 @@ export async function init(opts: Opts) {
   const { models, externalDataSources } = getModels(opts);
   const {
     basePath = "/",
-    mediaUrl = "/media",
+    mediaUrl = urlJoin(basePath, "/media"),
     storage,
     thumbnailProvider,
     responseHeaders,
@@ -218,7 +218,7 @@ export async function init(opts: Opts) {
     responseHeaders
   });
   const settings = Settings(persistence, models);
-  const media = Media(persistence, models, storage, thumbnailProvider);
+  const media = Media(persistence, models, storage, thumbnailProvider, basePath);
 
   const app = express();
 

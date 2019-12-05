@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import styled, { css } from "styled-components/macro";
 import Icon from "../common/icons";
 import { testable } from "../utils/helper";
+import basePath, { mediaBasePath } from "../basePath";
 
 type P = {
   onClick?: (ev: any) => void;
@@ -147,7 +148,7 @@ export default class Image extends Component<Props> {
     return (
       <img
         style={{ objectFit: "contain" }}
-        src={id.includes("://") ? id : `/thumbs/square/${id}`}
+        src={id.includes("://") ? id : `${mediaBasePath}/thumbs/square/${id}`}
         alt={""}
         width="150"
         height="150"

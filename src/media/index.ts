@@ -7,11 +7,14 @@ import describe from "./describe";
 import Storage from "./storage/Storage";
 import FsStorage from "./storage/FsStorage";
 
+import urlJoin from "url-join";
+
 export default function media(
   persistence: Persistence,
   models: Models,
   storage: Storage,
-  thumbnailProvider: ThumbnailProvider
+  thumbnailProvider: ThumbnailProvider,
+  basePath: string = "/"
 ) {
   return {
     describe(api: OpenApiBuilder) {
@@ -28,7 +31,7 @@ export default function media(
         try {
           const url = await thumbnailProvider.getThumbUrl(id, format);
           if (!url) res.status(404).end();
-          else res.redirect(url);
+          else res.redirect(urlJoin(basePath, url));
         } catch (err) {
           res.status(500).end();
         }

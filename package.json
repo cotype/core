@@ -72,6 +72,7 @@
     "temp-write": "^4.0.0",
     "tempy": "^0.3.0",
     "ts-loader": "^6.2.0",
+    "url-join": "^4.0.1",
     "webpack": "^4.41.0"
   },
   "devDependencies": {

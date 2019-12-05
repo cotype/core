@@ -3,3 +3,4 @@ if (!match) throw new Error("Path for the admin UI must include /admin");
 
 const [basePath] = match;
 export default basePath;
+export const mediaBasePath = basePath.replace("/admin", "");
