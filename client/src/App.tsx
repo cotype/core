@@ -29,6 +29,7 @@ import List from "./List";
 import Dashboard from "./Dashboard";
 import SplitPane from "./common/SplitPane";
 import ErrorBoundary from "./ErrorBoundary";
+import EditURLRedirect from "./common/EditURLRedirect";
 
 const Root = styled("div")`
   height: 100%;
@@ -164,6 +165,16 @@ class App extends React.Component<{}, State> {
                         <Route
                           path={`${basePath}/icons`}
                           component={IconGallery}
+                        />
+                        <Route
+                          path={`${basePath}/editURL`}
+                          render={(props) => (
+                            <EditURLRedirect
+                              {...props}
+                              contentModels={models.content}
+                              navigation={navigation}
+                            />
+                          )}
                         />
                         <Route exact path={basePath}>
                           <Redirect to={`${basePath}/dashboard`} />
