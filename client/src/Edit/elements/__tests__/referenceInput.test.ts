@@ -44,6 +44,24 @@ describe("ReferenceInput", () => {
     ).toBe(undefined);
   });
 
+  it("should be not required with valid mail address", () => {
+    const props = { required: false };
+    const ref = { id: "mailto:test@cellular.de", model: null };
+    expect(
+      ReferenceInput.validate(ref, props as FieldProps<any> & {
+        required?: boolean;
+      })
+    ).toBe(undefined);
+  });
+  it("should be not required with valid phone number", () => {
+    const props = { required: false };
+    const ref = { id: "tel:+491234567890", model: null };
+    expect(
+      ReferenceInput.validate(ref, props as FieldProps<any> & {
+        required?: boolean;
+      })
+    ).toBe(undefined);
+  });
   it("should be not required with valid external ref", () => {
     const props = { required: false };
     const ref = { id: "http://www.cellular.de", model: null };
@@ -62,7 +80,7 @@ describe("ReferenceInput", () => {
         required?: boolean;
       })
     ).toBe(
-      'This url is not valid. Links to the same domain need to start with "/" or to other domains with a valid protocol (http/https).'
+      'This url is not valid. Links to the same domain need to start with "/", to other domains with a valid protocol (http/https) or with a valid contact protocol (mailto/tel).'
     );
   });
 
