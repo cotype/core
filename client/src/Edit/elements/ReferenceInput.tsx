@@ -11,7 +11,7 @@ import { ReferenceType, SearchResultItem } from "../../../../typings";
 import { BasicResultItem } from "../../common/ResultItem";
 import { ControllerStateAndHelpers } from "downshift";
 
-const validationRegex = "W*(http:|https:)W*|^/.*$";
+const validationRegex = /W*(http:\/\/|https:\/\/|mailto:|tel:)W*|^\/.*$/gm;
 
 const Root = styled("div")`
   ${inputClass};
@@ -79,7 +79,7 @@ export default class ReferenceInput extends Component<Props, State> {
     if (!value || value.model || !value.id) return;
     const check = value.id.toString().match(validationRegex);
     if (!check) {
-      return 'This url is not valid. Links to the same domain need to start with "/" or to other domains with a valid protocol (http/https).';
+      return 'This url is not valid. Links to the same domain need to start with "/", to other domains with a valid protocol (http/https) or with a valid contact protocol (mailto/tel).';
     }
   }
 
