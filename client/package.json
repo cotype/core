@@ -53,7 +53,7 @@
     "@types/react-router-dom": "^5.1.0",
     "@types/react-sortable-hoc": "^0.6.5",
     "@types/react-virtualized": "^9.21.4",
-    "@types/styled-components": "^4.1.19",
+    "@types/styled-components": "^5.0.0",
     "react-scripts": "^3.2.0",
     "typescript": "^3.6.3",
     "xhr-mock": "^2.5.0"
