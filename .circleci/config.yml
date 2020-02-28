@@ -130,7 +130,7 @@ jobs:
           <<: *noStrictHost
       - run:
           name: Release
-          command: $(npm bin)/semantic-release
+          command: $(npm bin)/semantic-release || true
   pre-release:
     <<: *defaults
     steps:
@@ -144,8 +144,16 @@ jobs:
           <<: *noStrictHost
       - run:
           name: Pre-Release
-          command: $(npm bin)/semantish-prerelease
-
+          command: >
+            IS_PR=$CIRCLE_PULL_REQUEST
+            unset CIRCLE_PR_NUMBER;
+            unset CIRCLE_PULL_REQUEST;
+            unset CI_PULL_REQUEST;
+            if npx semantish-prerelease; then
+              if [ ! -z ${IS_PR+x} ]; then
+                npx decorate-gh-pr -c "<hr /><p><date>($(date))</date> Pre-released as <code>@cotype/core@$(cat package.json | npx json version)</code></p>"
+              fi;
+            fi;
 workflows:
   version: 2
   test-and-publish:
