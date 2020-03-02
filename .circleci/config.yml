@@ -78,7 +78,7 @@ jobs:
             - v1-cypress-3.3.2
       - run:
           name: Install cypress
-          command: CYPRESS_INSTALL_BINARY=3.3.2 $(npm bin)/cypress install
+          command: CYPRESS_INSTALL_BINARY=3.3.2 npx cypress install
       - run:
           name: Run cypress
           command: npm run e2e
@@ -116,7 +116,7 @@ jobs:
             - v1-coverage-{{ .Revision }}
       - run:
           name: Publish Coverage
-          command: $(npm bin)/codecov
+          command: npx codecov
   release:
     <<: *defaults
     steps:
@@ -130,7 +130,7 @@ jobs:
           <<: *noStrictHost
       - run:
           name: Release
-          command: $(npm bin)/semantic-release
+          command: npx semantic-release || true
   pre-release:
     <<: *defaults
     steps:
@@ -144,7 +144,7 @@ jobs:
           <<: *noStrictHost
       - run:
           name: Pre-Release
-          command: $(npm bin)/semantish-prerelease
+          command: npx semantish-prerelease --release-pr || true
 
 workflows:
   version: 2
