@@ -144,7 +144,7 @@ jobs:
           <<: *noStrictHost
       - run:
           name: Pre-Release
-          command: npx semantish-prerelease --release-pr
+          command: npx semantish-prerelease --release-pr || true
 
 workflows:
   version: 2
