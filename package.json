@@ -99,7 +99,7 @@
     "concurrently": "^5.0.0",
     "cypress": "^3.4.1",
     "cypress-file-upload": "^3.3.4",
-    "decorate-gh-pr": "1.1.0",
+    "decorate-gh-pr": "1.2.0",
     "faker": "^4.1.0",
     "get-port-cli": "^2.0.0",
     "install": "^0.13.0",
