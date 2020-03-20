@@ -16,6 +16,8 @@ export type NumberType = {
   index?: boolean;
   search?: boolean;
   hidden?: boolean;
+  precision?: number;
+  step?: number;
 };
 export type RichtextType = {
   type: "richtext";
