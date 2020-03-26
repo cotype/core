@@ -3,6 +3,7 @@ import { FieldProps } from "formik";
 import { slugify } from "../../utils/helper";
 import { Input } from "../../common/styles";
 import { required } from "./validation";
+import TextOutput from "./TextOutput";
 
 type Props = FieldProps<any> & { required?: boolean };
 export default class SlugInput extends Component<Props> {
@@ -21,10 +22,17 @@ export default class SlugInput extends Component<Props> {
   };
 
   render() {
-    const { field } = this.props;
-    const { value = "", ...props } = field;
-    return (
-      <Input value={value || ""} {...props} onChange={this.handleChange} />
-    );
+    const { field, form } = this.props;
+    if (
+      form.initialValues[field.name] === undefined ||
+      form.initialValues[field.name] === null ||
+      form.initialValues[field.name] === ""
+    ) {
+      const { value = "", ...props } = field;
+      return (
+        <Input value={value || ""} {...props} onChange={this.handleChange} />
+      );
+    }
+    return <TextOutput data-name={field.name} value={field.value} />;
   }
 }
