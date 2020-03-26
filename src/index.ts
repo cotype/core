@@ -7,7 +7,8 @@ import {
   ThumbnailProvider,
   ContentHooks,
   ResponseHeaders,
-  ExternalDataSource
+  ExternalDataSource,
+  BaseUrls
 } from "../typings";
 import express, {
   Request,
@@ -73,8 +74,7 @@ export type Opts = {
   models: ModelOpts[];
   navigation?: NavigationOpts[];
   storage: Storage;
-  basePath?: string;
-  mediaUrl?: string;
+  basePath?: BaseUrls | string;
   persistenceAdapter: Promise<PersistenceAdapter>;
   externalDataSources?: ExternalDataSource[];
   sessionOpts?: SessionOpts;
@@ -178,31 +178,55 @@ function getModels(opts: Pick<Opts, "externalDataSources" | "models">) {
   };
 }
 
+const getBaseURLS = (
+  basePath?: string | BaseUrls
+): { cms: string; media: string; preview: string } => {
+  if (!basePath) {
+    return {
+      cms: "/",
+      media: urlJoin("/", "/media"),
+      preview: "/"
+    };
+  }
+  if (typeof basePath === "string") {
+    return {
+      cms: basePath,
+      media: urlJoin(basePath, "/media"),
+      preview: basePath
+    };
+  }
+  return {
+    cms: basePath.cms,
+    media: basePath.media ? basePath.media : urlJoin(basePath.cms, "/media"),
+    preview: basePath.preview || basePath.cms
+  };
+};
+
 export async function getRestApiBuilder(
   opts: Pick<Opts, "models" | "basePath" | "externalDataSources">
 ) {
-  const { basePath = "" } = opts;
+  const { basePath } = opts;
   const { models } = getModels(opts);
 
-  return createRestApiBuilder(models, basePath);
+  return createRestApiBuilder(models, getBaseURLS(basePath).cms);
 }
-
 export async function init(opts: Opts) {
   const { models, externalDataSources } = getModels(opts);
   const {
-    basePath = "/",
-    mediaUrl = urlJoin(basePath, "/media"),
+    basePath,
     storage,
     thumbnailProvider,
     responseHeaders,
     contentHooks,
     migrationDir
   } = opts;
+  const baseURLS = getBaseURLS(basePath);
+  const mediaUrl = baseURLS.media;
   const persistence = await createPersistence(
     models,
     await opts.persistenceAdapter,
     {
-      basePath,
+      basePath: baseURLS.cms,
       mediaUrl,
       contentHooks,
       migrationDir
@@ -213,12 +237,18 @@ export async function init(opts: Opts) {
     persistence,
     models,
     externalDataSources,
-    basePath,
+    basePath: baseURLS.cms,
     mediaUrl,
     responseHeaders
   });
   const settings = Settings(persistence, models);
-  const media = Media(persistence, models, storage, thumbnailProvider, basePath);
+  const media = Media(
+    persistence,
+    models,
+    storage,
+    thumbnailProvider,
+    baseURLS.cms
+  );
 
   const app = express();
 
@@ -237,7 +267,7 @@ export async function init(opts: Opts) {
   });
 
   const router = promiseRouter();
-  app.use(basePath.replace(/\/$/, ""), router);
+  app.use(baseURLS.cms.replace(/\/$/, ""), router);
 
   auth.routes(router); // login, principal, logout
   media.routes(router); // static, thumbs
@@ -254,10 +284,7 @@ export async function init(opts: Opts) {
     res.json({
       ...filteredInfo,
       models: filteredModels,
-      baseUrls: {
-        media: mediaUrl,
-        cms: basePath
-      },
+      baseUrls: baseURLS,
       user: req.principal
     });
   });
@@ -288,12 +315,12 @@ export async function init(opts: Opts) {
   router.use(
     "/admin/rest/docs",
     swaggerUi(
-      urlJoin(basePath, "admin/rest/docs/"),
-      urlJoin(basePath, "admin/rest/swagger.json")
+      urlJoin(baseURLS.cms, "admin/rest/docs/"),
+      urlJoin(baseURLS.cms, "admin/rest/swagger.json")
     )
   );
   router.get("/admin/rest", (req, res) =>
-    res.redirect(urlJoin(basePath, "admin/rest/docs"))
+    res.redirect(urlJoin(baseURLS.cms, "admin/rest/docs"))
   );
 
   content.routes(router);
@@ -303,15 +330,17 @@ export async function init(opts: Opts) {
   }
 
   app.use(
-    (opts.clientMiddleware && opts.clientMiddleware(basePath)) ||
-      clientMiddleware(basePath)
+    (opts.clientMiddleware && opts.clientMiddleware(baseURLS.cms)) ||
+      clientMiddleware(baseURLS.cms)
   );
 
   if (opts.customSetup) {
     opts.customSetup(app, persistence.content, persistence.settings);
   }
 
-  app.get(basePath, (_, res) => res.redirect(urlJoin(basePath, "admin")));
+  app.get(baseURLS.cms, (_, res) =>
+    res.redirect(urlJoin(baseURLS.cms, "admin"))
+  );
 
   app.use((err: Error, req: Request, res: Response, _: () => void) => {
     if (err instanceof HttpError) {
