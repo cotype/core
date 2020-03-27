@@ -259,7 +259,6 @@ export const models: ModelOpts[] = [
         models: [],
         allowAbsoluteRefs: true
       },
-      
       sections: {
         label: "Section",
         type: "list",
