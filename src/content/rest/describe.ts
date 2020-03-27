@@ -140,8 +140,7 @@ const describeModel = (
           in: "query",
           name: `data.${prefix + field}[eq]`,
           schema: {
-            type: "boolean",
-            enum: [true, false]
+            type: "boolean"
           }
         });
         return;
@@ -224,8 +223,7 @@ const describeModel = (
         in: "query",
         name: `data.${prefix + field}[eq]`,
         schema: {
-          type: "boolean",
-          enum: [true, false]
+          type: "boolean"
         }
       });
       return;
