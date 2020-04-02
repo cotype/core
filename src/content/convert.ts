@@ -72,10 +72,6 @@ export default function convert({
         m => m.name.toLowerCase() === convertedRef._content.toLowerCase()
       );
 
-      // ONLY RELEVANT FOR CONTENT-REFERENCES:
-      // For external data sources content references don't exist
-      if (referencedModel!.external) return convertedRef;
-
       // No content for the ref was provided,
       // this means the referenced content does not exists anymore.
       // This happens when content get deleted or is scheduled
@@ -86,6 +82,11 @@ export default function convert({
       ) {
         return NO_STORE_VALUE;
       }
+
+      // ONLY RELEVANT FOR CONTENT-REFERENCES:
+      // For external data sources content references don't exist
+      if (referencedModel.external) return convertedRef;
+
 
       // If the referenced content has no `urlPath`,
       // we don't need to add the `_url`
