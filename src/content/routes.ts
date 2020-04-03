@@ -74,12 +74,16 @@ export default (
       return res.status(500).end();
     }
     const { total, items } = await dataSource.list(principal, getModel(model), {
-      search: {
-        term: q
-      },
       limit,
       offset,
-      models: [model]
+      models: [model],
+      ...(q
+        ? {
+            search: {
+              term: q
+            }
+          }
+        : {})
     });
     res.json({
       total,
@@ -248,12 +252,7 @@ export default (
         return;
       }
 
-      const item = await dataSource.loadRevision(
-        principal,
-        model,
-        id,
-        rev
-      );
+      const item = await dataSource.loadRevision(principal, model, id, rev);
       if (!item) res.status(404).end();
       else res.json(item);
     }
