@@ -56,7 +56,8 @@ const Option = styled("option")`
 
 type Props = FieldProps<ReferenceType> & {
   type: string;
-  models: string[];
+  models?: string[];
+  model?: string;
   required?: boolean;
   placeholder?: string;
   allowAbsoluteRefs?: boolean;
@@ -132,12 +133,12 @@ export default class ReferenceInput extends Component<Props, State> {
   };
 
   fetchItems = opts => {
-    const { type, models } = this.props;
+    const { type, models, model } = this.props;
 
     const queryString = stringify({
       ...opts,
-      linkable: models.length === 0,
-      models: models.length ? models : undefined
+      linkable: !model && models && models.length === 0,
+      models: !model && models && models.length ? models : model ? [model] : undefined
     });
 
     const isExternal = "externalDataSource" in this.props;
