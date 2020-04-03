@@ -52,7 +52,7 @@ function findValueByPath(path: string | undefined, data: Cotype.Data) {
   const title = (titlePath.reduce(
     (obj, key) => (obj ? obj[key] : undefined),
     data
-  ) as unknown) as (string | undefined);
+  ) as unknown) as string | undefined;
 
   return title;
 }
@@ -463,7 +463,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     model: Cotype.Model,
     opts: Cotype.ListOpts,
     criteria?: Cotype.Criteria
-  ): Promise<Cotype.ListChunk<Cotype.Content>> {
+  ): Promise<Cotype.ListChunk<Cotype.Item>> {
     if (!opts.orderBy) {
       opts.orderBy = model.orderBy || model.title;
     }

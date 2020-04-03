@@ -122,8 +122,8 @@ export function createDefinition(
           _content: {
             type: "string",
             enum:
-              (model.models && model.models.length) || model.model
-                ? [...(model.models || [model.model] || [])]
+              ('models' in model && model.models && model.models.length) || model.model
+                ? [...('models' in model && model.models || [model.model] || [])]
                 : undefined
           },
           _url: { type: "string" }

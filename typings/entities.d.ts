@@ -234,7 +234,7 @@ export type ReadOnlyDataSource = {
     model: Model,
     opts: ListOpts,
     criteria?: Criteria
-  ): Promise<ListChunk<Content>>;
+  ): Promise<ListChunk<Item>>;
   load(
     principal: Principal,
     model: Model,

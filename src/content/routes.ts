@@ -83,9 +83,7 @@ export default (
     });
     res.json({
       total,
-      items: items
-        .map(c => content.createSearchResultItem(c, q, false))
-        .filter(content.canView(principal))
+      items: items.filter(content.canView(principal))
     });
   });
 
