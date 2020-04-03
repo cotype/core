@@ -164,7 +164,7 @@ const describeModel = (
         schema: criteria.content,
         example: "{}",
         description:
-          (type.allowAbsoluteRefs
+          ('allowAbsoluteRefs' in type && type.allowAbsoluteRefs
             ? 'Query example: <tt>{"eq": "id"}</tt>, <tt>{"eq": "http://xx.xx"}</tt>'
             : 'Query example: <tt>{"eq": "id"}</tt>') +
           ', <tt>{"eq": "null"}</tt> or <tt>{"eq":"string“, "path":"field1.field2"}</tt>'
