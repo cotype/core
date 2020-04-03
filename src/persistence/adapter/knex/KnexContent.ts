@@ -548,7 +548,7 @@ export default class KnexContent implements ContentAdapter {
             // No types means this data is only needed to populate _urls in refs
             if (types.length === 0) {
               implicitTypes = implicitTypes.concat(
-                getModelNames(value.models || [value.model!])
+                getModelNames('models' in value && value.models || [value.model!])
               );
             }
           }
@@ -1111,11 +1111,11 @@ export default class KnexContent implements ContentAdapter {
           }
           if (
             field.type === "content" &&
-            (field.model || (field.models && field.models.length === 1)) // Get Docs which referenced by document
+            (field.model || ('models' in field && field.models && field.models.length === 1)) // Get Docs which referenced by document
           ) {
             // TODO: Criteria works just with one Model
             const selectModel: string =
-              field.model || (field.models && field.models[0]) || "";
+              field.model || ('models' in field && field.models && field.models[0]) || "";
             k.innerJoin("content_references as ref" + counter, join => {
               join.on(`ref${counter}.id`, `${lastContent}.id`);
               join.andOn(

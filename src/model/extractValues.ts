@@ -56,7 +56,7 @@ const extractValues = (obj: object, model: Model) => {
         } else if (field.item.type === "object") {
           arr.forEach((el: any) => {
             const objectValues: {
-              [path: string]: { value: string | null; index: boolean }[];
+              [path: string]: Array<{ value: string | null; index: boolean }>;
             } = {};
 
             Object.entries(el.value).forEach(([key, v]: any) => {
