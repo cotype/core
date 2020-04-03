@@ -463,7 +463,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     model: Cotype.Model,
     opts: Cotype.ListOpts,
     criteria?: Cotype.Criteria
-  ): Promise<Cotype.ListChunk<Cotype.Item>> {
+  ): Promise<Cotype.ListChunk<Cotype.Content>> {
     if (!opts.orderBy) {
       opts.orderBy = model.orderBy || model.title;
     }

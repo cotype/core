@@ -185,15 +185,22 @@ export type UnionType = {
   required?: boolean;
 };
 
-export type ReferenceType = {
-  type: "content" | "settings" | "external";
-  model?: string;
-  models?: string[];
-  required?: boolean;
-  allowAbsoluteRefs?: boolean;
-  index?: boolean;
-  hidden?: boolean;
-};
+export type ReferenceType =
+  | {
+      type: "content" | "settings" | "external";
+      model?: string;
+      models?: string[];
+      required?: boolean;
+      allowAbsoluteRefs?: boolean;
+      index?: boolean;
+      hidden?: boolean;
+    }
+  | {
+      type: "content";
+      model?: string;
+      index?: boolean;
+      externalDataSource: true;
+    };
 
 export type ImmutableType = {
   type: "immutable";

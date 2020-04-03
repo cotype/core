@@ -140,11 +140,15 @@ export default class ReferenceInput extends Component<Props, State> {
       models: models.length ? models : undefined
     });
 
-    return api.get(`/${type}?${queryString}`).then(({ items }) => {
-      this.setState({
-        items: orderSearchResults(items, this.state.searchTerm)
+    const isExternal = "externalDataSource" in this.props;
+
+    return api
+      .get(`/${isExternal ? "externalDataSource" : type}?${queryString}`)
+      .then(({ items }) => {
+        this.setState({
+          items: orderSearchResults(items, this.state.searchTerm)
+        });
       });
-    });
   };
 
   fetchItem = refObj => {
