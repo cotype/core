@@ -252,7 +252,7 @@ export default (
         principal,
         model,
         id,
-        Number(rev)
+        rev
       );
       if (!item) res.status(404).end();
       else res.json(item);
