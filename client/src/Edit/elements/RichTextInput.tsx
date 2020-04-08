@@ -107,15 +107,15 @@ export default class RichTextInput extends Component<Props> {
   closeLinkModal = () => this.setState({ open: false });
 
   render() {
-    const { field, formats, modules } = this.props;
+    const { field, formats, modules, linkFormats } = this.props;
     const { open, text, link } = this.state;
     let { value } = field;
     value = value ? value : this.defaultValue;
-
     return (
       <>
         {open && (
           <RichTextLinkModal
+            linkFormats={linkFormats}
             initial={{ text, link }}
             onSave={this.linkHandler}
             onClose={this.closeLinkModal}

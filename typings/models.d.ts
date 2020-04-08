@@ -19,10 +19,14 @@ export type NumberType = {
   precision?: number;
   step?: number;
 };
+
+type LinkOpts = "mail" | "media" | "link" | "tel";
+
 export type RichtextType = {
   type: "richtext";
   required?: boolean;
   formats?: any[][] | string[];
+  linkFormats?: LinkOpts[];
   modules?: {
     [key: string]: any;
   };
