@@ -228,13 +228,22 @@ export default class ObjectInput extends Component<Props> {
               const name = `${prefix}${key}`;
               const error = getIn(form.errors, name);
 
+              const fieldProps = {
+                ..._omit(props, serverSideProps),
+                models:
+                  "model" in props
+                    ? [props.model]
+                    : "models" in props
+                    ? props.models
+                    : undefined
+              };
               const element = (
                 <Field
                   name={name}
                   component={component}
                   model={model}
                   id={id}
-                  {..._omit(props, serverSideProps)}
+                  {...fieldProps}
                   validate={value => {
                     if (typeof component.validate === "function") {
                       return component.validate(value, props);
