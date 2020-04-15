@@ -168,3 +168,6 @@ Pull-Requests, Issues, Feedback, Coffee and positive thoughts are very welcome!
 If you want to work on this project locally using the development environment
 or want to know more about what we consider "internal stuff", please refer
 to the [contribution guidelines](https://github.com/cotype/core/blob/master/CONTRIBUTING.md)
+
+
+.
