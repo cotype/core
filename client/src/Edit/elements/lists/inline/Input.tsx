@@ -8,6 +8,8 @@ import ListButton from "../../../../common/ListButton";
 import SortableList from "./SortableList";
 import outputs from "../../outputs";
 import { DRAG_HELPER_CLASS } from "../block/SortableList";
+import _omit from "lodash/omit";
+import serverSideProps from "../../serverSideProps";
 
 export const ITEM_VALUE_KEY = "value";
 
@@ -126,7 +128,15 @@ export default class ChipListInput extends Component<Props, State> {
     const isNotAllowedToAddMoreItems = maxLength
       ? value && value.length >= maxLength
       : false;
-
+    const fieldProps = {
+      ..._omit(itemType, serverSideProps),
+      models:
+        "model" in itemType
+          ? [itemType.model]
+          : "models" in itemType
+          ? itemType.models
+          : undefined
+    };
     return (
       <FieldArray
         validateOnChange={false}
@@ -139,7 +149,7 @@ export default class ChipListInput extends Component<Props, State> {
               items={value}
               ItemComponent={ItemComponent}
               sortable={sortable}
-              itemType={itemType}
+              itemType={fieldProps}
               removeItem={index => arrayHelpers.remove(index)}
               arrayHelpers={arrayHelpers}
               name={name}

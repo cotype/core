@@ -137,7 +137,15 @@ export default class ListInput extends Component<Props, State> {
     const { name, value } = field;
     const ItemComponent = inputs.get(itemType);
     const { Factory, isSorting, schedule, onSchedule } = this.state;
-
+    const fieldProps = {
+      ..._omit(itemType, serverSideProps),
+      models:
+        "model" in itemType
+          ? [itemType.model]
+          : "models" in itemType
+          ? itemType.models
+          : undefined
+    };
     return (
       <FieldArray
         validateOnChange={false}
@@ -151,7 +159,7 @@ export default class ListInput extends Component<Props, State> {
                 items={value}
                 ItemComponent={ItemComponent}
                 sortable={sortable}
-                itemType={_omit(itemType, serverSideProps)}
+                itemType={fieldProps}
                 renderItemOptions={this.renderItemOptions}
                 arrayHelpers={arrayHelpers}
                 name={name}

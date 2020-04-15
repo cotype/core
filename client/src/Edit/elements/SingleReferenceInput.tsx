@@ -21,7 +21,7 @@ const ImageItem = styled("div")`
 
 type Props = FieldProps<any> & {
   type: string;
-  model: string;
+  models: [string];
   required?: boolean;
   placeholder?: string;
 };
@@ -76,19 +76,19 @@ export default class SingleReferenceInput extends Component<Props, State> {
   };
 
   fetchItems = opts => {
-    const { type, model } = this.props;
+    const { type, models } = this.props;
 
     const queryString = stringify(opts);
 
     return api
-      .get(`/${type}/${model}${queryString ? "?" + queryString : ""}`)
+      .get(`/${type}/${models[0]}${queryString ? "?" + queryString : ""}`)
       .then(({ items }) => this.setState({ items }));
   };
 
   fetchItem = id => {
-    const { type, model } = this.props;
+    const { type, models } = this.props;
     return api
-      .get(`/${type}/${model}/${id}/item`)
+      .get(`/${type}/${models[0]}/${id}/item`)
       .then(value =>
         this.setState({ value: this.props.field.value ? value : null })
       )
