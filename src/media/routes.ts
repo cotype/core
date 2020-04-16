@@ -2,13 +2,16 @@
  * Media routes (/api/media/*)
  */
 import { Router } from "express";
+import log from "../log";
 import { Persistence } from "../persistence";
 import ReferenceConflictError from "../persistence/errors/ReferenceConflictError";
+import inspect from "./inspect";
 import Storage from "./storage/Storage";
 import upload from "./upload";
-import inspect from "./inspect";
-import log from "../log";
 
+function isSvg(name: string) {
+  return !!name.match(/[A-Za-z0-9_-]*\.*svg$/);
+}
 export default function routes(
   router: Router,
   persistence: Persistence,
@@ -28,14 +31,27 @@ export default function routes(
       if (filesUpload.hasOwnProperty(fileKey)) {
         const { filename: id, originalname, size } = filesUpload[fileKey];
 
-        const { width, height, ext, hash, mime } = await inspect(storage.retrieve(id), storage.getFile(id));
+        const { width, height, ext, hash, mime } = await inspect(
+          storage.retrieve(id),
+          storage.getFile(id)
+        );
+
+        let mimetype = mime;
+        let imagetype = mime && mime.startsWith("image") ? ext : null;
+
+        // Our inspector is not able to correctly detect svg files.
+        // Therefore we only use the file extension to determine the mimetype / imagetype of SVGs.
+        if (isSvg(id)) {
+          mimetype = "image/svg+xml";
+          imagetype = "svg";
+        }
 
         const file = {
           id,
           size,
           originalname,
-          mimetype: mime,
-          imagetype: mime && mime.startsWith("image") ? ext : null,
+          mimetype,
+          imagetype,
           width,
           height,
           hash
@@ -59,7 +75,15 @@ export default function routes(
 
   router.get("/admin/rest/media", async (req, res) => {
     const { principal, query } = req;
-    const { limit = 50, offset = 0, orderBy, order, search, mimetype, unUsed } = query;
+    const {
+      limit = 50,
+      offset = 0,
+      orderBy,
+      order,
+      search,
+      mimetype,
+      unUsed
+    } = query;
 
     const list = await media.list(principal, {
       limit,
