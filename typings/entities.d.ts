@@ -111,6 +111,7 @@ export type User = {
   password: string;
   role: number;
   picture: string;
+  permissions: Permissions;
 };
 
 /**

@@ -178,16 +178,16 @@ export const models: ModelOpts[] = [
           }
         }
       },
-      refListReverse:{
+      refListReverse: {
         type: "references",
-        model: 'contentPages',
-        fieldName: 'refList'
+        model: "contentPages",
+        fieldName: "refList"
       },
-      refReverse:{
+      refReverse: {
         type: "references",
-        model: 'contentPages',
-        fieldName: 'ref'
-      },
+        model: "contentPages",
+        fieldName: "ref"
+      }
     }
   },
   {
@@ -254,7 +254,7 @@ export const models: ModelOpts[] = [
           allowAbsoluteRefs: true
         }
       },
-      ref:{
+      ref: {
         type: "content",
         models: [],
         allowAbsoluteRefs: true
@@ -271,6 +271,13 @@ export const models: ModelOpts[] = [
           }
         }
       }
+    }
+  },
+  {
+    name: "iframe",
+    collection: "iframe",
+    iframeOptions: {
+      url: "http://localhost:4000/docs/?session={sessionID}"
     }
   }
 ];

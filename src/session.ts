@@ -4,10 +4,13 @@ import log from "./log";
 
 function secret(
   opts: CookieSessionInterfaces.CookieSessionOptions = {}
-): Pick<CookieSessionInterfaces.CookieSessionOptions, "signed" | "secret"> {
+): Pick<
+  CookieSessionInterfaces.CookieSessionOptions,
+  "signed" | "secret" | "httpOnly"
+> {
   if (opts.secret) {
     /* Assume user provided everything needed */
-    return { secret: opts.secret, signed: true };
+    return { secret: opts.secret, signed: true, httpOnly: false };
   }
 
   // Don't sign session when testing as the http client in Node < 10 does not
@@ -15,7 +18,7 @@ function secret(
   const signed = process.env.NODE_ENV !== "test";
 
   if (!signed) {
-    return { signed: false, secret: undefined };
+    return { signed: false, secret: undefined, httpOnly: false };
   }
 
   if (process.env.NODE_ENV === "development") {
@@ -24,7 +27,8 @@ function secret(
     );
     return {
       secret: "insecure",
-      signed: true
+      signed: true,
+      httpOnly: false
     };
   }
 
@@ -36,7 +40,8 @@ function secret(
   );
   return {
     secret: randomString({ length: 20 }),
-    signed: true
+    signed: true,
+    httpOnly: false
   };
 }
 

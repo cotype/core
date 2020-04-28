@@ -17,7 +17,7 @@ import { Router } from "express";
 import { Persistence } from "../../persistence";
 import prepareSearchResults from "./prepareSearchResults";
 import filterRefData, { createJoin } from "./filterRefData";
-import { checkPermissions, Permission } from "../../auth/acl";
+import { checkPermissions, isAllowed, Permission } from "../../auth/acl";
 import { linkableAndSearchableModelNames, searchableModelNames } from "./utils";
 import pickFieldsFromResultData from "./pickFieldsFromResultData";
 
@@ -173,6 +173,33 @@ export default function routes(
 
     models.forEach(model => {
       const type = model.name;
+      if (model.collection === "iframe") {
+        router.get(`/rest/${mode}/${type}/checkPermisson`, async (req, res) => {
+          const { principal, query } = req;
+          const { sessionID } = query;
+          let permission = principal;
+          if (sessionID) {
+            try {
+              const buff = Buffer.from(sessionID, "base64");
+              const session = JSON.parse(buff.toString("utf-8"));
+              const userId = session.userId;
+              const user = await persistence.settings.loadUser(userId);
+              if (user) {
+                permission = user;
+              }
+            } catch (e) {
+              return res.status(500).json({ error: "Invalid Session" });
+            }
+          }
+          res.json({
+            view: isAllowed(permission, model, Permission.view),
+            edit: isAllowed(permission, model, Permission.edit),
+            publish: isAllowed(permission, model, Permission.publish),
+            forbidden: isAllowed(permission, model, Permission.forbidden)
+          });
+        });
+        return;
+      }
 
       // List
       router.get(`/rest/${mode}/${type}`, async (req, res) => {

@@ -10,14 +10,16 @@ import api from "../api";
 import { isAllowed, Permission } from "../auth/acl";
 import { withUser } from "../auth/UserContext";
 import ErrorBoundary from "../ErrorBoundary";
+import { IFrameView } from "./IFrameView";
 
 enum Collection {
+  IFrame = "iframe",
   Singleton = "singleton",
   None = "none"
 }
 
 type Props = {
-  user: Principal & User | null;
+  user: (Principal & User) | null;
   model: Model;
   match: matchType<any>;
   history: History;
@@ -133,6 +135,9 @@ class List extends Component<Props, State> {
     if (!user) return null;
     const edit = isAllowed(user, model, Permission.edit);
 
+    if (model.collection === Collection.IFrame && model.iframeOptions) {
+      return <IFrameView {...model.iframeOptions} />;
+    }
     if (model.collection === Collection.Singleton) {
       return (
         <ErrorBoundary>

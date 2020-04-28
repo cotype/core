@@ -11,7 +11,8 @@ export default function modelBuilder(
   externalDataSources?: Cotype.ExternalDataSource[]
 ) {
   const model = (opts: Cotype.ModelOpts): Cotype.Model => {
-    const { name, fields, title, readOnly } = opts;
+    const { name, title, readOnly, fields = {} } = opts;
+
     if (!name) {
       throw new Error("Model must have a `name` property.");
     }
@@ -28,6 +29,15 @@ export default function modelBuilder(
       versioned?: boolean;
       external?: boolean;
     } = {};
+
+    if (opts.collection === "iframe") {
+      externalDataProps.writable = false;
+      externalDataProps.versioned = false;
+      externalDataProps.external = false;
+      if (!opts.iframeOptions) {
+        throw new Error(`IFrame Model "${opts.name}" need "iframeOptions"`);
+      }
+    }
 
     if (externalDataSources) {
       const dataSource = externalDataSources.find(

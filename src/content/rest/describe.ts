@@ -84,7 +84,7 @@ const describeModel = (
           schema: criteria.content,
           example: "{}",
           description:
-            ('allowAbsoluteRefs' in type.item && type.item.allowAbsoluteRefs
+            ("allowAbsoluteRefs" in type.item && type.item.allowAbsoluteRefs
               ? 'Query example: <tt>{"eq": "id"}</tt>, <tt>{"eq": "http://xx.xx"}</tt>'
               : 'Query example: <tt>{"eq": "id"}</tt>') +
             ', <tt>{"eq": "null"}</tt> or <tt>{"eq":"string“, "path":"field1.field2"}</tt>'
@@ -164,7 +164,7 @@ const describeModel = (
         schema: criteria.content,
         example: "{}",
         description:
-          ('allowAbsoluteRefs' in type && type.allowAbsoluteRefs
+          ("allowAbsoluteRefs" in type && type.allowAbsoluteRefs
             ? 'Query example: <tt>{"eq": "id"}</tt>, <tt>{"eq": "http://xx.xx"}</tt>'
             : 'Query example: <tt>{"eq": "id"}</tt>') +
           ', <tt>{"eq": "null"}</tt> or <tt>{"eq":"string“, "path":"field1.field2"}</tt>'
@@ -329,7 +329,7 @@ function createJoinParams(model: Model, { content: models }: Models) {
 
   visitModel(model, (key: string, field: Field) => {
     if (field.type === "content") {
-      if ('models' in field && field.models && field.models.length) {
+      if ("models" in field && field.models && field.models.length) {
         field.models.forEach(n => {
           refs.push(n);
         });
@@ -481,6 +481,48 @@ export default (api: OpenApiBuilder, models: Models) => {
     const pluralName = toTypeName(pluralize(name));
     const singleton = collection === "singleton";
     const tags = [plural];
+
+    if (collection === "iframe") {
+      api.addPath(`/${name}/checkPermisson`, {
+        /** List contents */
+        get: {
+          summary: `Check Permisson for ${singularName}`,
+          operationId: `checkPermission_${singularName}`,
+          tags,
+          parameters: [
+            {
+              name: "sessionID",
+              in: "query",
+              description: "You can pass sessionID by Session or by Query",
+              schema: {
+                type: "string"
+              }
+            }
+          ],
+          responses: {
+            "200": {
+              description: `Permissions of ${singularName}`,
+              content: {
+                "application/json": {
+                  schema: object.required(
+                    "view",
+                    "edit",
+                    "publish",
+                    "forbidden"
+                  )({
+                    view: { type: "boolean" },
+                    edit: { type: "boolean" },
+                    publish: { type: "boolean" },
+                    forbidden: { type: "boolean" }
+                  })
+                }
+              }
+            }
+          }
+        }
+      });
+      return;
+    }
 
     const {
       params: commonParams,
