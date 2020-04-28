@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import ObjectOutput from "./ObjectOutput";
 import outputs from "./outputs";
 import { TypeLabel } from "./UnionInput";
-import titleCase from "title-case";
+import { titleCase } from "title-case";
 
 type Props = {
   value: {

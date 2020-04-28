@@ -145,7 +145,7 @@ export default function convert({
       }
       if (contentFormat) return formatQuillDelta(delta, contentFormat);
     },
-    list(list: Array<{ key: number; value: object }>) {
+    list(list: { key: number; value: object }[]) {
       const { publishedOnly, ignoreSchedule } = previewOpts;
 
       const visible = (item: any) => {

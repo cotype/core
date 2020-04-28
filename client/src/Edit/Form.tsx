@@ -9,9 +9,10 @@ import Sidebar from "./ActionBar";
 import History from "./History";
 import Schedule from "../common/Schedule";
 import { Input } from "./elements";
-import titleCase from "title-case";
+import {titleCase} from "title-case";
 import { getPreviewUrl } from "../utils/helper";
 import styled from "styled-components/macro";
+
 
 export const errorClass = "error-field-label";
 
@@ -28,7 +29,7 @@ type Props = RouteComponentProps & {
   clone?: string;
   id?: string;
   model: Cotype.Model;
-  versions?: Array<Cotype.VersionItem & { published: boolean }>;
+  versions?: (Cotype.VersionItem & { published: boolean })[];
   onSave?: (record: { id: string; isUpdate: boolean; data: any }) => void;
   onDelete?: (id: string) => void;
   onDuplicate?: (id: string) => void;

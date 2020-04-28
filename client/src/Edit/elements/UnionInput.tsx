@@ -2,7 +2,7 @@ import * as Cotype from "../../../../typings";
 import React, { Component, Fragment } from "react";
 import { FieldProps } from "formik";
 import styled from "styled-components/macro";
-import titleCase from "title-case";
+import { titleCase } from "title-case";
 import basePath from "../../basePath";
 import Button from "../../common/Button";
 import ModalDialog from "../../common/ModalDialog";

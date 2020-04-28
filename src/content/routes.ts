@@ -50,7 +50,7 @@ export default (
   router.get("/admin/rest/content", async (req, res) => {
     const { principal, query } = req;
     /* tslint:disable-next-line:no-shadowed-variable */
-    const { q, limit = 50, offset = 0, models = [], linkable } = query;
+    const { q, limit = 50, offset = 0, models = [], linkable } = query as any;
     const items = await content.search(principal, q, true, {
       limit,
       offset,
@@ -63,7 +63,7 @@ export default (
   router.get("/admin/rest/externalDataSource", async (req, res) => {
     const { principal, query } = req;
     /* tslint:disable-next-line:no-shadowed-variable */
-    const { q, limit = 50, offset = 0, models = [""] } = query;
+    const { q, limit = 50, offset = 0, models = [""] } = query as any;
     const model = models[0];
     const dataSource = externalDataSources.find(
       ({ contentTypes }: Cotype.ExternalDataSource) => {
@@ -95,7 +95,7 @@ export default (
 
   router.get("/admin/rest/dashboard/unpublished", async (req, res) => {
     const { principal, query } = req;
-    const { limit = 50, offset = 0 } = query;
+    const { limit = 50, offset = 0 } = query as any;
 
     const items = await content.listUnpublishedContent(principal, {
       limit,
@@ -106,7 +106,7 @@ export default (
 
   router.get("/admin/rest/dashboard/updated", async (req, res) => {
     const { query, principal } = req;
-    const { limit = 50, offset = 0 } = query;
+    const { limit = 50, offset = 0 } = query as any;
 
     const items = await content.listLastUpdatedContent(principal, {
       limit,
@@ -117,7 +117,7 @@ export default (
 
   router.get("/admin/rest/dashboard/updated-by-user", async (req, res) => {
     const { principal, query } = req;
-    const { limit = 50, offset = 0 } = query;
+    const { limit = 50, offset = 0 } = query as any;
 
     const items = await content.listLastUpdatedContent(
       principal,
@@ -131,7 +131,7 @@ export default (
   router.get("/admin/rest/content/:modelName", async (req, res) => {
     const { principal, params, query } = req;
     const { modelName } = params;
-    const { search = {}, limit = 50, offset = 0, ...rest } = query;
+    const { search = {}, limit = 50, offset = 0, ...rest } = query as any;
     const criteria = rest && Object.keys(rest).length ? rest : undefined;
     const opts: Cotype.ListOpts = { search, offset, limit };
     const model = getModel(modelName);
@@ -243,7 +243,7 @@ export default (
     "/admin/rest/content/:modelName/:id/versions/:rev",
     async (req, res) => {
       const { principal, params } = req;
-      const { modelName, id, rev } = params;
+      const { modelName, id, rev } = params as any;
       const model = getModel(modelName);
       const dataSource = getDataSource(modelName) as Cotype.VersionedDataSource;
 

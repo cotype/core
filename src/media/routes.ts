@@ -83,7 +83,7 @@ export default function routes(
       search,
       mimetype,
       unUsed
-    } = query;
+    } = query as any;
 
     const list = await media.list(principal, {
       limit,

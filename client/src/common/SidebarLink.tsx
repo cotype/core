@@ -6,7 +6,7 @@ const active = css`
   background-color: hsla(0, 0%, 100%, 0.1);
 `;
 
-const StyledNavLink = styled(NavLink)`
+const StyledNavLink = styled(NavLink)<NavLinkProps>`
   display: block;
   color: #e8e8e8;
   text-decoration: none;
