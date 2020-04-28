@@ -174,7 +174,7 @@ export default function routes(
     models.forEach(model => {
       const type = model.name;
       if (model.collection === "iframe") {
-        router.get(`/rest/${mode}/${type}/checkPermisson`, async (req, res) => {
+        router.get(`/rest/${mode}/${type}/checkPermission`, async (req, res) => {
           const { principal, query } = req;
           const { sessionID } = query;
           let permission = principal;

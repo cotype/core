@@ -483,7 +483,7 @@ export default (api: OpenApiBuilder, models: Models) => {
     const tags = [plural];
 
     if (collection === "iframe") {
-      api.addPath(`/${name}/checkPermisson`, {
+      api.addPath(`/${name}/checkPermission`, {
         /** List contents */
         get: {
           summary: `Check Permisson for ${singularName}`,
