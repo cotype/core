@@ -79,7 +79,7 @@ export interface ContentAdapter {
   listVersions(
     model: Cotype.Model,
     id: string
-  ): Promise<Array<Cotype.VersionItem & { published: boolean }>>;
+  ): Promise<(Cotype.VersionItem & { published: boolean })[]>;
   setPublishedRev(
     model: Cotype.Model,
     id: string,

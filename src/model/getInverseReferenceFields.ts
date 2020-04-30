@@ -4,8 +4,12 @@ import { InverseReferenceType } from "../../typings";
 
 const getInverseReferenceFields = (
   model: Cotype.Model
-): Array<{ path: string; model: string; fieldName:string; }> => {
-  const referenceFields: Array<{ path: string; model: string; fieldName:string; }> = [];
+): { path: string; model: string; fieldName: string }[] => {
+  const referenceFields: {
+    path: string;
+    model: string;
+    fieldName: string;
+  }[] = [];
   visit({}, model, {
     references(_value, field: InverseReferenceType, _parent, path) {
       if (path)

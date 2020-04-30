@@ -294,7 +294,7 @@ export type VersionedDataSource = WritableDataSource & {
     principal: Principal,
     model: Model,
     id: string
-  ): Promise<Array<VersionItem & { published: boolean }>>;
+  ): Promise<(VersionItem & { published: boolean })[]>;
   loadRevision(
     principal: Principal,
     model: Model,

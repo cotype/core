@@ -9,7 +9,7 @@ type Props = {
   id: string;
   rev?: string | number;
   model: Cotype.Model;
-  versions?: Array<Cotype.VersionItem & { published: boolean }>;
+  versions?: (Cotype.VersionItem & { published: boolean })[];
   onReceiveData?: (data: any) => void;
 };
 

@@ -65,7 +65,7 @@ const dateClass = css`
 
 type VersionList = {
   model: Cotype.Model;
-  versions: Array<Cotype.VersionItem & { published: boolean }>;
+  versions: (Cotype.VersionItem & { published: boolean })[];
   activeVersion?: number | string;
   onSelectVersion: (v: Cotype.VersionItem) => void;
   onUnpublish: () => void;

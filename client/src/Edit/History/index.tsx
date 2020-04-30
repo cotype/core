@@ -16,7 +16,7 @@ type Props = {
   id: string;
   rev?: string;
   model: Cotype.Model;
-  versions?: Array<Cotype.VersionItem & { published: boolean }>;
+  versions?: (Cotype.VersionItem & { published: boolean })[];
   onClose: () => void;
   onUnpublish: () => void;
   onRestore: (rev: string) => void;

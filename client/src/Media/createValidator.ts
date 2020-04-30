@@ -9,7 +9,7 @@ export type MediaFilter = {
   maxHeight?: number;
 };
 
-type GetElementType<T extends any[]> = T extends Array<infer U> ? U : never;
+type GetElementType<T extends any[]> = T extends (infer U)[] ? U : never;
 
 function every<T extends any[]>(
   thing: T,

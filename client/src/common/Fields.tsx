@@ -49,12 +49,12 @@ export type FieldLayout =
 
 type Props = {
   layout?: FieldLayout;
-  fields: Array<{
+  fields: {
     key?: string;
     error?: string;
     label: any;
     element: any;
-  }>;
+  }[];
 };
 
 export default class Fields extends Component<Props> {
