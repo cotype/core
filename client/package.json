@@ -11,7 +11,7 @@
   "dependencies": {
     "color-hash": "^1.0.3",
     "date.js": "^0.3.3",
-    "downshift": "^3.3.4",
+    "downshift": "^5.2.3",
     "formik": "^1.5.8",
     "hoist-non-react-statics": "^3.3.0",
     "javascript-time-ago": "^2.0.2",
