@@ -49,7 +49,7 @@
     "crypto-random-string": "^3.0.1",
     "express": "^4.17.1",
     "express-promise-router": "^3.0.3",
-    "file-type": "^12.3.0",
+    "file-type": "^14.3.0",
     "fs-extra": "^8.1.0",
     "glob-promise": "^3.4.0",
     "got": "^9.6.0",
