@@ -110,9 +110,17 @@ export default class ListInput extends Component<Props, State> {
 
     const value = this.props.field.value || [];
     const key = 1 + value.reduce((max, item) => Math.max(max, item.key), 0);
-
+    const fieldProps = {
+      ..._omit(itemType, serverSideProps),
+      models:
+        "model" in itemType
+          ? [itemType.model]
+          : "models" in itemType
+          ? itemType.models
+          : undefined
+    };
     if (comp.itemFactory) {
-      const Factory = comp.itemFactory(itemType, item => {
+      const Factory = comp.itemFactory(fieldProps, item => {
         if (item) insert({ key, [ITEM_VALUE_KEY]: item });
         this.setState({ Factory: null });
       });
@@ -121,7 +129,7 @@ export default class ListInput extends Component<Props, State> {
     }
 
     if (comp.getDefaultValue) {
-      insert({ key, [ITEM_VALUE_KEY]: comp.getDefaultValue(itemType) });
+      insert({ key, [ITEM_VALUE_KEY]: comp.getDefaultValue(fieldProps) });
     } else {
       insert({ key, [ITEM_VALUE_KEY]: null });
     }
