@@ -68,10 +68,18 @@ export default class ChipListInput extends Component<Props, State> {
   createFactory = arrayHelpers => {
     const itemType = this.props.item;
     const InputComponent = inputs.get(itemType);
-
+    const fieldProps = {
+      ..._omit(itemType, serverSideProps),
+      models:
+        "model" in itemType
+          ? [itemType.model]
+          : "models" in itemType
+          ? itemType.models
+          : undefined
+    };
     let Factory;
     if (InputComponent.itemFactory) {
-      Factory = InputComponent.itemFactory(itemType, item => {
+      Factory = InputComponent.itemFactory(fieldProps, item => {
         if (item) this.createItem(i => arrayHelpers.push(i), item);
         this.setState({ Factory: null });
       });
@@ -82,7 +90,7 @@ export default class ChipListInput extends Component<Props, State> {
       Factory = () => (
         <div>
           <InputComponent
-            {...itemType}
+            {...fieldProps}
             form={{ setFieldValue }}
             field={{ value: this.state.newItemValue, name: "new", onChange }}
             layout="inList"
