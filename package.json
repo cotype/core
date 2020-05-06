@@ -115,7 +115,7 @@
     "sqlite3": "^4.1.0",
     "supertest": "^4.0.2",
     "tough-cookie": "^3.0.1",
-    "ts-jest": "^24.1.0",
+    "ts-jest": "^25.5.0",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-react": "^4.1.0",
