@@ -119,7 +119,7 @@ class Api {
   getVersions(
     model: Cotype.Model,
     id: string
-  ): Promise<Array<Cotype.VersionItem & { published: boolean }>> {
+  ): Promise<(Cotype.VersionItem & { published: boolean })[]> {
     const { type, name } = model;
     return this.get(`/${type}/${name}/${id}/versions`);
   }

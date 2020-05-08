@@ -9,7 +9,7 @@ import {
   ReferenceObject,
   ParameterObject
 } from "openapi3-ts";
-import changeCase from "change-case";
+import * as changeCase from "change-case";
 
 const stringType = { type: "string" };
 const booleanType = { type: "boolean" };

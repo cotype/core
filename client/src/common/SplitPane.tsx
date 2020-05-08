@@ -1,4 +1,4 @@
-import React, { Component, Children } from "react";
+import React, { Component, Children, ReactElement } from "react";
 import styled from "styled-components/macro";
 
 const Root = styled("div")`
@@ -110,7 +110,7 @@ export default class SplitPane extends Component<Props, State> {
         {...this.rootProps}
         style={!primaryLeft ? { flexDirection: "row-reverse" } : undefined}
       >
-        {childArray.reduce((memo, children, i) => {
+        {childArray.reduce<ReactElement[]>((memo, children, i) => {
           if (memo.length) {
             memo.push(<Splitter key={`${i}-split`} {...this.splitterProps} />);
           }

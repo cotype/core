@@ -1,6 +1,6 @@
 import * as Cotype from "../../../../typings";
 import React, { Component } from "react";
-import titleCase from "title-case";
+import { titleCase } from "title-case";
 
 import Fields, { FieldLayout } from "../../common/Fields";
 import outputs from "./outputs";
@@ -22,7 +22,7 @@ export default class ObjectOutput extends Component<Props> {
       if (output[type] && value[key]) {
         return output[type]({ ...f, value: value[key] });
       }
-      return null
+      return null;
     }, null);
   };
 

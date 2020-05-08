@@ -17,7 +17,7 @@ const historyStyle = {
 type Props = {
   id: string;
   model: Cotype.Model;
-  versions?: Array<Cotype.VersionItem & { published: boolean }>;
+  versions?: (Cotype.VersionItem & { published: boolean })[];
   onPublish?: () => void;
   onUnpublish: () => void;
   modelPaths: Cotype.ModelPaths;

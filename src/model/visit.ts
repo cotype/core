@@ -12,7 +12,7 @@ type Visitor = {
     field: any,
     deleteFunc: () => void,
     stringPath: string
-  ) => void;
+  ) => void | typeof NO_STORE_VALUE | any;
 };
 
 export default function visit(

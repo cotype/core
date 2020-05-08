@@ -64,7 +64,7 @@ type State = {
   orderBy?: string;
   order?: string;
   search?: string;
-  filters: Array<{ label: string; value: string }>;
+  filters: ({ label: string; value: string })[];
   topbarProgress: number | undefined;
   unUsed: boolean;
 };

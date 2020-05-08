@@ -107,7 +107,7 @@ type Props = RouteComponentProps<any> & {
   onHistory?: () => void;
   onPreview?: () => void;
   onSchedule?: () => void;
-  versions?: Array<Cotype.VersionItem & { published: boolean }>;
+  versions?: (Cotype.VersionItem & { published: boolean })[];
   activeVersion?: number;
   model: Cotype.Model;
   submitForm?: () => void;

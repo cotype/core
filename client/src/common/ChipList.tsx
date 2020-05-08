@@ -78,7 +78,7 @@ export default class ChipList extends Component<Props, State> {
       <Root>
         {values &&
           values.map((v, index) => (
-            <Item key={index} style={{ background: colorHash.hex(v) }}>
+            <Item key={index} style={{ background: colorHash.hex(String(v)) }}>
               {v}
               <StyledButton type="button" onClick={() => onDelete(index)}>
                 <ClearCircleIcon />

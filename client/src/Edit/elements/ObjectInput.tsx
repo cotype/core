@@ -2,7 +2,7 @@ import * as Cotype from "../../../../typings";
 import React, { Component } from "react";
 import { Field, FieldProps, getIn } from "formik";
 import _omit from "lodash/omit";
-import titleCase from "title-case";
+import { titleCase } from "title-case";
 import Fields, { FieldLayout } from "../../common/Fields";
 import inputs from "./inputs";
 import ObjectOutput from "./ObjectOutput";

@@ -114,8 +114,8 @@ export default function routes(
     /** Search */
     router.get(`/rest/${mode}/search/content`, async (req, res) => {
       const { principal, query } = req;
-      const { term, limit = 50, offset = 0 } = query;
-      const searchModels = getSearchModels(query);
+      const { term, limit = 50, offset = 0 } = query as any;
+      const searchModels = getSearchModels(query as any);
 
       if (!searchModels.length) {
         return res.json({
@@ -160,8 +160,8 @@ export default function routes(
 
     router.get(`/rest/${mode}/search/suggest`, async (req, res) => {
       const { principal, query } = req;
-      const { term } = query;
-      const searchModels = getSearchModels(query);
+      const { term } = query as any;
+      const searchModels = getSearchModels(query as any);
 
       if (!searchModels.length) {
         return res.json([]);
@@ -186,7 +186,7 @@ export default function routes(
           orderBy,
           fields,
           ...rest
-        } = query;
+        } = query as any;
 
         const opts: ListOpts = { search, offset, limit, order, orderBy };
 
@@ -258,7 +258,7 @@ export default function routes(
       // load
       router.get(`/rest/${mode}/${type}/:id`, async (req, res) => {
         const { principal, params, query } = req;
-        const { join, fields } = query;
+        const { join, fields } = query as any;
 
         checkPermissionToJoin(req.principal, join);
         const dataSource = getDataSource(type);
@@ -295,7 +295,7 @@ export default function routes(
             `/rest/${mode}/${type}/${uniqueField}/:uniqueValue`,
             async (req, res) => {
               const { principal, query, params } = req;
-              const { join, fields } = query;
+              const { join, fields } = query as any;
 
               checkPermissionToJoin(req.principal, join);
 

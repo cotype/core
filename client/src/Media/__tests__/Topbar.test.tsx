@@ -1,6 +1,6 @@
 import mock from "xhr-mock";
 import React from "react";
-import { render, fireEvent, wait } from "@testing-library/react";
+import { render, fireEvent, waitFor } from "@testing-library/react";
 import api from "../../api";
 import { UploadProvider, createXhrClient } from "react-use-upload";
 import Topbar, { Props as TopbarProps } from "../Topbar";
@@ -78,6 +78,6 @@ describe("UploadZone", () => {
 /*    await wait(() =>
       expect(onUploadProgress).toHaveBeenCalledWith(expect.any(Number)) //TODO: Could not test, because upload return NaN for MockFiles
     );*/
-    await wait(() => expect(onUpload).toHaveBeenCalledWith("Foo"));
+    await waitFor(() => expect(onUpload).toHaveBeenCalledWith("Foo"));
   });
 });

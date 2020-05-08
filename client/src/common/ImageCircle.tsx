@@ -38,7 +38,9 @@ export default function ImageCircle({
     <Circle
       {...rest}
       style={{
-        backgroundColor: validImageSrc ? "transparent" : colorHash.hex(alt),
+        backgroundColor: validImageSrc
+          ? "transparent"
+          : colorHash.hex(String(alt)),
         backgroundImage: validImageSrc ? `url(${src})` : "none",
         fontSize: size
       }}

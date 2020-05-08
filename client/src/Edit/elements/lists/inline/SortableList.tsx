@@ -4,7 +4,7 @@ import { SortableContainer } from "react-sortable-hoc";
 import SortableItem from "./SortableItem";
 
 type SortableList = {
-  items: Array<{ key: number | string; value: { _type: string } }>;
+  items: ({ key: number | string; value: { _type: string } })[];
   name: string;
   sortable: boolean | undefined;
   ItemComponent: React.ComponentType<any> & { validate: () => void };

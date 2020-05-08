@@ -7,7 +7,7 @@ import VersionList from "../VersionList";
 type Props = {
   id: string;
   model: Cotype.Model;
-  versions: Array<Cotype.VersionItem & { published: boolean }>;
+  versions: (Cotype.VersionItem & { published: boolean })[];
   onSelect?: (rev: string) => void;
   onUnpublish: () => void;
 };

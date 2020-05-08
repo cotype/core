@@ -1,16 +1,12 @@
 import * as Cotype from "../../typings";
-import {
-  init,
-  knexAdapter,
-  Opts,
-  FsStorage,
-} from "../../src";
+import { init, knexAdapter, Opts, FsStorage } from "../../src";
 import * as path from "path";
 import { models } from "../models";
 import { navigation } from "../navigation.json";
 import { Express } from "express";
 import ContentPersistence from "../../src/persistence/ContentPersistence";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
+import { KnexConfig } from "../../src/persistence/adapter/knex";
 
 const uploadDir = path.resolve(__dirname, "..", "uploads");
 const storage = new FsStorage(uploadDir);
@@ -21,7 +17,7 @@ function getClient(url: string) {
   throw new Error("Unsupported connection string: " + url);
 }
 
-export function getKnexConfig() {
+export function getKnexConfig(): KnexConfig {
   if (!process.env.DB || process.env.NODE_ENV === "test") {
     return {
       client: "sqlite3",

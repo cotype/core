@@ -47,7 +47,7 @@ import ContentPersistence from "./persistence/ContentPersistence";
 import Storage from "./media/storage/Storage";
 import logResponseTime from "./responseTimeLogger";
 import MigrationContext from "./persistence/MigrationContext";
-import proxyMiddleware from "http-proxy-middleware";
+import { createProxyMiddleware } from "http-proxy-middleware";
 import { spawn } from "child_process";
 import SettingsPersistence from "./persistence/SettingsPersistence";
 
@@ -133,12 +133,12 @@ const startDevServer = () => {
 export const clientMiddleware = (basePath: string = "/") =>
   process.env.DEVCLIENT // Use Proxy to Dev Server
     ? [
-        proxyMiddleware("/static", {
+        createProxyMiddleware("/static", {
           target: `http://localhost:4001`,
           logLevel: "error",
           changeOrigin: true
         }),
-        proxyMiddleware(urlJoin(basePath, "/admin"), {
+        createProxyMiddleware(urlJoin(basePath, "/admin"), {
           target: `http://localhost:4001`,
           logLevel: "error",
           changeOrigin: true,

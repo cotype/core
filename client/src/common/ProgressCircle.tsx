@@ -19,7 +19,8 @@ const classes = {
   `,
   background: css`
     fill: #ddd;
-  `
+  `,
+  root: ""
 };
 
 type Props = {
@@ -31,7 +32,7 @@ export default function ProgressCircle({ percentage, size = "100%" }: Props) {
     <CircularProgressbar
       value={percentage}
       text={`${percentage}%`}
-      classes={classes}
+      classes={classes as any}
       styles={{ root: { width: size } }}
     />
   );

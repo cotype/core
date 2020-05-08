@@ -122,8 +122,8 @@ const OrderButton = styled("div")`
 export type Props = {
   onFilterChange: (filter: string) => void;
   onSearch: (query: string) => void;
-  filters: Array<{ label: string; value: string }>;
-  orderBys: Array<{ label: string; value: string }>;
+  filters: ({ label: string; value: string })[];
+  orderBys: ({ label: string; value: string })[];
   onOrderByChange: (orderBy: string) => void;
   onOrderChange: (order: string) => void;
   onUnUsedChange: (unUsed: boolean) => void;

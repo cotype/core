@@ -26,7 +26,7 @@ const itemClass = css`
   align-items: center;
 `;
 
-const StyledNavLink = styled(NavLink)`
+const StyledNavLink = styled(NavLink)<NavLinkProps>`
   ${itemClass} color: inherit;
   text-decoration: none;
   opacity: 0.7;

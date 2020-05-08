@@ -3,7 +3,7 @@
  * that can be deduced from other props or the context.
  */
 import * as Cotype from "../../typings";
-import changeCase from "change-case";
+import { titleCase } from "title-case";
 import pluralize from "pluralize";
 
 export default function modelBuilder(
@@ -15,7 +15,7 @@ export default function modelBuilder(
     if (!name) {
       throw new Error("Model must have a `name` property.");
     }
-    const singular = opts.singular || changeCase.title(name);
+    const singular = opts.singular || titleCase(name);
     const plural = opts.plural || pluralize(singular);
 
     const firstTitleField = Object.keys(fields).find(
