@@ -2,7 +2,7 @@ jest.mock("react-day-picker/lib/style.css");
 jest.mock("react-router-dom", () => ({ Link: () => "Link" }));
 
 import React from "react";
-import { render, fireEvent, waitForElement } from "@testing-library/react";
+import { render, fireEvent, waitFor } from "@testing-library/react";
 import ScheduleModal from "../Schedule";
 import ModelPathsContext from "../../ModelPathsContext";
 
@@ -37,13 +37,13 @@ it("should display ConflictDialog on schedule error", async () => {
     </ModelPathsContext.Provider>
   );
 
-  const visibleUntilSlider = await waitForElement(() =>
+  const visibleUntilSlider = await waitFor(() =>
     findByText(/Visible Until/i).then(e => e.closest("div"))
   );
 
   fireEvent.click(visibleUntilSlider as Element);
 
-  const scheduleButton = await waitForElement(() =>
+  const scheduleButton = await waitFor(() =>
     findByText(/schedule/i, { selector: "span" }).then(e => e.closest("button"))
   );
 
@@ -51,6 +51,6 @@ it("should display ConflictDialog on schedule error", async () => {
 
   expect(onSchedule).toBeCalledTimes(1);
   expect(
-    await waitForElement(() => findByText(/content in use/i))
+    await waitFor(() => findByText(/content in use/i))
   ).toBeInTheDocument();
 });

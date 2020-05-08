@@ -1,5 +1,4 @@
 declare module "@slite/quill-delta-markdown";
-declare module "got";
 declare module "mudder" {
   export const base62: {
     stringToNumber(s: string): number;

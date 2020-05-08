@@ -117,7 +117,7 @@ export const BasicResultItem = ({ item, term }: BasicProps) => {
         <TitleWrapper>
           <ResultTitle title={title} term={term}></ResultTitle>
 
-          <Kind style={{ background: colorHash.hex(kind) }}>{kind}</Kind>
+          <Kind style={{ background: colorHash.hex(String(kind)) }}>{kind}</Kind>
         </TitleWrapper>
         <DescriptionWrapper>
           {"description" in item && item.description && (

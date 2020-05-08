@@ -5,10 +5,7 @@ import { DayModifiers } from "react-day-picker";
 import DayPickerInput from "react-day-picker/DayPickerInput";
 import "react-day-picker/lib/style.css";
 import "moment/locale/de";
-import MomentLocaleUtils, {
-  formatDate,
-  parseDate
-} from "react-day-picker/moment";
+import MomentLocaleUtils from "react-day-picker/moment";
 
 export const FORMAT = "L";
 
@@ -38,7 +35,9 @@ type Props = {
 
 export default class DatePicker extends Component<Props> {
   format(value: string) {
-    return value ? `${formatDate(value, FORMAT, "de")}` : "";
+    return value
+      ? `${MomentLocaleUtils.formatDate(new Date(value), FORMAT, "de")}`
+      : "";
   }
 
   handleChange = (
@@ -62,10 +61,14 @@ export default class DatePicker extends Component<Props> {
     return (
       <Wrapper>
         <DayPickerInput
-          formatDate={formatDate}
-          parseDate={parseDate}
+          formatDate={MomentLocaleUtils.formatDate}
+          parseDate={MomentLocaleUtils.parseDate}
           placeholder={placeholder || "DD.MM.YYYY"}
-          classNames={{ container: "day-picker-container", overlay: "" } as any}
+          classNames={{
+            container: "day-picker-container",
+            overlay: "",
+            overlayWrapper: ""
+          }}
           onDayChange={this.handleChange}
           format={[FORMAT, "l", "LL", "ll"]}
           dayPickerProps={{
