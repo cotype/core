@@ -20,6 +20,11 @@
               "model": "contentPages"
             }
           ]
+        },
+        {
+          "type": "model",
+          "name": "Iframe",
+          "model": "iframe"
         }
       ]
     }

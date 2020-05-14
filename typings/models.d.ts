@@ -228,9 +228,9 @@ export type ModelOpts = {
   name: string;
   singular?: string;
   plural?: string;
-  collection?: "list" | "singleton" | "none";
+  collection?: "list" | "singleton" | "none" | "iframe";
   urlPath?: string;
-  fields: {
+  fields?: {
     [key: string]: Field & { unique?: boolean };
   };
   customQuery?: {
@@ -244,6 +244,9 @@ export type ModelOpts = {
   orderBy?: string;
   order?: "asc" | "desc";
   readOnly?: boolean;
+  iframeOptions?: {
+    url: string; // "{sessionID}" gets replaced with Session ID
+  };
 };
 
 export interface GroupItemOpts {
@@ -285,8 +288,13 @@ export type ModelBuilderOpts = Partial<ModelOpts> & {
   external?: boolean;
 };
 
+export type RequireOne<T, K extends keyof T> = T &
+  {
+    [P in K]-?: T[P];
+  };
+
 export type Model = ModelBuilderOpts &
-  ModelOpts & {
+  RequireOne<ModelOpts, "fields"> & {
     name: string;
     plural: string;
     singular: string;
