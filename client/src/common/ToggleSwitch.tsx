@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components/macro";
 
 type P = {
-  on: boolean;
+  active: boolean;
   disabled?: boolean;
 };
 
@@ -14,7 +14,12 @@ const Track = styled("div")`
   border-radius: 11px;
   cursor: ${(p: P) => (!p.disabled ? "pointer" : "auto")};
   display: inline-block;
-  background: ${(p: P) => (p.on ? !p.disabled ? "var(--primary-color)" : "rgba(0, 0, 0, 0.25)" : "#ccc")};
+  background: ${(p: P) =>
+    p.active
+      ? !p.disabled
+        ? "var(--primary-color)"
+        : "rgba(0, 0, 0, 0.25)"
+      : "#ccc"};
 `;
 
 const Knob = styled("div")`
@@ -24,7 +29,7 @@ const Knob = styled("div")`
   border-radius: 50%;
   background: #fff;
   transition: all 0.2s ease-in-out;
-  transform: translateX(${(p: P) => (p.on ? "22px" : 0)});
+  transform: translateX(${(p: P) => (p.active ? "22px" : 0)});
 `;
 
 type Props = {
@@ -33,8 +38,8 @@ type Props = {
   onClick?: () => void;
 };
 const ToggleSwitch = ({ on, onClick, disabled }: Props) => (
-  <Track on={on} onClick={onClick} disabled={disabled}>
-    <Knob on={on} />
+  <Track active={on} onClick={onClick} disabled={disabled}>
+    <Knob active={on} />
   </Track>
 );
 
