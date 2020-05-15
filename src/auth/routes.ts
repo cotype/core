@@ -2,7 +2,8 @@ import bcrypt from "bcryptjs";
 import _ from "lodash";
 import { Router, Request } from "express";
 import { Persistence } from "../persistence";
-import { Permissions, User } from "../../typings";
+import { Permissions, User, Models } from "../../typings";
+import { Permission, isAllowed } from "./acl";
 
 export type AnonymousPermissions = (req: Request) => Partial<Permissions>;
 
@@ -13,9 +14,11 @@ export type AnonymousPermissions = (req: Request) => Partial<Permissions>;
 export default async (
   router: Router,
   persistence: Persistence,
-  anonymousPermissions: AnonymousPermissions
+  anonymousPermissions: AnonymousPermissions,
+  models: Models
 ) => {
   const { settings } = persistence;
+
   router.post(`/admin/rest/login`, async (req: any, res) => {
     const { email, password } = req.body;
     const user = await settings.findUserByEmail(email);
@@ -49,5 +52,38 @@ export default async (
   router.post(`/admin/rest/logout`, async (req: any, res) => {
     req.session = undefined;
     res.status(204).end();
+  });
+
+  router.get("/admin/rest/permissions/:type", async (req, res) => {
+    const { query, params } = req;
+    const { sessionID } = query;
+    let principal = req.principal;
+    if (typeof sessionID === "string") {
+      try {
+        const buff = Buffer.from(sessionID, "base64");
+        const session = JSON.parse(buff.toString("utf-8"));
+        const userId = session.userId;
+        const user = await persistence.settings.loadUser(userId);
+        if (user) {
+          principal = user;
+        }
+      } catch (e) {
+        return res.status(500).json({ error: "Invalid Session" });
+      }
+    }
+    if (!principal) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    const model = models.content.find(
+      m => m.name.toLowerCase() === params.type.toLowerCase()
+    );
+    if (!model) {
+      return res.status(404).json({ error: "No such model" });
+    }
+    res.json({
+      view: isAllowed(principal, model, Permission.view),
+      edit: isAllowed(principal, model, Permission.edit),
+      publish: isAllowed(principal, model, Permission.publish)
+    });
   });
 };

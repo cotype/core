@@ -483,44 +483,7 @@ export default (api: OpenApiBuilder, models: Models) => {
     const tags = [plural];
 
     if (collection === "iframe") {
-      api.addPath(`/${name}/checkPermission`, {
-        /** List contents */
-        get: {
-          summary: `Check Permisson for ${singularName}`,
-          operationId: `checkPermission_${singularName}`,
-          tags,
-          parameters: [
-            {
-              name: "sessionID",
-              in: "query",
-              description: "You can pass sessionID by Session or by Query",
-              schema: {
-                type: "string"
-              }
-            }
-          ],
-          responses: {
-            "200": {
-              description: `Permissions of ${singularName}`,
-              content: {
-                "application/json": {
-                  schema: object.required(
-                    "view",
-                    "edit",
-                    "publish",
-                    "forbidden"
-                  )({
-                    view: { type: "boolean" },
-                    edit: { type: "boolean" },
-                    publish: { type: "boolean" },
-                    forbidden: { type: "boolean" }
-                  })
-                }
-              }
-            }
-          }
-        }
-      });
+      // Ignore iframe models
       return;
     }
 

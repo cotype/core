@@ -232,7 +232,7 @@ export async function init(opts: Opts) {
       migrationDir
     }
   );
-  const auth = Auth(persistence, opts.anonymousPermissions);
+  const auth = Auth(persistence, opts.anonymousPermissions, models);
   const content = Content({
     persistence,
     models,

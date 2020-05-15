@@ -3,6 +3,7 @@ import describe from "./describe";
 import routes, { AnonymousPermissions } from "./routes";
 import { Persistence } from "../persistence";
 import { Permission } from "./acl";
+import { Models } from "../../typings";
 
 const defaultPermissions: AnonymousPermissions = req => ({
   preview: true,
@@ -13,12 +14,13 @@ export { AnonymousPermissions };
 
 export default (
   persistence: Persistence,
-  permissions: AnonymousPermissions = defaultPermissions
+  permissions: AnonymousPermissions = defaultPermissions,
+  models: Models
 ) => {
   return {
     describe,
     routes(router: Router) {
-      routes(router, persistence, permissions);
+      routes(router, persistence, permissions, models);
     }
   };
 };
