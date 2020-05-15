@@ -81,7 +81,7 @@
     "@types/cookie": "^0.3.3",
     "@types/cookie-session": "^2.0.39",
     "@types/faker": "^4.1.11",
-    "@types/fs-extra": "^8.1.0",
+    "@types/fs-extra": "^9.0.0",
     "@types/got": "^9.6.10",
     "@types/graphql": "^14.5.0",
     "@types/http-proxy-middleware": "^0.19.3",
