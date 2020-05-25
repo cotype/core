@@ -15,7 +15,11 @@ type State = {
 export default class OptionsInput extends Component<Props, State> {
   static getDefaultValue(props: Props) {
     if (props.nullLabel) return null;
-    return props.values ? props.values[0] : null;
+    return props.values && props.values[0]
+      ? typeof props.values[0] === "string"
+        ? props.values[0]
+        : props.values[0].value
+      : null;
   }
 
   static validate(value: any, props: Props) {
@@ -59,7 +63,10 @@ export default class OptionsInput extends Component<Props, State> {
     const { nullLabel, values, form, field } = this.props;
 
     if (!nullLabel && !field.value && values && values !== prevProps.values) {
-      form.setFieldValue(field.name, values[0]);
+      form.setFieldValue(
+        field.name,
+        typeof values[0] === "string" ? values[0] : values[0].value
+      );
     }
   }
 
@@ -69,7 +76,16 @@ export default class OptionsInput extends Component<Props, State> {
     const { value, ...props } = field;
     const selected = options.find(o => String(o.value) === String(value));
     return (
-      <select value={selected ? selected.value : ""} {...props}>
+      <select
+        value={
+          selected
+            ? typeof selected === "string"
+              ? selected
+              : selected.value
+            : ""
+        }
+        {...props}
+      >
         {options.map(o => (
           <option key={o.value} value={o.value}>
             {o.label}
