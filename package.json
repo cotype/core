@@ -98,7 +98,7 @@
     "codecov": "3.6.5",
     "concurrently": "^5.2.0",
     "cypress": "^3.8.3",
-    "cypress-file-upload": "^3.3.4",
+    "cypress-file-upload": "^4.0.7",
     "decorate-gh-pr": "1.2.3",
     "faker": "^4.1.0",
     "get-port-cli": "^2.0.0",
