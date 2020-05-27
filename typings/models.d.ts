@@ -247,6 +247,7 @@ export type ModelOpts = {
   plural?: string;
   collection?: "list" | "singleton" | "none" | "iframe";
   urlPath?: string;
+  noFeed?: true;
   fields?: {
     [key: string]: Field & { unique?: boolean };
   };

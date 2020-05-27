@@ -172,7 +172,7 @@ export default function routes(
     });
 
     models
-      .filter(m => m.collection !== "iframe")
+      .filter(m => m.collection !== "iframe" && !m.noFeed)
       .forEach(model => {
         const type = model.name;
 
