@@ -109,7 +109,11 @@ type BasicProps = {
 };
 export const BasicResultItem = ({ item, term }: BasicProps) => {
   const { title, image, kind } = item;
-  const src = image ? `/thumbs/square/${image}` : null;
+  const src = image
+    ? image.includes("://")
+      ? image
+      : `/thumbs/square/${image}`
+    : null;
   return (
     <ImageItem>
       <ImageCircle src={src} alt={title} size={12} />
@@ -117,7 +121,9 @@ export const BasicResultItem = ({ item, term }: BasicProps) => {
         <TitleWrapper>
           <ResultTitle title={title} term={term}></ResultTitle>
 
-          <Kind style={{ background: colorHash.hex(String(kind)) }}>{kind}</Kind>
+          <Kind style={{ background: colorHash.hex(String(kind)) }}>
+            {kind}
+          </Kind>
         </TitleWrapper>
         <DescriptionWrapper>
           {"description" in item && item.description && (
