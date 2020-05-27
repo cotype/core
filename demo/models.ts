@@ -270,6 +270,13 @@ export const models: ModelOpts[] = [
             singleTeaser
           }
         }
+      },
+      virtual: {
+        type: "virtual",
+        outputType: "string",
+        get: contentPage => {
+          return "Not saved in CMS, this is virtual " + contentPage.pagetitle;
+        }
       }
     }
   },

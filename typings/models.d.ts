@@ -1,3 +1,19 @@
+export type VirtualType = {
+  type: "virtual";
+} & (
+  | {
+      outputType: "string";
+      get: (fullModelData: any) => string;
+    }
+  | {
+      outputType: "number";
+      get: (fullModelData: any) => number;
+    }
+  | {
+      outputType: "boolean";
+      get: (fullModelData: any) => boolean;
+    }
+);
 export type BooleanType = {
   type: "boolean";
   input?: "checkbox" | "toggle";
@@ -222,7 +238,8 @@ export type Type =
   | ReferenceType
   | PositionType
   | ImmutableType
-  | InverseReferenceType;
+  | InverseReferenceType
+  | VirtualType;
 
 export type ModelOpts = {
   name: string;

@@ -4,7 +4,7 @@ import {
   Data,
   ContentRefs,
   PreviewOpts,
-  ContentFormat
+  ContentFormat, VirtualType
 } from "../../typings";
 import urlJoin from "url-join";
 import visit, { NO_STORE_VALUE } from "../model/visit";
@@ -185,6 +185,15 @@ export default function convert({
       field: { types: { [key: string]: object } }
     ) {
       if (!Object.keys(field.types).includes(data._type)) return null;
+    },
+    virtual(
+      _data,
+      field: VirtualType,
+    ) {
+      if(field.get){
+        return field.get(content)
+      }
+      return undefined
     }
   });
   return content;

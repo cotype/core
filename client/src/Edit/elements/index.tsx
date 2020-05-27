@@ -46,6 +46,8 @@ import inputs from "./inputs";
 import outputs from "./outputs";
 import PositionInput from "./PositionInput";
 
+const Empty: React.FC = () => null;
+
 inputs.register({
   boolean: BooleanInput,
   content: ReferenceInput,
@@ -64,7 +66,8 @@ inputs.register({
   date: DateInput,
   textarea: TextAreaInput,
   immutable: ImmutableInput,
-  position: PositionInput
+  position: PositionInput,
+  virtual: Empty
 });
 
 outputs.register({
@@ -83,7 +86,8 @@ outputs.register({
   date: DateOutput,
   textarea: TextOutput,
   immutable: ImmutableOutput,
-  position: TextOutput
+  position: TextOutput,
+  virtual: Empty
 });
 
 export const Input = ObjectInput;

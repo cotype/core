@@ -99,7 +99,12 @@ export function createDefinition(
         createDefinition(field, external)
       ),
       required: Object.entries(model.fields)
-        .map(([key, value]) => ((value as any).required ? key : null))
+        .map(([key, value]) =>
+          ((value as any).type === "virtual" && (value as any).get) ||
+          (value as any).required
+            ? key
+            : null
+        )
         .filter(Boolean) as string[]
     };
   }
@@ -122,8 +127,12 @@ export function createDefinition(
           _content: {
             type: "string",
             enum:
-              ('models' in model && model.models && model.models.length) || model.model
-                ? [...('models' in model && model.models || [model.model] || [])]
+              ("models" in model && model.models && model.models.length) ||
+              model.model
+                ? [
+                    ...(("models" in model && model.models) || [model.model] ||
+                      [])
+                  ]
                 : undefined
           },
           _url: { type: "string" }
@@ -197,6 +206,15 @@ export function createDefinition(
     return createDefinition(model.child, external);
   }
 
+  if (model.type === "virtual") {
+    if (!model.get) {
+      return empty;
+    }
+    return {
+      type: model.outputType
+    };
+  }
+
   return ref.schema(model.type);
 }
 
@@ -207,7 +225,12 @@ export function modelSchema(model: Model, external?: boolean) {
       createDefinition(field, external)
     ),
     required: Object.entries(model.fields)
-      .map(([key, value]) => ((value as any).required ? key : null))
+      .map(([key, value]) =>
+        ((value as any).type === "virtual" && (value as any).get) ||
+        (value as any).required
+          ? key
+          : null
+      )
       .filter(Boolean) as string[]
   };
 }
