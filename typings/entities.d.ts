@@ -161,7 +161,7 @@ export type Data = {
   [field: string]: any;
 };
 
-export type DataRecord<T=Data> = Schedule & {
+export type DataRecord<T = Data> = Schedule & {
   id: string;
   data: T;
 };
@@ -178,7 +178,7 @@ export type RevisionRecord = {
   data: Data;
 };
 
-export type Content<T=Data> = DataRecord<T> & {
+export type Content<T = Data> = DataRecord<T> & {
   type: string;
   author: string;
   date: Date | string;
