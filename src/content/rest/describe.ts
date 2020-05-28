@@ -470,7 +470,7 @@ export default (api: OpenApiBuilder, models: Models) => {
   // Add models schemas
   const refs: { [key: string]: ReferenceObject } = {};
   models.content.forEach(model => {
-    if (model.collection === "iframe" || model.noFeed) {
+    if (model.collection === "iframe") {
       // Ignore iframe models & noFeed Models
       return;
     }
