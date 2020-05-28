@@ -470,7 +470,7 @@ export default (api: OpenApiBuilder, models: Models) => {
   // Add models schemas
   const refs: { [key: string]: ReferenceObject } = {};
   models.content.forEach(model => {
-    if (model.collection === "iframe" || !model.noFeed) {
+    if (model.collection === "iframe" || model.noFeed) {
       // Ignore iframe models & noFeed Models
       return;
     }
@@ -486,7 +486,7 @@ export default (api: OpenApiBuilder, models: Models) => {
     const singleton = collection === "singleton";
     const tags = [plural];
 
-    if (collection === "iframe" || !model.noFeed) {
+    if (collection === "iframe" || model.noFeed) {
       // Ignore iframe models & noFeed Models
       return;
     }
