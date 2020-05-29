@@ -19,7 +19,7 @@
     "mudder": "^1.0.9",
     "path-match": "^1.2.4",
     "quill-delta": "^4.2.2",
-    "rc-input-number": "^4.6.1",
+    "rc-input-number": "^5.0.0",
     "react": "^16.13.1",
     "react-circular-progressbar": "^2.0.3",
     "react-day-picker": "^7.4.8",
