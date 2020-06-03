@@ -569,8 +569,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     opts: Cotype.ListOpts,
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.ListChunk<Cotype.SearchResultItem>> {
+    const clearedTerm = term.replace("*", " ");
     const textSearch = await this.adapter.search(
-      term,
+      clearedTerm.length > 0 ? clearedTerm : " ",
       false,
       opts,
       previewOpts
