@@ -196,9 +196,18 @@ export function createDefinition(
     return {
       oneOf: Object.entries(model.types).map(([name, type]) => {
         const def = createDefinition(type, external, api);
-        _.set(def, "properties._type", { type: "string", enum: [name] });
-        _.set(def, "required", [...(def.required || []), "_type"]);
-        return def;
+        return {
+          allOf: [
+            def,
+            {
+              type: "object",
+              properties: {
+                _type: { type: "string", enum: [name] }
+              },
+              required: ["_type"]
+            }
+          ]
+        };
       }),
       discriminator: {
         propertyName: "_type"
