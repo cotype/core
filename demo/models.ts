@@ -187,6 +187,16 @@ export const models: ModelOpts[] = [
         type: "references",
         model: "contentPages",
         fieldName: "ref"
+      },
+      testObject:{
+        type:"object",
+        typeName:"TestObject",
+        fields:{
+          test:{
+            type:"string",
+            required:true
+          }
+        }
       }
     }
   },
@@ -276,6 +286,16 @@ export const models: ModelOpts[] = [
         outputType: "string",
         get: contentPage => {
           return "Not saved in CMS, this is virtual " + contentPage.pagetitle;
+        }
+      },
+      testObject:{
+        type:"object",
+        typeName:"TestObject",
+        fields:{
+          test:{
+            type:"string",
+            required:true
+          }
         }
       }
     }

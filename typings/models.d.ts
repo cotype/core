@@ -168,6 +168,7 @@ export type ObjectType = {
   fields: Fields;
   layout?: "vertical" | "horizontal" | "inline";
   modalView?: boolean;
+  typeName?: string;
 };
 
 export type MapKeyValue = { label: string; value: string } | string;

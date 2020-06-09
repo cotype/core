@@ -2,7 +2,7 @@
  * Helpers to build a Swagger/OpenAPI spec.
  */
 import { Model, Type } from "../../typings";
-import _ from "lodash";
+import _, { isEqual } from "lodash";
 import {
   OpenApiBuilder,
   SchemaObject,
@@ -85,18 +85,19 @@ export function body(props: Props) {
     }
   };
 }
-
+const refs: { [key: string]: SchemaObject } = {};
 export function createDefinition(
   model: Type,
-  external?: boolean
+  external: boolean,
+  api: OpenApiBuilder
 ): SchemaObject {
   if (!model) return empty;
   if (model.type in scalars) return scalars[model.type];
   if (model.type === "object") {
-    return {
+    const schema = {
       type: "object",
       properties: _.mapValues(model.fields, field =>
-        createDefinition(field, external)
+        createDefinition(field, external, api)
       ),
       required: Object.entries(model.fields)
         .map(([key, value]) =>
@@ -107,6 +108,21 @@ export function createDefinition(
         )
         .filter(Boolean) as string[]
     };
+    if (model.typeName) {
+      const typeName = toTypeName(model.typeName);
+      if (!refs[typeName]) {
+        api.addSchema(typeName, schema);
+        refs[typeName] = schema;
+      } else {
+        if (!isEqual(refs[typeName], schema)) {
+          throw new Error(
+            `Object key "typeName" is used for different objects`
+          );
+        }
+      }
+      return ref.schema(toTypeName(model.typeName));
+    }
+    return schema;
   }
 
   if (model.type === "richtext") {
@@ -179,7 +195,7 @@ export function createDefinition(
   if (model.type === "union") {
     return {
       oneOf: Object.entries(model.types).map(([name, type]) => {
-        const def = createDefinition(type, external);
+        const def = createDefinition(type, external, api);
         _.set(def, "properties._type", { type: "string", enum: [name] });
         _.set(def, "required", [...(def.required || []), "_type"]);
         return def;
@@ -191,19 +207,19 @@ export function createDefinition(
   }
 
   if (model.type === "list") {
-    if (external) return array(createDefinition(model.item, external));
+    if (external) return array(createDefinition(model.item, external, api));
 
     return array({
       type: "object",
       properties: {
         key: { type: "number" },
-        value: createDefinition(model.item, external)
+        value: createDefinition(model.item, external, api)
       }
     });
   }
 
   if (model.type === "immutable") {
-    return createDefinition(model.child, external);
+    return createDefinition(model.child, external, api);
   }
 
   if (model.type === "virtual") {
@@ -218,11 +234,15 @@ export function createDefinition(
   return ref.schema(model.type);
 }
 
-export function modelSchema(model: Model, external?: boolean) {
+export function modelSchema(
+  model: Model,
+  external: boolean,
+  api: OpenApiBuilder
+) {
   return {
     type: "object",
     properties: _.mapValues(model.fields, field =>
-      createDefinition(field, external)
+      createDefinition(field, external, api)
     ),
     required: Object.entries(model.fields)
       .map(([key, value]) =>
@@ -237,13 +257,13 @@ export function modelSchema(model: Model, external?: boolean) {
 
 export function addModel(api: OpenApiBuilder, model: Model) {
   const TypeName = toTypeName(model.name);
-  api.addSchema(TypeName, modelSchema(model));
+  api.addSchema(TypeName, modelSchema(model, false, api));
   return ref.schema(TypeName);
 }
 
 export function addExternalModel(api: OpenApiBuilder, model: Model) {
   const TypeName = toTypeName(model.name);
-  api.addSchema(TypeName, modelSchema(model, true));
+  api.addSchema(TypeName, modelSchema(model, true, api));
   return ref.schema(TypeName);
 }
 
