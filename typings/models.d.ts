@@ -193,6 +193,7 @@ export type ListType = {
   maxLength?: number;
   layout?: "inline" | "block";
   hidden?: boolean;
+  typeName?: string;
 };
 
 export type UnionTypeType = ObjectType & { label?: string; icon?: string };

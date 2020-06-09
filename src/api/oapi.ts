@@ -116,7 +116,7 @@ export function createDefinition(
       } else {
         if (!isEqual(refs[typeName], schema)) {
           throw new Error(
-            `Object key "typeName" is used for different objects`
+            `Object key "typeName" is used for different element`
           );
         }
       }
@@ -209,13 +209,28 @@ export function createDefinition(
   if (model.type === "list") {
     if (external) return array(createDefinition(model.item, external, api));
 
-    return array({
+    const schema = array({
       type: "object",
       properties: {
         key: { type: "number" },
         value: createDefinition(model.item, external, api)
       }
     });
+    if (model.typeName) {
+      const typeName = toTypeName(model.typeName);
+      if (!refs[typeName]) {
+        api.addSchema(typeName, schema);
+        refs[typeName] = schema;
+      } else {
+        if (!isEqual(refs[typeName], schema)) {
+          throw new Error(
+            `List key "typeName" is used for different element`
+          );
+        }
+      }
+      return ref.schema(toTypeName(model.typeName));
+    }
+    return schema
   }
 
   if (model.type === "immutable") {
