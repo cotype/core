@@ -211,12 +211,17 @@ export default class ObjectInput extends Component<Props> {
               const f = fields[key];
               const { label: l, ...props } = f;
 
-              if ("hidden" in f || f.type === "references") return null;
+              if (
+                "hidden" in f ||
+                f.type === "references" ||
+                f.type === "virtual"
+              )
+                return null;
 
               const component = inputs.get(f);
               let label = l || titleCase(key);
 
-              if (typeof component.getHint === "function") {
+              if (component && typeof component.getHint === "function") {
                 const getHint = component.getHint(fields[key]);
                 if (getHint) label += ` ${getHint}`;
               }

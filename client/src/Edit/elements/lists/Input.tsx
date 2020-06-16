@@ -51,7 +51,7 @@ class Input extends Component<Props> {
     if (value && value.length) {
       value.forEach((item, idx) => {
         const component = inputs.get(props.item);
-        const error = component.validate(item.value, props.item);
+        const error = component && component.validate(item.value, props.item);
         if (error) errors[idx] = { value: error };
       });
 

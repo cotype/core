@@ -1,3 +1,19 @@
+export type VirtualType = {
+  type: "virtual";
+} & (
+  | {
+      outputType: "string";
+      get: (fullModelData: any) => string;
+    }
+  | {
+      outputType: "number";
+      get: (fullModelData: any) => number;
+    }
+  | {
+      outputType: "boolean";
+      get: (fullModelData: any) => boolean;
+    }
+);
 export type BooleanType = {
   type: "boolean";
   input?: "checkbox" | "toggle";
@@ -152,6 +168,7 @@ export type ObjectType = {
   fields: Fields;
   layout?: "vertical" | "horizontal" | "inline";
   modalView?: boolean;
+  typeName?: string;
 };
 
 export type MapKeyValue = { label: string; value: string } | string;
@@ -176,6 +193,7 @@ export type ListType = {
   maxLength?: number;
   layout?: "inline" | "block";
   hidden?: boolean;
+  typeName?: string;
 };
 
 export type UnionTypeType = ObjectType & { label?: string; icon?: string };
@@ -222,7 +240,8 @@ export type Type =
   | ReferenceType
   | PositionType
   | ImmutableType
-  | InverseReferenceType;
+  | InverseReferenceType
+  | VirtualType;
 
 export type ModelOpts = {
   name: string;
@@ -230,6 +249,7 @@ export type ModelOpts = {
   plural?: string;
   collection?: "list" | "singleton" | "none" | "iframe";
   urlPath?: string;
+  noFeed?: true;
   fields?: {
     [key: string]: Field & { unique?: boolean };
   };
