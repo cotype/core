@@ -8,7 +8,7 @@ export default class OptionsOutput extends Component<Props> {
     const { value } = this.props;
     return (
       <select disabled>
-        <option value={typeof value === "string" ? value : value.value}>{typeof value === "string" ? value : value.label}</option>)
+        <option value={typeof value === "string" ? value : value && value.value}>{typeof value === "string" ? value : value && value.label}</option>)
       </select>
     );
   }

@@ -7,3 +7,4 @@ etc/
 lib/
 node_modules/
 uploads/
+.idea/
