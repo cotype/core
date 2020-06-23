@@ -5,7 +5,7 @@ import { Input } from "../../common/styles";
 import { required } from "./validation";
 import TextOutput from "./TextOutput";
 
-type Props = FieldProps<any> & { required?: boolean };
+type Props = FieldProps<any> & { required?: boolean; id?:string };
 export default class SlugInput extends Component<Props> {
   static getDefaultValue(props: Props) {
     return "";
@@ -22,11 +22,12 @@ export default class SlugInput extends Component<Props> {
   };
 
   render() {
-    const { field, form } = this.props;
+    const { field, form,id } = this.props;
     if (
       form.initialValues[field.name] === undefined ||
       form.initialValues[field.name] === null ||
-      form.initialValues[field.name] === ""
+      form.initialValues[field.name] === "" ||
+      id === undefined
     ) {
       const { value = "", ...props } = field;
       return (
