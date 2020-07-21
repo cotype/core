@@ -95,7 +95,7 @@
     "@types/tough-cookie": "^4.0.0",
     "@types/url-join": "^4.0.0",
     "@xiphe/cypress-parcel-preprocessor": "1.0.1-RC.1",
-    "codecov": "3.6.5",
+    "codecov": "3.7.1",
     "concurrently": "^5.2.0",
     "cypress": "^3.8.3",
     "cypress-file-upload": "^3.3.4",
