@@ -59,6 +59,7 @@ export default (
 
     res.json(items);
   });
+  router.use("/admin/rest/externalDataSource", login);
   /** Search */
   router.get("/admin/rest/externalDataSource", async (req, res) => {
     const { principal, query } = req;
@@ -92,7 +93,7 @@ export default (
   });
 
   /** Dashboard routes  */
-
+  router.use("/admin/rest/dashboard", login);
   router.get("/admin/rest/dashboard/unpublished", async (req, res) => {
     const { principal, query } = req;
     const { limit = 50, offset = 0 } = query as any;

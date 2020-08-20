@@ -6,6 +6,7 @@ import { Model } from "../../typings";
 import _ from "lodash";
 import { Router } from "express";
 import { Persistence } from "../persistence";
+import login from "../auth/login";
 
 export default (router: Router, persistence: Persistence, model: Model) => {
   const { settings } = persistence;
@@ -15,6 +16,7 @@ export default (router: Router, persistence: Persistence, model: Model) => {
     return _.pick(obj, Object.keys(fields));
   }
 
+  router.use(`/admin/rest/${modelType}`, login);
   /** List */
   router.get(`/admin/rest/${modelType}/${modelName}`, async (req: any, res) => {
     const { principal, query } = req;
