@@ -86,6 +86,7 @@ type Slug = {
   index?: boolean;
   search?: boolean;
   hidden?: boolean;
+  alwaysEditable?: boolean;
 };
 
 type DateString = {
