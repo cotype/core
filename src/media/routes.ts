@@ -8,6 +8,7 @@ import ReferenceConflictError from "../persistence/errors/ReferenceConflictError
 import inspect from "./inspect";
 import Storage from "./storage/Storage";
 import upload from "./upload";
+import login from "../auth/login";
 
 function isSvg(name: string) {
   return !!name.match(/[A-Za-z0-9_-]*\.*svg$/);
@@ -20,6 +21,7 @@ export default function routes(
   const { media } = persistence;
   const uploadHandler = upload(storage);
 
+  router.use("/admin/rest/upload", login);
   router.post("/admin/rest/upload", uploadHandler, async (req, res) => {
     const { principal, files: filesUpload } = req;
     const files: object[] = [];
@@ -73,6 +75,7 @@ export default function routes(
     res.json({ files, duplicates });
   });
 
+  router.use("/admin/rest/media", login);
   router.get("/admin/rest/media", async (req, res) => {
     const { principal, query } = req;
     const {

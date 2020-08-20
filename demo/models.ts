@@ -188,13 +188,13 @@ export const models: ModelOpts[] = [
         model: "contentPages",
         fieldName: "ref"
       },
-      testObject:{
-        type:"object",
-        typeName:"TestObject",
-        fields:{
-          test:{
-            type:"string",
-            required:true
+      testObject: {
+        type: "object",
+        typeName: "TestObject",
+        fields: {
+          test: {
+            type: "string",
+            required: true
           }
         }
       }
@@ -288,15 +288,26 @@ export const models: ModelOpts[] = [
           return "Not saved in CMS, this is virtual " + contentPage.pagetitle;
         }
       },
-      testObject:{
-        type:"object",
-        typeName:"TestObject",
-        fields:{
-          test:{
-            type:"string",
-            required:true
+      testObject: {
+        type: "object",
+        typeName: "TestObject",
+        fields: {
+          test: {
+            type: "string",
+            required: true
           }
         }
+      },
+      slugEditable: {
+        type: "string",
+        input: "slug",
+        label:"editable slug",
+        alwaysEditable: true
+      },
+      slug3: {
+        type: "string",
+        input: "slug",
+        label:"not editable slug"
       }
     }
   },
