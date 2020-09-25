@@ -16,6 +16,7 @@ import { withModelPaths } from "../ModelPathsContext";
 import PopoverMenu from "../common/PopoverMenu";
 import Icon from "../common/Icon";
 import LanguageSwitch from "../common/LanguageSwitch";
+import isi18nModel from "../utils/isi18nModel";
 
 const { edit, publish } = Permission;
 
@@ -124,7 +125,9 @@ type Props = RouteComponentProps<any> & {
 
   languages?: Cotype.Language[] | null;
   setLanguage?: (lang: Cotype.Language) => void;
+  openLanguageModal?: () => void;
   language?: Cotype.Language | null;
+  documentLanguages?: Cotype.Language[] | null;
 };
 
 type State = {
@@ -193,7 +196,8 @@ class ActionBar extends Component<Props, State> {
       versions,
       languages,
       setLanguage,
-      language
+      language,
+      documentLanguages
     } = this.props;
 
     const canEdit = isAllowed(user, model, edit);
@@ -252,16 +256,24 @@ class ActionBar extends Component<Props, State> {
         />
       );
     }
-    if (language && languages && languages.length > 0 && setLanguage) {
+    if (
+      documentLanguages &&
+      language &&
+      languages &&
+      languages.length > 0 &&
+      setLanguage &&
+      isi18nModel(model)
+    ) {
       actions.push(
         <PopoverMenu
           align={"center"}
           position={"bottom"}
-          renderMenu={() => (
+          renderMenu={close => (
             <LanguageSwitch
-              languages={languages}
+              languages={documentLanguages}
               setLanguage={setLanguage}
-              onChangeLanguages={() => {}}
+              onChangeLanguages={this.props.openLanguageModal}
+              onClick={close}
             />
           )}
         >

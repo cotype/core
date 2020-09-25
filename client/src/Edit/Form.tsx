@@ -12,6 +12,7 @@ import { Input } from "./elements";
 import { titleCase } from "title-case";
 import { getPreviewUrl } from "../utils/helper";
 import styled from "styled-components/macro";
+import LanguageModal from "./LanguageModal";
 
 export const errorClass = "error-field-label";
 
@@ -44,12 +45,16 @@ type State = {
   schedule?: any;
   modal: null | "history" | "schedule";
   language: Cotype.Language | null;
+  documentLanguages: Cotype.Language[] | null;
+  langModalOpen: boolean;
 };
 
 class Form extends Component<Props, State> {
   state: State = {
     modal: null,
-    language: this.props.languages ? this.props.languages[0] : null
+    language: this.props.languages ? this.props.languages[0] : null,
+    documentLanguages: this.props.languages ? [this.props.languages[0]] : null,
+    langModalOpen: false
   };
   componentDidMount() {
     this.initForm();
@@ -82,10 +87,14 @@ class Form extends Component<Props, State> {
     const { model } = this.props;
     if (id) {
       api.load(model, id).then(res => {
-        const { data, visibleFrom, visibleUntil } = res;
+        const { data, visibleFrom, visibleUntil, activeLanguages } = res;
         this.setState({
           initialData: data,
-          schedule: { visibleFrom, visibleUntil }
+          schedule: { visibleFrom, visibleUntil },
+          documentLanguages:
+            this.props.languages?.filter(l =>
+              activeLanguages?.includes(l.key)
+            ) || null
         });
       });
     }
@@ -111,9 +120,7 @@ class Form extends Component<Props, State> {
   };
 
   submit = (form: any) => {
-    console.log("Asd11");
     form.validateForm().then((errors: object) => {
-      console.log("sd");
       const fields = Object.keys(errors);
       const fieldCount = fields.length;
       if (fieldCount) {
@@ -157,7 +164,7 @@ class Form extends Component<Props, State> {
         model,
         id,
         values,
-        this.props.languages?.map(l => l.key)
+        this.state.documentLanguages?.map(l => l.key)
       )
       .then(res => {
         const {
@@ -214,6 +221,15 @@ class Form extends Component<Props, State> {
   setLanguage = (lang: Cotype.Language) => {
     this.setState({ language: lang });
   };
+  setDocumentLanguages = (langs: Cotype.Language[]) => {
+    this.setState({ documentLanguages: langs });
+  };
+  openLangModal = () => {
+    this.setState({ langModalOpen: true });
+  };
+  closeLangModal = () => {
+    this.setState({ langModalOpen: false });
+  };
 
   render() {
     const {
@@ -228,7 +244,6 @@ class Form extends Component<Props, State> {
     } = this.props;
 
     const { modal, initialData } = this.state;
-    console.log(initialData);
     if (!initialData) {
       return null;
     }
@@ -301,6 +316,8 @@ class Form extends Component<Props, State> {
                 errors={errors as any}
                 setLanguage={this.setLanguage}
                 language={this.state.language}
+                documentLanguages={this.state.documentLanguages}
+                openLanguageModal={this.openLangModal}
               />
               <Page id="edit-form">
                 <form onSubmit={handleSubmit}>
@@ -320,6 +337,17 @@ class Form extends Component<Props, State> {
                         i18n={model.i18n}
                         language={this.state.language}
                       />
+                      {this.props.languages &&
+                        this.state.documentLanguages &&
+                        this.state.langModalOpen && (
+                          <LanguageModal
+                            onSave={this.setDocumentLanguages}
+                            onClose={this.closeLangModal}
+                            model={model}
+                            activeLanguages={this.state.documentLanguages}
+                            languages={this.props.languages}
+                          />
+                        )}
                     </Content>
                   </Cols>
                 </form>

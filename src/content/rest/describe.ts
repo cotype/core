@@ -19,6 +19,7 @@ import visitModel from "../../model/visitModel";
 import { isComparable } from "../../persistence/adapter/knex/lookup";
 import pluralize from "pluralize";
 import { searchableModelNames } from "./utils";
+import isi18nModel from "../../model/isi18nModel";
 
 export const listSearchParams: ParameterObject = {
   in: "query",
@@ -519,8 +520,7 @@ export default (api: OpenApiBuilder, models: Models, languages: Language[]) => {
         }
       });
     }
-    if (languages && languages.length > 0) {
-      //TODO: I18N
+    if (languages && languages.length > 0 && isi18nModel(model)) {
       commonParams.push(languageParameter(languages));
     }
 

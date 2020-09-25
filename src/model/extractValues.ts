@@ -1,5 +1,5 @@
 import getAlwaysUniqueFields from "./getAlwaysUniqueFields";
-import { Field, Model } from "../../typings";
+import { Model } from "../../typings";
 import visit from "./visit";
 /**
  * Recursively walks through a content object and extracts all texts.

@@ -706,7 +706,11 @@ export default class KnexContent implements ContentAdapter {
     }
 
     const content = await k
-      .select(["contents.*", "content_revisions.data"])
+      .select([
+        "contents.*",
+        "content_revisions.data",
+        "content_revisions.activeLanguages"
+      ])
       .first();
 
     return content ? this.parseData(content, model) : null;
@@ -721,8 +725,17 @@ export default class KnexContent implements ContentAdapter {
         "c.type": model.name,
         "c.deleted": false
       })
-      .first("c.id", "cr.data");
-    return content && { id: content.id, rev, data: JSON.parse(content.data) };
+      .first("c.id", "cr.data", "cr.activeLanguages");
+    return (
+      content && {
+        id: content.id,
+        rev,
+        data: JSON.parse(content.data),
+        activeLanguages:
+          content.activeLanguages &&
+          content.activeLanguages.split(",").filter(Boolean)
+      }
+    );
   }
 
   async listVersions(model: Cotype.Model, id: string) {

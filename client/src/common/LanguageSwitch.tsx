@@ -1,6 +1,6 @@
 import * as Cotype from "../../../typings";
 import styled from "styled-components/macro";
-import React from "react";
+import React, { useCallback } from "react";
 import Button from "./Button";
 
 const Box = styled.div`
@@ -26,8 +26,14 @@ const Row = styled(Button)`
 const LanguageSwitch = (p: {
   languages: Cotype.Language[] | null;
   setLanguage: (lang: Cotype.Language) => void;
-  onChangeLanguages: () => void;
+  onChangeLanguages?: () => void;
+  onClick: () => void;
 }) => {
+  const changeLanguages = useCallback(() => {
+    p.onChangeLanguages && p.onChangeLanguages();
+    p.onClick();
+  }, [p.onClick, p.onChangeLanguages]);
+
   if (!p.languages) {
     return null;
   }
@@ -35,12 +41,20 @@ const LanguageSwitch = (p: {
     <Box>
       {p.languages.map(l => {
         return (
-          <Row onClick={() => p.setLanguage(l)} key={l.key}>
+          <Row
+            onClick={() => {
+              p.setLanguage(l);
+              p.onClick();
+            }}
+            key={l.key}
+          >
             {l.title}
           </Row>
         );
       })}
-      <Row onClick={p.onChangeLanguages}>Sprachen anpassen</Row>
+      {p.onChangeLanguages && (
+        <Row onClick={changeLanguages}>Sprachen anpassen</Row>
+      )}
     </Box>
   );
 };

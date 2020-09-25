@@ -55,6 +55,23 @@ export default function visit(obj: any, model: Cotype.Model, visitor: Visitor) {
     if (m.type === "immutable") {
       walk(m.child, value, key, parent, stringPath);
     }
+    if ("i18n" in visitor && "i18n" in m && m.i18n) {
+      const ret = visitor["i18n"](
+        value,
+        m,
+        () => {
+          if (parent && key) {
+            _.set(parent, key, undefined);
+          }
+        },
+        Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + key // Remove Dot and ArrayKey when Parent is List
+      );
+      if (typeof ret !== "undefined") {
+        if (parent && key) {
+          _.set(parent, key, ret);
+        }
+      }
+    }
     if (m.type in visitor) {
       const ret = visitor[m.type](
         value,

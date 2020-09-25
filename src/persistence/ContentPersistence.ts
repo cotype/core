@@ -210,9 +210,13 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       activeLanguages
     );
 
-    this.applyPostHooks("onCreate", model, { id, data: storeData });
+    this.applyPostHooks("onCreate", model, {
+      id,
+      data: storeData,
+      activeLanguages
+    });
 
-    return { id: String(id), data: storeData };
+    return { id: String(id), data: storeData, activeLanguages };
   }
 
   async createRevision(
@@ -417,7 +421,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     const resp = {
       id: String(id),
-      data: rev.data
+      data: rev.data,
+      activeLanguages
     };
 
     this.applyPostHooks("onSave", model, resp);

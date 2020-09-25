@@ -164,7 +164,7 @@ export type Data = {
 export type DataRecord<T = Data> = Schedule & {
   id: string;
   data: T;
-  activeLanguages?: string[];
+  activeLanguages: string[];
 };
 
 /**

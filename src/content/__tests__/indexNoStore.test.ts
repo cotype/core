@@ -88,7 +88,8 @@ describe("Index fields but don't store them in revisions", () => {
 
     expect(updatedData).toStrictEqual({
       id: data.id,
-      data: { title: dummyData.title }
+      data: { title: dummyData.title },
+      activeLanguages: []
     });
 
     const foundData = await find("noStore", data.id, {}, false);
