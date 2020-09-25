@@ -140,7 +140,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     const { title: titlePath, image, singular, orderBy } = model;
 
     const title = findValueByPath(titlePath, data);
-    const orderValue = findValueByPath(orderBy || title, data);
+    const orderValue = findValueByPath(orderBy || titlePath, data);
 
     return {
       id,
@@ -189,7 +189,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     principal: Cotype.Principal,
     model: Cotype.Model,
     data: Cotype.Data,
-    models: Cotype.Model[]
+    models: Cotype.Model[],
+    activeLanguages: string[]
   ) {
     data = this.setOrderPosition(data, model, models);
     const hookData = await this.applyPreHooks("onCreate", model, data);
@@ -205,7 +206,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       searchData,
       model,
       models,
-      principal.id!
+      principal.id!,
+      activeLanguages
     );
 
     this.applyPostHooks("onCreate", model, { id, data: storeData });
@@ -218,7 +220,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     model: Cotype.Model,
     id: string,
     data: object,
-    models: Cotype.Model[]
+    models: Cotype.Model[],
+    activeLanguages: string[]
   ) {
     const { storeData, searchData } = await this.splitStoreAndIndexData(
       data,
@@ -231,7 +234,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       model,
       models,
       id,
-      principal.id!
+      principal.id!,
+      activeLanguages
     );
 
     return { rev, data: storeData };
@@ -242,7 +246,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     contentFormat: ContentFormat,
     previewOpts: Cotype.PreviewOpts = {},
     join: Cotype.Join = {},
-    model: Cotype.Model
+    model: Cotype.Model,
+    language?: string
   ): Promise<Cotype.Refs> {
     // load all content the loaded content is referencing
 
@@ -293,7 +298,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
             contentFormat,
             allModels: this.models,
             mediaUrl: this.config.mediaUrl,
-            previewOpts
+            previewOpts,
+            language,
+            fallBackLanguage: this.config.languages[0]
           })
         };
       });
@@ -314,7 +321,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     id: string,
     join: Cotype.Join = {},
     contentFormat: ContentFormat,
-    previewOpts?: Cotype.PreviewOpts
+    previewOpts?: Cotype.PreviewOpts,
+    language?: string
   ): Promise<Cotype.ContentWithRefs | null> {
     const content = await this.adapter.load(model, id, previewOpts);
     if (!content) return content;
@@ -324,7 +332,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       contentFormat,
       previewOpts,
       join,
-      model
+      model,
+      language
     );
 
     const convertedContentData = convert({
@@ -334,7 +343,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       contentFormat,
       allModels: this.models,
       mediaUrl: this.config.mediaUrl,
-      previewOpts
+      previewOpts,
+      language,
+      fallBackLanguage: this.config.languages[0]
     });
 
     return {
@@ -391,7 +402,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     model: Cotype.Model,
     id: string,
     data: object,
-    models: Cotype.Model[]
+    models: Cotype.Model[],
+    activeLanguages: string[]
   ): Promise<{ id: string; data: object }> {
     const hookData = await this.applyPreHooks("onSave", model, data);
     const rev = await this.createRevision(
@@ -399,7 +411,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       model,
       id,
       hookData,
-      models
+      models,
+      activeLanguages
     );
 
     const resp = {
@@ -494,14 +507,16 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     contentFormat: Cotype.ContentFormat,
     join: Cotype.Join,
     criteria?: Cotype.Criteria,
-    previewOpts?: Cotype.PreviewOpts
+    previewOpts?: Cotype.PreviewOpts,
+    language?: string
   ): Promise<Cotype.ListChunkWithRefs<Cotype.Content>> {
     const items = await this.adapter.list(
       model,
       this.models,
       opts,
       criteria,
-      previewOpts
+      previewOpts,
+      language
     );
     if (!items.total) return { ...items, _refs: { content: {}, media: {} } };
 
@@ -510,7 +525,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       contentFormat,
       previewOpts,
       join,
-      model
+      model,
+      language
     );
 
     const convertedItems = {
@@ -524,7 +540,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
           contentFormat,
           allModels: this.models,
           mediaUrl: this.config.mediaUrl,
-          previewOpts
+          previewOpts,
+          language,
+          fallBackLanguage: this.config.languages[0]
         })
       }))
     };

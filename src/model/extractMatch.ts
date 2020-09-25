@@ -31,18 +31,23 @@ export default function extractMatch(
     } while (m);
   }
 
-  visit(obj, model, {
-    string(s: string, field: StringType, _parent, path) {
-      if (s && field.search !== false && path !== model.title) add(s);
+  visit(
+    obj,
+    model,
+    {
+      string(s: string, field: StringType, _parent, path) {
+        if (s && field.search !== false && path !== model.title) add(s);
+      },
+      number(n: number, field: NumberType) {
+        if (field.search !== false && n !== undefined) add(String(n));
+      },
+      richtext(delta: QuillDelta, field: RichtextType) {
+        const text = formatQuillDelta(delta, "plaintext");
+        if (text && field.search !== false) add(text);
+      }
     },
-    number(n: number, field: NumberType) {
-      if (field.search !== false && n !== undefined) add(String(n));
-    },
-    richtext(delta: QuillDelta, field: RichtextType) {
-      const text = formatQuillDelta(delta, "plaintext");
-      if (text && field.search !== false) add(text);
-    }
-  });
+    { calli18nMultipleTimes:true }
+  );
   if (!query) return;
 
   let matches = bm25BestMatch(sentences, query);

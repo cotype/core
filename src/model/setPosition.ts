@@ -16,17 +16,22 @@ export default function setPosition(
   forcePositionSet?: boolean,
   stringPath?: string
 ) {
-  visit(obj, model, {
-    position(pos: string, f, d, path: string) {
-      if ((stringPath && stringPath === path) || !stringPath) {
-        if (!pos || forcePositionSet) {
-          return middleString(
-            lastPos,
-            nextPos === lastPos ? nextPos + "z" : nextPos
-          );
+  visit(
+    obj,
+    model,
+    {
+      position(pos: string, f, d, path: string) {
+        if ((stringPath && stringPath === path) || !stringPath) {
+          if (!pos || forcePositionSet) {
+            return middleString(
+              lastPos,
+              nextPos === lastPos ? nextPos + "z" : nextPos
+            );
+          }
         }
       }
-    }
-  });
+    },
+    { calli18nMultipleTimes: true }
+  );
   return obj;
 }

@@ -18,7 +18,11 @@ type Props = RouteComponentProps & {
   model: Cotype.Model;
   match: match<any>;
   onDelete: (id) => Promise<Cotype.ErrorResponseBody | void>;
-  onSave?: (record: { id: any; data: any }) => void;
+  onSave?: (record: {
+    id: string;
+    isUpdate: boolean;
+    data: any;
+  }) => void;
   modelPaths: Cotype.ModelPaths;
   baseUrls: Cotype.BaseUrls;
 };
@@ -47,7 +51,11 @@ class Edit extends Component<Props, State> {
     }
   }
 
-  onSave = (record: any) => {
+  onSave = (record: {
+    id: string;
+    isUpdate: boolean;
+    data: any;
+  }) => {
     const { onSave } = this.props;
     this.fetchVersions();
     if (onSave) onSave(record);

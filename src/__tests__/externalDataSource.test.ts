@@ -196,6 +196,7 @@ describe("external data source support", () => {
         expect.objectContaining(adminUser),
         expect.objectContaining(pagesModel),
         data,
+        expect.anything(),
         expect.anything()
       );
       await expect(res.body.id).toBe(id);
@@ -225,7 +226,9 @@ describe("external data source support", () => {
         .put(`/admin/rest/content/pages/${id}`)
         .set(headers)
         .send({
-          title
+          data: {
+            title
+          }
         })
         .expect(200);
 
@@ -237,6 +240,7 @@ describe("external data source support", () => {
         expect.objectContaining({
           title
         }),
+        expect.anything(),
         expect.anything()
       );
     });

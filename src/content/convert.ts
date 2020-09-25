@@ -4,7 +4,9 @@ import {
   Data,
   ContentRefs,
   PreviewOpts,
-  ContentFormat, VirtualType
+  ContentFormat,
+  VirtualType,
+  Language
 } from "../../typings";
 import urlJoin from "url-join";
 import visit, { NO_STORE_VALUE } from "../model/visit";
@@ -33,6 +35,8 @@ type ConvertProps = {
   contentFormat: ContentFormat;
   mediaUrl: string;
   previewOpts?: PreviewOpts;
+  language?: string;
+  fallBackLanguage?: Language;
 };
 export default function convert({
   content,
@@ -41,7 +45,9 @@ export default function convert({
   allModels,
   contentFormat = "html",
   mediaUrl,
-  previewOpts = {}
+  previewOpts = {},
+  language,
+  fallBackLanguage
 }: ConvertProps) {
   /**
    * Converts content-references of type content
@@ -107,6 +113,15 @@ export default function convert({
   };
 
   visit(content, contentModel, {
+    i18n(value: { [lang: string]: any }) {
+      if (language && language in value) {
+        return value[language];
+      }
+      if (fallBackLanguage && fallBackLanguage.key in value) {
+        return value[fallBackLanguage.key];
+      }
+      return value[Object.keys(value)[0]];
+    },
     richtext(delta: QuillDelta) {
       if (delta && delta.ops) {
         delta.ops = delta.ops.map(el => {
@@ -186,14 +201,11 @@ export default function convert({
     ) {
       if (!Object.keys(field.types).includes(data._type)) return null;
     },
-    virtual(
-      _data,
-      field: VirtualType,
-    ) {
-      if(field.get){
-        return field.get(content)
+    virtual(_data, field: VirtualType) {
+      if (field.get) {
+        return field.get(content);
       }
-      return undefined
+      return undefined;
     }
   });
   return content;

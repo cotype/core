@@ -8,7 +8,8 @@ import {
   ContentHooks,
   ResponseHeaders,
   ExternalDataSource,
-  BaseUrls
+  BaseUrls,
+  Language
 } from "../typings";
 import express, {
   Request,
@@ -89,6 +90,7 @@ export type Opts = {
   ) => void;
   contentHooks?: ContentHooks;
   migrationDir?: string;
+  languages?: Language[];
 };
 
 const root = path.resolve(__dirname, "../dist/client");
@@ -203,12 +205,16 @@ const getBaseURLS = (
 };
 
 export async function getRestApiBuilder(
-  opts: Pick<Opts, "models" | "basePath" | "externalDataSources">
+  opts: Pick<Opts, "models" | "basePath" | "externalDataSources" | "languages">
 ) {
   const { basePath } = opts;
   const { models } = getModels(opts);
 
-  return createRestApiBuilder(models, getBaseURLS(basePath).cms);
+  return createRestApiBuilder(
+    models,
+    getBaseURLS(basePath).cms,
+    opts.languages || []
+  );
 }
 export async function init(opts: Opts) {
   const { models, externalDataSources } = getModels(opts);
@@ -229,7 +235,8 @@ export async function init(opts: Opts) {
       basePath: baseURLS.cms,
       mediaUrl,
       contentHooks,
-      migrationDir
+      migrationDir,
+      languages: opts.languages || []
     }
   );
   const auth = Auth(persistence, opts.anonymousPermissions, models);
@@ -239,7 +246,8 @@ export async function init(opts: Opts) {
     externalDataSources,
     basePath: baseURLS.cms,
     mediaUrl,
-    responseHeaders
+    responseHeaders,
+    languages: opts.languages || []
   });
   const settings = Settings(persistence, models);
   const media = Media(
@@ -285,7 +293,8 @@ export async function init(opts: Opts) {
       ...filteredInfo,
       models: filteredModels,
       baseUrls: baseURLS,
-      user: req.principal
+      user: req.principal,
+      languages: opts.languages || []
     });
   });
 

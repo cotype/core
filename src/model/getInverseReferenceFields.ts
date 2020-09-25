@@ -19,7 +19,7 @@ const getInverseReferenceFields = (
           fieldName: field.fieldName
         });
     }
-  });
+  },{calli18nMultipleTimes:true});
   return referenceFields;
 };
 

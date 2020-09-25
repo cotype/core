@@ -12,6 +12,10 @@ import api from "../api";
 import { conflictTypes } from ".";
 import ConflictDialog from "../common/ConflictDialog";
 import { testable } from "../utils/helper";
+import { withModelPaths } from "../ModelPathsContext";
+import PopoverMenu from "../common/PopoverMenu";
+import Icon from "../common/Icon";
+import LanguageSwitch from "../common/LanguageSwitch";
 
 const { edit, publish } = Permission;
 
@@ -67,11 +71,13 @@ const previewButtonClass = css`
 const modelActionButtons = css`
   background: none;
   padding-left: 0;
+  color: var(--primary-color);
   & > svg {
     color: var(--primary-color);
   }
   :hover {
     background: none;
+    color: var(--accent-color);
     & > svg {
       color: var(--accent-color);
     }
@@ -112,6 +118,13 @@ type Props = RouteComponentProps<any> & {
   model: Cotype.Model;
   submitForm?: () => void;
   errors?: { key: string };
+
+  modelPaths: Cotype.ModelPaths | null;
+  baseUrls: Cotype.BaseUrls | null;
+
+  languages?: Cotype.Language[] | null;
+  setLanguage?: (lang: Cotype.Language) => void;
+  language?: Cotype.Language | null;
 };
 
 type State = {
@@ -177,7 +190,10 @@ class ActionBar extends Component<Props, State> {
       onHistory,
       model,
       user,
-      versions
+      versions,
+      languages,
+      setLanguage,
+      language
     } = this.props;
 
     const canEdit = isAllowed(user, model, edit);
@@ -236,7 +252,25 @@ class ActionBar extends Component<Props, State> {
         />
       );
     }
-
+    if (language && languages && languages.length > 0 && setLanguage) {
+      actions.push(
+        <PopoverMenu
+          align={"center"}
+          position={"bottom"}
+          renderMenu={() => (
+            <LanguageSwitch
+              languages={languages}
+              setLanguage={setLanguage}
+              onChangeLanguages={() => {}}
+            />
+          )}
+        >
+          <Button css={modelActionButtons} icon={paths.Translate} type="button">
+            {language.title}
+          </Button>
+        </PopoverMenu>
+      );
+    }
     return (
       <div>
         {actions.map((action, index) => (
@@ -368,4 +402,4 @@ class ActionBar extends Component<Props, State> {
   }
 }
 
-export default withRouter(withUser(ActionBar));
+export default withRouter(withUser(withModelPaths(ActionBar)));

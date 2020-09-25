@@ -23,7 +23,12 @@ type Props = {
   model: Model;
   match: matchType<any>;
   history: History;
-  onChange?: (model: Model, id: string, data: Data) => void;
+  onChange?: (
+    model: Model,
+    id: string,
+    data: Data,
+    activeLanguages?: string[]
+  ) => void;
 };
 
 type State = {
@@ -54,12 +59,22 @@ class List extends Component<Props, State> {
     });
   };
 
-  onSave = ({ id, isUpdate, data }: any) => {
+  onSave = ({
+    id,
+    isUpdate,
+    data,
+    activeLanguages
+  }: {
+    id: string;
+    isUpdate: boolean;
+    data: any;
+    activeLanguages?: string[];
+  }) => {
     const { match, history, model, onChange } = this.props;
     if (!isUpdate) {
       history.replace(`${match.url}/edit/${id}`, data);
     }
-    if (onChange) onChange(model, id, data);
+    if (onChange) onChange(model, id, data, activeLanguages);
     this.listView.current!.refresh();
   };
 

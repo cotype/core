@@ -266,7 +266,7 @@ export const models: ModelOpts[] = [
       },
       ref: {
         type: "content",
-        models: [],
+        models: ["contentPages"],
         allowAbsoluteRefs: true
       },
       sections: {
@@ -301,13 +301,13 @@ export const models: ModelOpts[] = [
       slugEditable: {
         type: "string",
         input: "slug",
-        label:"editable slug",
+        label: "editable slug",
         alwaysEditable: true
       },
       slug3: {
         type: "string",
-        input: "slug",
-        label:"not editable slug"
+        label: "not editable slug",
+        i18n: true
       }
     }
   },
@@ -316,6 +316,40 @@ export const models: ModelOpts[] = [
     collection: "iframe",
     iframeOptions: {
       url: "http://localhost:4000/docs/?session={sessionID}"
+    }
+  },
+  {
+    name: "translateAblep",
+    collection: "singleton",
+    fields: {
+      translateField: {
+        type: "string",
+        i18n: true,
+        required: true,
+        index: true
+      },
+      translateObject: {
+        type: "object",
+        i18n: true,
+        fields: {
+          testString: {
+            type: "string",
+            required: true
+          }
+        }
+      },
+      stringList: {
+        label: "String List",
+        type: "list",
+        sortable: true,
+        schedule: true,
+        i18n: true,
+        item: {
+          type: "string",
+          label: "String",
+          index: true
+        }
+      }
     }
   }
 ];

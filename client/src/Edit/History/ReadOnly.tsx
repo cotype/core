@@ -22,6 +22,7 @@ type Props = {
   onUnpublish: () => void;
   modelPaths: Cotype.ModelPaths;
   baseUrls: Cotype.BaseUrls;
+  languages: Cotype.Language[] | null;
 };
 
 type State = {

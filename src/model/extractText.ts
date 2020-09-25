@@ -14,17 +14,22 @@ import formatQuillDelta from "../content/formatQuillDelta";
 
 export default function extractText(obj: object, model: Model) {
   const tokens: string[] = [];
-  visit(obj, model, {
-    string(s: string, field: StringType) {
-      if (s && field.search !== false) tokens.push(s);
+  visit(
+    obj,
+    model,
+    {
+      string(s: string, field: StringType, _del, stringPath) {
+        if (s && field.search !== false) tokens.push(s);
+      },
+      number(n: number, field: NumberType) {
+        if (field.search !== false) tokens.push(String(n));
+      },
+      richtext(delta: QuillDelta, field: RichtextType) {
+        const text = formatQuillDelta(delta, "plaintext");
+        if (text && field.search !== false) tokens.push(text);
+      }
     },
-    number(n: number, field: NumberType) {
-      if (field.search !== false) tokens.push(String(n));
-    },
-    richtext(delta: QuillDelta, field: RichtextType) {
-      const text = formatQuillDelta(delta, "plaintext");
-      if (text && field.search !== false) tokens.push(text);
-    }
-  });
+    { calli18nMultipleTimes: true }
+  );
   return tokens.join(" ");
 }

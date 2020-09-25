@@ -187,6 +187,7 @@ export default function routes(
             order,
             orderBy,
             fields,
+            i18n,
             ...rest
           } = query as any;
 
@@ -208,7 +209,8 @@ export default function routes(
               format,
               join,
               criteria,
-              req.previewOpts
+              req.previewOpts,
+              i18n
             );
 
             if (result.total > 0) {
@@ -238,7 +240,8 @@ export default function routes(
               format,
               join,
               criteria,
-              req.previewOpts
+              req.previewOpts,
+              i18n
             );
 
             if (fields) {
@@ -260,7 +263,7 @@ export default function routes(
         // load
         router.get(`/rest/${mode}/${type}/:id`, async (req, res) => {
           const { principal, params, query } = req;
-          const { join, fields } = query as any;
+          const { join, fields, i18n } = query as any;
 
           checkPermissionToJoin(req.principal, join);
           const dataSource = getDataSource(type);
@@ -273,7 +276,8 @@ export default function routes(
             params.id,
             join,
             format,
-            req.previewOpts
+            req.previewOpts,
+            i18n
           );
 
           if (!result) return res.status(404).end();
@@ -300,7 +304,7 @@ export default function routes(
               `/rest/${mode}/${type}/${uniqueField}/:uniqueValue`,
               async (req, res) => {
                 const { principal, query, params } = req;
-                const { join, fields } = query as any;
+                const { join, fields, i18n } = query as any;
 
                 checkPermissionToJoin(req.principal, join);
 
@@ -320,7 +324,8 @@ export default function routes(
                   format,
                   join,
                   criteria,
-                  req.previewOpts
+                  req.previewOpts,
+                  i18n
                 );
 
                 if (!result.total) return res.status(404).end();

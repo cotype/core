@@ -63,6 +63,7 @@ type Text = {
   validationRegex?: string;
   regexError?: string;
   store?: boolean;
+  i18n?: boolean;
 };
 type TextArea = {
   type: "string";
@@ -170,6 +171,7 @@ export type ObjectType = {
   layout?: "vertical" | "horizontal" | "inline";
   modalView?: boolean;
   typeName?: string;
+  i18n?: boolean;
 };
 
 export type MapKeyValue = { label: string; value: string } | string;
@@ -195,6 +197,8 @@ export type ListType = {
   layout?: "inline" | "block";
   hidden?: boolean;
   typeName?: string;
+
+  i18n?: boolean;
 };
 
 export type UnionTypeType = ObjectType & { label?: string; icon?: string };
@@ -254,6 +258,7 @@ export type ModelOpts = {
   fields?: {
     [key: string]: Field & { unique?: boolean };
   };
+  i18n?: boolean;
   customQuery?: {
     [s: string]: string;
   };

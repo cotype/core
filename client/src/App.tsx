@@ -5,7 +5,8 @@ import {
   Principal,
   Data,
   ModelPaths,
-  BaseUrls
+  BaseUrls,
+  Language
 } from "../../typings";
 import * as React from "react";
 import {
@@ -54,6 +55,7 @@ type State = {
   navigation?: NavigationItem[];
   modelPaths?: ModelPaths;
   baseUrls?: BaseUrls;
+  languages?: Language[];
 };
 class App extends React.Component<{}, State> {
   state: State = {};
@@ -83,7 +85,8 @@ class App extends React.Component<{}, State> {
       user,
       navigation = [],
       modelPaths = null,
-      baseUrls = null
+      baseUrls = null,
+      languages = null
     } = this.state;
 
     if (!user) {
@@ -95,7 +98,9 @@ class App extends React.Component<{}, State> {
       <ErrorBoundary>
         <UploadProvider client={createXhrClient({ baseUrl: api.baseURI })}>
           <UserContext.Provider value={user}>
-            <ModelPathsContext.Provider value={{ modelPaths, baseUrls }}>
+            <ModelPathsContext.Provider
+              value={{ modelPaths, baseUrls, languages }}
+            >
               <Router>
                 <Root>
                   <Header navigation={navigation} />
@@ -168,7 +173,7 @@ class App extends React.Component<{}, State> {
                         />
                         <Route
                           path={`${basePath}/editURL`}
-                          render={(props) => (
+                          render={props => (
                             <EditURLRedirect
                               {...props}
                               contentModels={models.content}

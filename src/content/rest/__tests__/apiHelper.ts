@@ -140,7 +140,7 @@ export function createApiWriteHelpers(
     const { body } = await server
       .put(`/admin/rest/content/${type}/${id}`)
       .set(headers)
-      .send(data)
+      .send({ data })
       .expect(200);
 
     return body;

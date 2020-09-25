@@ -128,7 +128,8 @@ export default class KnexContent implements ContentAdapter {
     indexData: Cotype.Data,
     model: Cotype.Model,
     models: Cotype.Model[],
-    author: string
+    author: string,
+    activeLanguages?: string[]
   ) {
     await this.testUniqueFields(model, models, storeData);
 
@@ -140,7 +141,16 @@ export default class KnexContent implements ContentAdapter {
 
     storeData = await this.testPositionFields(model, models, storeData, id);
 
-    await this.createRev(storeData, indexData, model, models, id, 1, author);
+    await this.createRev(
+      storeData,
+      indexData,
+      model,
+      models,
+      id,
+      1,
+      author,
+      activeLanguages
+    );
     return id;
   }
 
@@ -221,47 +231,62 @@ export default class KnexContent implements ContentAdapter {
             ignoreSchedule: true
           });
           if (items.items[0]) {
-            visit(items.items[0].data, model, {
-              position(s: string, f, d, stringPath) {
-                if (stringPath === fieldPath) {
-                  if (!value) {
-                    // No Position Value passed, use end of list
-                    data = setPosition(data, model, s, "z", true, fieldPath);
-                  } else if (
-                    s === value &&
-                    String(items.items[0].id) !== String(id) // Value exists, and is not same document
-                  ) {
-                    if (items.items[1]) {
-                      // get next one and middle it
-                      visit(items.items[1].data, model, {
-                        position(nextPosition: string, g, h, nextStringPath) {
-                          if (nextStringPath === fieldPath) {
-                            data = setPosition(
-                              data,
-                              model,
-                              value,
-                              nextPosition,
-                              true,
-                              fieldPath
-                            );
-                          }
-                        }
-                      });
-                    } else {
-                      // No next one, just middle to end
-                      data = setPosition(
-                        data,
-                        model,
-                        value,
-                        "z",
-                        true,
-                        fieldPath
-                      );
+            visit(
+              items.items[0].data,
+              model,
+              {
+                position(s: string, f, d, stringPath) {
+                  if (stringPath === fieldPath) {
+                    if (!value) {
+                      // No Position Value passed, use end of list
+                      data = setPosition(data, model, s, "z", true, fieldPath);
+                    } else if (
+                      s === value &&
+                      String(items.items[0].id) !== String(id) // Value exists, and is not same document
+                    ) {
+                      if (items.items[1]) {
+                        // get next one and middle it
+                        visit(
+                          items.items[1].data,
+                          model,
+                          {
+                            position(
+                              nextPosition: string,
+                              g,
+                              h,
+                              nextStringPath
+                            ) {
+                              if (nextStringPath === fieldPath) {
+                                data = setPosition(
+                                  data,
+                                  model,
+                                  value,
+                                  nextPosition,
+                                  true,
+                                  fieldPath
+                                );
+                              }
+                            }
+                          },
+                          { calli18nMultipleTimes: true }
+                        );
+                      } else {
+                        // No next one, just middle to end
+                        data = setPosition(
+                          data,
+                          model,
+                          value,
+                          "z",
+                          true,
+                          fieldPath
+                        );
+                      }
                     }
                   }
                 }
-              }
-            });
+              },
+              { calli18nMultipleTimes: true }
+            );
           }
         })
       );
@@ -275,7 +300,8 @@ export default class KnexContent implements ContentAdapter {
     model: Cotype.Model,
     models: Cotype.Model[],
     id: string,
-    author: string
+    author: string,
+    activeLanguages?: string[]
   ) {
     storeData = await this.testPositionFields(model, models, storeData, id);
 
@@ -286,7 +312,16 @@ export default class KnexContent implements ContentAdapter {
       .where({ id });
 
     const rev = (content.latest_rev || 0) + 1;
-    return this.createRev(storeData, indexData, model, models, id, rev, author);
+    return this.createRev(
+      storeData,
+      indexData,
+      model,
+      models,
+      id,
+      rev,
+      author,
+      activeLanguages
+    );
   }
 
   async createRev(
@@ -296,19 +331,19 @@ export default class KnexContent implements ContentAdapter {
     models: Cotype.Model[],
     id: string,
     rev: number,
-    author: string
+    author: string,
+    activeLanguages: string[] = []
   ) {
     await this.knex("content_revisions").insert({
       id,
       rev,
       data: JSON.stringify(data),
-      author
+      author,
+      activeLanguages: activeLanguages.join(",") + ","
     });
 
     // Set the new revision as latest on the content
-    await this.knex("contents")
-      .where({ id })
-      .update({ latest_rev: rev });
+    await this.knex("contents").where({ id }).update({ latest_rev: rev });
 
     await this.indexRevision(data, searchData, model, models, id, rev);
 
@@ -325,14 +360,10 @@ export default class KnexContent implements ContentAdapter {
     published = false
   ) {
     // Delete content_values except the published ones
-    await this.knex("content_values")
-      .where({ id, published })
-      .del();
+    await this.knex("content_values").where({ id, published }).del();
 
     // Delete content_search except the published one
-    await this.knex("content_search")
-      .where({ id, published })
-      .del();
+    await this.knex("content_search").where({ id, published }).del();
 
     await this.extractValues(data, model, id, rev, published);
     await this.extractText(searchData, model, id, rev, published);
@@ -390,7 +421,6 @@ export default class KnexContent implements ContentAdapter {
         ...serialize(value, fieldType)
       });
     });
-
     return this.knex.batchInsert("content_values", rows);
   }
 
@@ -548,7 +578,9 @@ export default class KnexContent implements ContentAdapter {
             // No types means this data is only needed to populate _urls in refs
             if (types.length === 0) {
               implicitTypes = implicitTypes.concat(
-                getModelNames('models' in value && value.models || [value.model!])
+                getModelNames(
+                  ("models" in value && value.models) || [value.model!]
+                )
               );
             }
           }
@@ -617,7 +649,8 @@ export default class KnexContent implements ContentAdapter {
   async load(
     model: Cotype.Model,
     id: string,
-    previewOpts: Cotype.PreviewOpts = {}
+    previewOpts: Cotype.PreviewOpts = {},
+    language?: string
   ) {
     const k = this.knex("contents")
       .join("content_revisions", join => {
@@ -634,7 +667,9 @@ export default class KnexContent implements ContentAdapter {
         "contents.type": model.name,
         "contents.deleted": false
       });
-
+    if (language) {
+      k.andWhere("content_revisions.activeLanguages", "LIKE", `%${language}%`);
+    }
     if (previewOpts.publishedOnly && !previewOpts.ignoreSchedule) {
       k.andWhere((k2: any) => {
         k2.where("contents.visibleFrom", "<=", new Date()).orWhereNull(
@@ -732,21 +767,15 @@ export default class KnexContent implements ContentAdapter {
     // TODO: check if referenced content still exists
 
     // Delete values from previously published revision
-    await this.knex("content_values")
-      .where({ id, published: true })
-      .del();
+    await this.knex("content_values").where({ id, published: true }).del();
 
     // Delete search from previously published revision
-    await this.knex("content_search")
-      .where({ id, published: true })
-      .del();
+    await this.knex("content_search").where({ id, published: true }).del();
 
     if (publishedRev !== null) {
       // Insert values for newly published revision
       const { data } = await this.loadRevision(model, id, publishedRev);
-      const c = await this.knex("contents")
-        .where({ id })
-        .first();
+      const c = await this.knex("contents").where({ id }).first();
 
       await this.checkReferences(id, publishedRev, c);
       await this.extractValues(data, model, id, publishedRev, true);
@@ -850,9 +879,7 @@ export default class KnexContent implements ContentAdapter {
       .where({ type: model.name, id })
       .update({ deleted: true });
 
-    await this.knex("content_references")
-      .where({ id })
-      .del();
+    await this.knex("content_references").where({ id }).del();
   }
 
   async schedule(
@@ -953,7 +980,11 @@ export default class KnexContent implements ContentAdapter {
 
     const { limit = 50, offset = 0, models = [] } = listOpts;
     if (models.length > 0) {
-      k.andWhere("contents.type", "in", models.map(m => m));
+      k.andWhere(
+        "contents.type",
+        "in",
+        models.map(m => m)
+      );
     }
 
     const [count] = await k.clone().countDistinct(`${searchTable}.id as total`);
@@ -1012,7 +1043,8 @@ export default class KnexContent implements ContentAdapter {
     models: Cotype.Model[],
     listOpts: Cotype.ListOpts = {},
     criteria: Cotype.Criteria = {},
-    previewOpts: Cotype.PreviewOpts = {}
+    previewOpts: Cotype.PreviewOpts = {},
+    language?: string
   ): Promise<Cotype.ListChunk<Cotype.Content>> {
     const {
       limit = 50,
@@ -1054,6 +1086,10 @@ export default class KnexContent implements ContentAdapter {
         "content_revisions.rev"
       );
     });
+
+    if (language) {
+      k.andWhere("content_revisions.activeLanguages", "LIKE", `%${language}%`);
+    }
 
     if (search && search.term) {
       if (search.scope === "title") {
@@ -1229,11 +1265,7 @@ export default class KnexContent implements ContentAdapter {
                     value.map(val => val.toLowerCase().trim())
                   );
                 }
-                const v = value
-                  ? String(value)
-                      .toLowerCase()
-                      .trim()
-                  : value;
+                const v = value ? String(value).toLowerCase().trim() : value;
                 k.andWhere(`vals${counter}.literal_lc`, sqlOp, v);
               }
             });
@@ -1256,6 +1288,7 @@ export default class KnexContent implements ContentAdapter {
         join.andOnIn("orderValue.field", [orderBy]);
       });
     }
+
     const [count] = await k.clone().countDistinct("contents.id as total");
     const total = Number(count.total);
     if (total === 0) return { total, items: [] };
@@ -1329,6 +1362,7 @@ export default class KnexContent implements ContentAdapter {
     if (orderByColumn) {
       selectColumns.push(orderByColumn);
     }
+
     const items = k.select(selectColumns);
 
     return {
@@ -1422,9 +1456,7 @@ export default class KnexContent implements ContentAdapter {
         log.error(err);
         await tx.rollback();
         // Delete pending migrations
-        await this.knex("content_migrations")
-          .whereIn("name", names)
-          .del();
+        await this.knex("content_migrations").whereIn("name", names).del();
       }
     } catch (err) {
       log.info("Waiting for migrations to be applied ...");

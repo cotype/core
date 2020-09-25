@@ -7,7 +7,7 @@ import basePath from "../basePath";
 import ImageCircle from "../common/ImageCircle";
 import TimeAgo from "react-time-ago";
 import ColorHash from "color-hash";
-import { withModelPaths } from "../ModelPathsContext";
+import { useModelPaths, withModelPaths } from "../ModelPathsContext";
 const colorHash = new ColorHash({ saturation: 0.7, lightness: 0.6 });
 
 const ImageItem = styled("div")`
@@ -143,15 +143,14 @@ export const BasicResultItem = ({ item, term }: BasicProps) => {
 type Props = {
   item: Cotype.SearchResultItem | Cotype.VersionItem;
   term?: string;
-  modelPaths: Cotype.ModelPaths;
-  baseUrls: Cotype.BaseUrls;
 };
 
 const link = (...parts: string[]) => basePath + parts.filter(Boolean).join("/");
 
-const ResultItem = ({ item, modelPaths, term }: Props) => {
+const ResultItem = ({ item, term }: Props) => {
+  const { modelPaths } = useModelPaths();
   const { type, model, id } = item;
-  if (!type) return null;
+  if (!type || !modelPaths) return null;
 
   const path =
     type === "settings"
@@ -167,4 +166,4 @@ const ResultItem = ({ item, modelPaths, term }: Props) => {
   );
 };
 
-export default withModelPaths(ResultItem);
+export default ResultItem;

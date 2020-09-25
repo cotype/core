@@ -9,7 +9,7 @@
 import fs from "fs";
 import path from "path";
 
-import { Models, ContentHooks } from "../../typings";
+import { Models, ContentHooks, Language } from "../../typings";
 import { PersistenceAdapter } from "./adapter";
 import init from "./init";
 import withAuth from "../auth/withAuth";
@@ -24,6 +24,7 @@ export type PersistenceConfig = {
   mediaUrl: string;
   contentHooks?: ContentHooks;
   migrationDir?: string;
+  languages: Language[]
 };
 
 export class Persistence {

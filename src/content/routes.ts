@@ -179,7 +179,8 @@ export default (
       principal,
       model,
       data,
-      models.content
+      models.content,
+      body.activeLanguages || []
     );
     return res.json({ id, data: responseData });
   });
@@ -209,14 +210,14 @@ export default (
       res.status(404).end();
       return;
     }
-
-    const data = _.pick(body, [...Object.keys(model.fields)]);
+    const data = _.pick(body.data, [...Object.keys(model.fields)]);
     const item = await dataSource.update(
       principal,
       model,
       id,
       data,
-      models.content
+      models.content,
+      body.activeLanguages || []
     );
     return res.json(item);
   });

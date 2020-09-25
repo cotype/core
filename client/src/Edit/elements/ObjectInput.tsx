@@ -33,6 +33,8 @@ type Props = Partial<FieldProps<any>> & {
   modalView?: boolean;
   model?: Cotype.Model;
   id?: string;
+  language?: Cotype.Language | null;
+  i18n?: boolean;
 };
 
 type State = {
@@ -42,7 +44,10 @@ type State = {
 };
 
 export default class ObjectInput extends Component<Props> {
-  static getDefaultValue({ fields }) {
+  static getDefaultValue(
+    { fields, i18n }: { fields: Cotype.Fields; i18n?: boolean },
+    languages?: Cotype.Language[] | null
+  ) {
     const initialValues = {};
     Object.keys(fields).forEach(id => {
       const f = fields[id];
@@ -50,16 +55,25 @@ export default class ObjectInput extends Component<Props> {
         return;
       }
       const component = inputs.get(f);
-      initialValues[id] =
+      const initialField =
         component && component.getDefaultValue
-          ? component.getDefaultValue(f)
+          ? component.getDefaultValue(f, languages)
           : null;
+      if (languages && "i18n" in f && f.i18n) {
+        initialValues[id] = Object.values(languages).reduce((acc, l) => {
+          acc[l.key] = initialField;
+          return acc;
+        }, {});
+      } else {
+        initialValues[id] = initialField;
+      }
     });
     return initialValues;
   }
 
   static validate(value, props) {
     const isRequired = required(value, props);
+    console.log("asd", value);
     if (isRequired) return isRequired;
 
     const errors = {};
@@ -180,7 +194,17 @@ export default class ObjectInput extends Component<Props> {
   }
 
   render() {
-    const { form, field, fields, layout, modalView, model, id } = this.props;
+    const {
+      form,
+      field,
+      fields,
+      layout,
+      modalView,
+      model,
+      id,
+      i18n,
+      language
+    } = this.props;
 
     if (modalView) {
       return (
@@ -230,7 +254,11 @@ export default class ObjectInput extends Component<Props> {
                 label += "*";
               }
 
-              const name = `${prefix}${key}`;
+              const name = `${prefix}${key}${
+                "i18n" in props && props.i18n && language
+                  ? "." + language.key
+                  : ""
+              }`;
               const error = getIn(form.errors, name);
 
               const fieldProps = {
@@ -251,9 +279,14 @@ export default class ObjectInput extends Component<Props> {
                   {...fieldProps}
                   validate={value => {
                     if (typeof component.validate === "function") {
-                      return component.validate(value, props);
+                      return component.validate(
+                        value,
+                        props,
+                        this.props.language
+                      );
                     }
                   }}
+                  language={this.props.language}
                 />
               );
               return {

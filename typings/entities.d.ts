@@ -164,6 +164,7 @@ export type Data = {
 export type DataRecord<T = Data> = Schedule & {
   id: string;
   data: T;
+  activeLanguages?: string[];
 };
 
 /**
@@ -234,7 +235,7 @@ export type ReadOnlyDataSource = {
     principal: Principal,
     model: Model,
     opts: ListOpts,
-    criteria?: Criteria
+    criteria?: Criteria,
   ): Promise<ListChunk<Item>>;
   load(
     principal: Principal,
@@ -242,7 +243,8 @@ export type ReadOnlyDataSource = {
     id: string,
     join: Join,
     format?: string,
-    previewOpts?: PreviewOpts
+    previewOpts?: PreviewOpts,
+    language?: string
   ): Promise<ContentWithRefs | null>;
   loadInternal(
     principal: Principal,
@@ -262,7 +264,8 @@ export type ReadOnlyDataSource = {
     format: string,
     join: Join,
     criteria?: Criteria,
-    previewOpts?: PreviewOpts
+    previewOpts?: PreviewOpts,
+    language?: string
   ): Promise<ListChunkWithRefs<Content>>;
   findInternal(
     principal: Principal,
@@ -278,7 +281,8 @@ export type WritableDataSource = ReadOnlyDataSource & {
     principal: Principal,
     model: Model,
     data: Data,
-    models: Model[]
+    models: Model[],
+    activeLanguages: string[]
   ): Promise<{ id: string; data: Data }>;
   delete(principal: Principal, model: Model, id: string): Promise<void>;
   update(
@@ -286,7 +290,8 @@ export type WritableDataSource = ReadOnlyDataSource & {
     model: Model,
     id: string,
     data: Data,
-    models: Model[]
+    models: Model[],
+    activeLanguages: string[]
   ): Promise<{ id: string; data: Data }>;
 };
 
@@ -314,7 +319,8 @@ export type VersionedDataSource = WritableDataSource & {
     model: Model,
     id: string,
     data: Data,
-    models: Model[]
+    models: Model[],
+    activeLanguages: string[]
   ): Promise<RevisionRecord>;
   schedule(
     principal: Principal,
@@ -377,3 +383,5 @@ export type ContentHooks = {
   preHooks?: PreHooks;
   postHooks?: PostHooks;
 };
+
+export type Language = { title: string; key: string };

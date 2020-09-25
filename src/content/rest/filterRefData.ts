@@ -54,17 +54,22 @@ export const getDeepJoins = (
         });
       }
     };
-    visit({}, contentModel, {
-      content(s, field, d, stringPath) {
-        deepJoinParser(stringPath, field);
+    visit(
+      {},
+      contentModel,
+      {
+        content(s, field, d, stringPath) {
+          deepJoinParser(stringPath, field);
+        },
+        references(s: string, field, d, stringPath) {
+          deepJoinParser(stringPath, field);
+        },
+        list(s: string, field, d, stringPath) {
+          deepJoinParser(stringPath, field);
+        }
       },
-      references(s: string, field, d, stringPath) {
-        deepJoinParser(stringPath, field);
-      },
-      list(s: string, field, d, stringPath) {
-        deepJoinParser(stringPath, field);
-      }
-    });
+      { calli18nMultipleTimes: true }
+    );
   });
   if (Object.keys(deeperJoins).length > 0) {
     return [deeps, ...getDeepJoins(deeperJoins, models)];
@@ -135,7 +140,7 @@ export const getContainingMedia = (
   return containingMedia;
 };
 
-export default function(
+export default function (
   contents: Cotype.Content[],
   refs: Cotype.Refs,
   join: Cotype.Join,
