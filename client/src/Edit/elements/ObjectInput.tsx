@@ -67,7 +67,6 @@ export default class ObjectInput extends Component<Props> {
 
   static validate(value, props) {
     const isRequired = required(value, props);
-    console.log("asd", value);
     if (isRequired) return isRequired;
 
     const errors = {};

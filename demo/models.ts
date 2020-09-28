@@ -320,8 +320,18 @@ export const models: ModelOpts[] = [
   },
   {
     name: "translateAblep",
-    collection: "singleton",
+    urlPath: {
+      de: "/abc/def/:slug",
+      en: "/en/en/:slug"
+    },
     fields: {
+      slug: {
+        type: "string",
+        input: "slug",
+        i18n: true,
+        required: true,
+        index: true
+      },
       translateField: {
         type: "string",
         i18n: true,

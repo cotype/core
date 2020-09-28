@@ -49,21 +49,33 @@ const EditURLRedirect: React.FC<Props> = ({
         if (model.urlPath && model.urlPath === parsed.q) {
           return true;
         }
-        if (model.urlPath && model.urlPath.includes(":")) {
+        if (
+          model.urlPath &&
+          typeof model.urlPath === "string" &&
+          model.urlPath.includes(":")
+        ) {
           const matcher = createRoute(model.urlPath);
           const match = matcher(parsed.q);
           if (match) {
             return true;
           }
+        } else if (model.urlPath) {
+          return Object.values(model.urlPath).some(s => {
+            const matcher = createRoute(s);
+            const match = matcher(parsed.q);
+            if (match) {
+              return true;
+            }
+          });
         }
         return false;
       });
       if (foundModels.length > 0) {
         foundModels = foundModels.sort((a, b) => {
-          if (!a.urlPath) {
+          if (!a.urlPath || typeof a.urlPath !== "string") {
             return 1;
           }
-          if (!b.urlPath) {
+          if (!b.urlPath || typeof b.urlPath !== "string") {
             return -1;
           }
           const deepnesA = (a.urlPath.match(/\//g) || []).length;
@@ -78,7 +90,7 @@ const EditURLRedirect: React.FC<Props> = ({
         );
         if (
           path &&
-          foundModels[0].urlPath &&
+          typeof foundModels[0].urlPath === "string" &&
           foundModels[0].urlPath.includes(":")
         ) {
           const matcher = createRoute(foundModels[0].urlPath);

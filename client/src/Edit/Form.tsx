@@ -13,6 +13,7 @@ import { titleCase } from "title-case";
 import { getPreviewUrl } from "../utils/helper";
 import styled from "styled-components/macro";
 import LanguageModal from "./LanguageModal";
+import { Language } from "../../../typings";
 
 export const errorClass = "error-field-label";
 
@@ -53,7 +54,7 @@ class Form extends Component<Props, State> {
   state: State = {
     modal: null,
     language: this.props.languages ? this.props.languages[0] : null,
-    documentLanguages: this.props.languages ? this.props.languages : null,
+    documentLanguages: this.props.languages ? [this.props.languages[0]] : null,
     langModalOpen: false
   };
   componentDidMount() {
@@ -78,7 +79,7 @@ class Form extends Component<Props, State> {
       this.fetchData(contentId);
     } else {
       this.setState({
-        initialData: Input.getDefaultValue(model, languages)
+        initialData: Input.getDefaultValue(model, languages && [languages[0]])
       });
     }
   };
@@ -114,11 +115,22 @@ class Form extends Component<Props, State> {
     this.setState({ modal: null });
   };
 
-  onPreview = (form: FormikProps<any>, modelPreviewUrl: string) => {
+  onPreview = (
+    form: FormikProps<any>,
+    modelPreviewUrl: string | { [langKey: string]: string },
+    language?: Language | null
+  ) => {
     const { baseUrls } = this.props;
     const previewUrl = getPreviewUrl(
       form.values,
-      `${baseUrls.preview ? baseUrls.preview : ""}${modelPreviewUrl}`
+      `${baseUrls.preview ? baseUrls.preview : ""}${
+        typeof modelPreviewUrl === "string"
+          ? modelPreviewUrl
+          : modelPreviewUrl[
+              language ? language.key : Object.keys(modelPreviewUrl)[0]
+            ]
+      }`,
+      language
     );
     if (previewUrl) window.open(previewUrl);
   };
@@ -226,7 +238,7 @@ class Form extends Component<Props, State> {
     this.setState({ language: lang });
   };
   setDocumentLanguages = (langs: Cotype.Language[]) => {
-    this.setState({ documentLanguages: langs });
+    this.setState({ documentLanguages: langs, language: langs[0] });
   };
   openLangModal = () => {
     this.setState({ langModalOpen: true });
@@ -304,7 +316,7 @@ class Form extends Component<Props, State> {
                 onUnpublish={onUnpublish}
                 onPreview={() => {
                   if (model.urlPath) {
-                    this.onPreview(form, model.urlPath);
+                    this.onPreview(form, model.urlPath, this.state.language);
                   }
                 }}
                 onHistory={() => {

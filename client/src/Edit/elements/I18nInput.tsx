@@ -59,8 +59,6 @@ export default class I18nInput extends Component<Props> {
     const fieldProps = {
       ..._omit(this.props, serverSideProps)
     };
-    console.log("XX", this.props);
-
     return (
       <Fields
         layout={"inline"}
@@ -78,30 +76,37 @@ export default class I18nInput extends Component<Props> {
                   field={{
                     ...this.props.field,
                     name: fieldName,
-                    value: value[l.key]
+                    value:
+                      value && l.key in value
+                        ? value[l.key]
+                        : Input.getDefaultValue &&
+                          Input.getDefaultValue(
+                            this.props,
+                            this.props.activeLanguages
+                          )
                   }}
                   render={props => <Input {...fieldProps} {...props} />}
-                  validate={value => {
+                  validate={b => {
                     if (typeof Input.validate === "function") {
-                      return Input.validate(value, this.props);
+                      return Input.validate(b, this.props);
                     }
                   }}
                 />
               );
               return {
                 label: "",
-                element: element,
+                element,
                 key: l.key,
                 error: hasActuallyErrors(error)
                   ? error
                   : langError
-                  ? `Field in other language wrong: ${Object.keys(
-                      langError
-                    ).map(
-                      le =>
-                        this.props.activeLanguages?.find(aL => aL.key === le)
-                          ?.title
-                    ).join(', ')}`
+                  ? `Field in other language wrong: ${Object.keys(langError)
+                      .map(
+                        le =>
+                          this.props.activeLanguages?.find(aL => aL.key === le)
+                            ?.title
+                      )
+                      .join(", ")}`
                   : undefined,
                 hidden: this.props.activeLanguage?.key !== l.key
               };

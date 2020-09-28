@@ -25,11 +25,6 @@ type Props = {
   languages: Language[];
 };
 
-const modalDialogStyle = {
-  width: "80vw",
-  background: "#f5f5f5",
-  maxWidth: 800
-};
 class LanguageModal extends Component<Props, { activeLanguages: Language[] }> {
   state = {
     activeLanguages: this.props.activeLanguages

@@ -1,4 +1,6 @@
 // TODO use existing modules
+import { Language } from "../../../typings";
+
 export function formatBytes(bytes: number, decimals?: number) {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -72,7 +74,10 @@ export function slugify(text: string) {
 const noTestID = {};
 
 export function testable(id) {
-  if (process.env.NODE_ENV === "production" && !process.env.REACT_APP_TEST_ENV) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    !process.env.REACT_APP_TEST_ENV
+  ) {
     return noTestID;
   }
 
@@ -81,7 +86,11 @@ export function testable(id) {
   };
 }
 
-export function getPreviewUrl(values: object, modelUrl: string) {
+export function getPreviewUrl(
+  values: object,
+  modelUrl: string,
+  language?: Language | null
+) {
   if (!modelUrl) return;
 
   const [baseUrl, slug] = modelUrl.split("/:");
@@ -92,7 +101,12 @@ export function getPreviewUrl(values: object, modelUrl: string) {
   const slugPath = slug.split(".");
   // find value from path
   const slugUrl = slugPath.reduce(
-    (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
+    (obj, key) =>
+      obj && obj[key] !== "undefined"
+        ? language
+          ? obj[key][language.key]
+          : obj[key]
+        : undefined,
     values
   );
 

@@ -81,7 +81,7 @@ export default function visit(
     }
 
     if ("i18n" in visitor && "i18n" in m && m.i18n) {
-      const ret = visitor["i18n"](
+      const ret = visitor.i18n(
         value,
         m,
         () => {
@@ -119,11 +119,10 @@ export default function visit(
           }
         }
       };
-      if ("i18n" in m && m.i18n && opts.calli18nMultipleTimes) {
-        parsedValue &&
-          Object.entries(parsedValue).forEach(([lKey, v]) => {
-            innerVisitor(v, key + "." + lKey);
-          });
+      if ("i18n" in m && m.i18n && opts.calli18nMultipleTimes && parsedValue) {
+        Object.entries(parsedValue).forEach(([lKey, v]) => {
+          innerVisitor(v, key + "." + lKey);
+        });
       } else {
         innerVisitor(parsedValue, key || "");
       }

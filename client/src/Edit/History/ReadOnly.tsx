@@ -6,6 +6,7 @@ import HistoryChooser from "./HistoryChooser";
 import ModalDialog from "../../common/ModalDialog";
 import { getPreviewUrl } from "../../utils/helper";
 import { withModelPaths } from "../../ModelPathsContext";
+import { Language } from "../../../../typings";
 
 const historyStyle = {
   width: "80vw",
@@ -28,21 +29,37 @@ type Props = {
 type State = {
   historyOpen: boolean;
   formData: any;
+
+  language: Cotype.Language | null;
+  documentLanguages: Cotype.Language[] | null;
 };
 class ReadOnly extends Component<Props> {
   state: State = {
     historyOpen: false,
-    formData: null
+    formData: null,
+
+    language: this.props.languages ? this.props.languages[0] : null,
+    documentLanguages: this.props.languages ? this.props.languages : null
   };
 
-  onPreview = (modelPreviewUrl?: string) => {
+  onPreview = (
+    modelPreviewUrl?: string | { [s: string]: string },
+    language?: Language | null
+  ) => {
     const { formData } = this.state;
     const { baseUrls } = this.props;
     if (!formData || !modelPreviewUrl) return;
 
     const previewUrl = getPreviewUrl(
       formData.data,
-      `${baseUrls.preview ? baseUrls.preview : ""}${modelPreviewUrl}`
+      `${baseUrls.preview ? baseUrls.preview : ""}${
+        typeof modelPreviewUrl === "string"
+          ? modelPreviewUrl
+          : modelPreviewUrl[
+              language ? language.key : Object.keys(modelPreviewUrl)[0]
+            ]
+      }`,
+      language
     );
     if (previewUrl) window.open(previewUrl);
   };
@@ -72,6 +89,10 @@ class ReadOnly extends Component<Props> {
     );
   }
 
+  setLanguage = (lang: Cotype.Language) => {
+    this.setState({ language: lang });
+  };
+
   render() {
     const { id, model, versions, onPublish } = this.props;
     return (
@@ -85,10 +106,20 @@ class ReadOnly extends Component<Props> {
           }}
           hasSchedule={false}
           onPublishChange={onPublish}
+          setLanguage={this.setLanguage}
+          language={this.state.language}
+          documentLanguages={this.state.documentLanguages}
           onPreview={() => this.onPreview(model.urlPath)}
         />
         <History
-          onReceiveData={data => this.setState({ formData: data })}
+          onReceiveData={data =>
+            this.setState({
+              formData: data,
+              documentLanguages: this.props.languages?.filter(l =>
+                data.activeLanguages.includes(l)
+              )
+            })
+          }
           versions={versions}
           id={id}
           rev={versions ? versions[0].rev : undefined}

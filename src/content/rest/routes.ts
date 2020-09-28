@@ -114,7 +114,7 @@ export default function routes(
     /** Search */
     router.get(`/rest/${mode}/search/content`, async (req, res) => {
       const { principal, query } = req;
-      const { term, limit = 50, offset = 0 } = query as any;
+      const { term, limit = 50, offset = 0, i18n } = query as any;
       const searchModels = getSearchModels(query as any);
 
       if (!searchModels.length) {
@@ -136,7 +136,8 @@ export default function routes(
           offset,
           models: searchModels
         },
-        req.previewOpts
+        req.previewOpts,
+        i18n
       );
 
       const preparedResults = prepareSearchResults(results, models, mediaUrl);

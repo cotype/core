@@ -159,7 +159,7 @@ export type SettingsType = {
   required?: boolean;
 };
 
-export type Field = Type & { label?: string };
+export type Field = Type & { label?: string; i18n?: boolean };
 
 export type Fields = {
   [key: string]: Field;
@@ -171,7 +171,6 @@ export type ObjectType = {
   layout?: "vertical" | "horizontal" | "inline";
   modalView?: boolean;
   typeName?: string;
-  i18n?: boolean;
 };
 
 export type MapKeyValue = { label: string; value: string } | string;
@@ -253,7 +252,7 @@ export type ModelOpts = {
   singular?: string;
   plural?: string;
   collection?: "list" | "singleton" | "none" | "iframe";
-  urlPath?: string;
+  urlPath?: string | { [langKey: string]: string };
   noFeed?: true;
   fields?: {
     [key: string]: Field & { unique?: boolean };

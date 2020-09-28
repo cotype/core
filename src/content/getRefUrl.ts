@@ -1,13 +1,21 @@
 import { Data } from "../../typings";
 
-export default function getRefUrl(data: Data, modelUrl?: string) {
+export default function getRefUrl(
+  data: Data,
+  modelUrl?: string | { [langKey: string]: string },
+  language?: string
+) {
   if (!modelUrl) return;
+  const modelURL =
+    typeof modelUrl === "string"
+      ? modelUrl
+      : modelUrl[language || Object.keys(modelUrl)[0]];
 
-  const slugs = modelUrl.match(/\/:([\w|.]*)/gm);
+  const slugs = modelURL.match(/\/:([\w|.]*)/gm);
   if (!slugs || slugs.length === 0) {
-    return modelUrl;
+    return modelURL;
   }
-  let slugURL = modelUrl;
+  let slugURL = modelURL;
   slugs.forEach(slug => {
     const slugPath = slug.replace("/:", "").split(".");
     // find value from path

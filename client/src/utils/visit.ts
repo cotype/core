@@ -56,7 +56,7 @@ export default function visit(obj: any, model: Cotype.Model, visitor: Visitor) {
       walk(m.child, value, key, parent, stringPath);
     }
     if ("i18n" in visitor && "i18n" in m && m.i18n) {
-      const ret = visitor["i18n"](
+      const ret = visitor.i18n(
         value,
         m,
         () => {

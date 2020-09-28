@@ -54,6 +54,9 @@ function findValueByPath(path: string | undefined, data: Cotype.Data) {
     data
   ) as unknown) as string | undefined;
 
+  if (title && typeof title !== "string") {
+    return title[Object.keys(title)[0]];
+  }
   return title;
 }
 
@@ -156,7 +159,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
   createSearchResultItem = (
     content: Cotype.Content,
     term: string,
-    external: boolean = true
+    external: boolean = true,
+    language?: string
   ): Cotype.SearchResultItem | null => {
     const { id, type, data } = content;
 
@@ -174,7 +178,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       description: extractMatch(data, model, term, !external),
       image: image && ((data || {})[image] || null),
       model: model.name,
-      url: external ? (getRefUrl(data, model.urlPath) as string) : undefined
+      url: external
+        ? (getRefUrl(data, model.urlPath, language) as string)
+        : undefined
     };
   };
 
@@ -590,7 +596,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     principal: Cotype.Principal,
     term: string,
     opts: Cotype.ListOpts,
-    previewOpts?: Cotype.PreviewOpts
+    previewOpts?: Cotype.PreviewOpts,
+    language?: string
   ): Promise<Cotype.ListChunk<Cotype.SearchResultItem>> {
     const clearedTerm = term.replace("*", " ");
     const textSearch = await this.adapter.search(
@@ -601,7 +608,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     );
 
     const items = textSearch.items
-      .map(c => this.createSearchResultItem(c, term))
+      .map(c => this.createSearchResultItem(c, term, true, language))
       .filter(this.canView(principal)) as Cotype.SearchResultItem[];
 
     return {

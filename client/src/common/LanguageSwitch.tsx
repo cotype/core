@@ -30,7 +30,9 @@ const LanguageSwitch = (p: {
   onClick: () => void;
 }) => {
   const changeLanguages = useCallback(() => {
-    p.onChangeLanguages && p.onChangeLanguages();
+    if (p.onChangeLanguages) {
+      p.onChangeLanguages();
+    }
     p.onClick();
   }, [p.onClick, p.onChangeLanguages]);
 

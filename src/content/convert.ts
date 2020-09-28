@@ -105,7 +105,8 @@ export default function convert({
       const allRefData = contentRefs[convertedRef._content][convertedRef._id];
       convertedRef._url = getRefUrl(
         (allRefData || {}).data,
-        referencedModel.urlPath
+        referencedModel.urlPath,
+        language
       );
 
       return convertedRef;
@@ -140,7 +141,7 @@ export default function convert({
               ) {
                 const data = contentRefs[model.name][match[2]];
                 if (data && data.data) {
-                  el.attributes.link = getRefUrl(data.data, model.urlPath);
+                  el.attributes.link = getRefUrl(data.data, model.urlPath, language);
                 }
               } else {
                 el.attributes.link = "";
