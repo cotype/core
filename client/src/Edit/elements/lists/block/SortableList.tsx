@@ -28,6 +28,7 @@ type SortableList = {
 const BasicSortableList = SortableContainer(
   ({ items, ...props }: SortableList) => {
     const { types } = props.itemType;
+    console.log("AA", props, items);
     return (
       <div>
         {items &&

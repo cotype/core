@@ -4,6 +4,18 @@ import ModalDialog from "../common/ModalDialog";
 import { paths } from "../common/icons";
 import * as Cotype from "../../../typings";
 import { Language } from "../../../typings";
+import ToggleSwitch from "../common/ToggleSwitch";
+import styled from "styled-components/macro";
+
+const Row = styled("div")`
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1em;
+`;
+const Label = styled("span")`
+  font-weight: bold;
+  margin-left: 1em;
+`;
 
 type Props = {
   onSave: (languages: Language[]) => void;
@@ -18,11 +30,15 @@ const modalDialogStyle = {
   background: "#f5f5f5",
   maxWidth: 800
 };
-class LanguageModal extends Component<Props, {}> {
-  setPosition = (languages: Language[]) => {
-    this.props.onSave(languages);
+class LanguageModal extends Component<Props, { activeLanguages: Language[] }> {
+  state = {
+    activeLanguages: this.props.activeLanguages
   };
   save = () => {
+    if (this.state.activeLanguages.length < 1) {
+      return alert("At least one language");
+    }
+    this.props.onSave(this.state.activeLanguages);
     this.props.onClose();
   };
   render() {
@@ -41,7 +57,32 @@ class LanguageModal extends Component<Props, {}> {
         icon={paths.Translate}
         actionButtons={actions}
       >
-        <div>hallo</div>
+        {this.props.languages.map(lang => {
+          const isActive = !!this.state.activeLanguages?.find(
+            l => l.key === lang.key
+          );
+          return (
+            <Row>
+              <ToggleSwitch
+                on={isActive}
+                onClick={() =>
+                  this.setState(s =>
+                    s.activeLanguages.find(l => l.key === lang.key)
+                      ? {
+                          activeLanguages: s.activeLanguages.filter(
+                            a => a.key !== lang.key
+                          )
+                        }
+                      : {
+                          activeLanguages: [...s.activeLanguages, lang]
+                        }
+                  )
+                }
+              />
+              <Label>{lang.title}</Label>
+            </Row>
+          );
+        })}
       </ModalDialog>
     );
   }

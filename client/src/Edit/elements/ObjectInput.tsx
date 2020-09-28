@@ -33,7 +33,8 @@ type Props = Partial<FieldProps<any>> & {
   modalView?: boolean;
   model?: Cotype.Model;
   id?: string;
-  language?: Cotype.Language | null;
+  activeLanguages?: Cotype.Language[] | null;
+  activeLanguage?: Cotype.Language | null;
   i18n?: boolean;
 };
 
@@ -59,14 +60,7 @@ export default class ObjectInput extends Component<Props> {
         component && component.getDefaultValue
           ? component.getDefaultValue(f, languages)
           : null;
-      if (languages && "i18n" in f && f.i18n) {
-        initialValues[id] = Object.values(languages).reduce((acc, l) => {
-          acc[l.key] = initialField;
-          return acc;
-        }, {});
-      } else {
-        initialValues[id] = initialField;
-      }
+      initialValues[id] = initialField;
     });
     return initialValues;
   }
@@ -203,7 +197,8 @@ export default class ObjectInput extends Component<Props> {
       model,
       id,
       i18n,
-      language
+      activeLanguages,
+      activeLanguage
     } = this.props;
 
     if (modalView) {
@@ -254,11 +249,7 @@ export default class ObjectInput extends Component<Props> {
                 label += "*";
               }
 
-              const name = `${prefix}${key}${
-                "i18n" in props && props.i18n && language
-                  ? "." + language.key
-                  : ""
-              }`;
+              const name = `${prefix}${key}`;
               const error = getIn(form.errors, name);
 
               const fieldProps = {
@@ -279,14 +270,11 @@ export default class ObjectInput extends Component<Props> {
                   {...fieldProps}
                   validate={value => {
                     if (typeof component.validate === "function") {
-                      return component.validate(
-                        value,
-                        props,
-                        this.props.language
-                      );
+                      return component.validate(value, props);
                     }
                   }}
-                  language={this.props.language}
+                  activeLanguages={activeLanguages}
+                  activeLanguage={activeLanguage}
                 />
               );
               return {

@@ -58,11 +58,11 @@ const extractValues = (obj: object, model: Model) => {
         } else if (scalars.includes(field.item.type)) {
           setValue(
             stringPath,
-            Array.isArray(arr)
-              ? arr.map((el: any) => el.value)
+            Array.isArray(arr || [])
+              ? (arr || []).map((el: any) => el.value)
               : Object.fromEntries(
                   Object.entries(arr).map(([k, v]) => {
-                    return [k, (v as any[]).map((el: any) => el.value)];
+                    return [k, ((v || []) as any[]).map((el: any) => el.value)];
                   })
                 ),
             field.item.index,

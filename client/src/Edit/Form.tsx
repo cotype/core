@@ -53,7 +53,7 @@ class Form extends Component<Props, State> {
   state: State = {
     modal: null,
     language: this.props.languages ? this.props.languages[0] : null,
-    documentLanguages: this.props.languages ? [this.props.languages[0]] : null,
+    documentLanguages: this.props.languages ? this.props.languages : null,
     langModalOpen: false
   };
   componentDidMount() {
@@ -94,7 +94,11 @@ class Form extends Component<Props, State> {
           documentLanguages:
             this.props.languages?.filter(l =>
               activeLanguages?.includes(l.key)
-            ) || null
+            ) || null,
+          language:
+            this.props.languages?.filter(l =>
+              activeLanguages?.includes(l.key)
+            )[0] || null
         });
       });
     }
@@ -335,7 +339,8 @@ class Form extends Component<Props, State> {
                         model={model}
                         id={id}
                         i18n={model.i18n}
-                        language={this.state.language}
+                        activeLanguages={this.state.documentLanguages}
+                        activeLanguage={this.state.language}
                       />
                       {this.props.languages &&
                         this.state.documentLanguages &&

@@ -141,7 +141,7 @@ export default class ListInput extends Component<Props, State> {
 
   render() {
     const { field, item: itemType, sortable, addLabel } = this.props;
-
+    console.log("pp", this.props);
     const { name, value } = field;
     const ItemComponent = inputs.get(itemType);
     const { Factory, isSorting, schedule, onSchedule } = this.state;

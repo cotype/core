@@ -3,12 +3,24 @@ import styled, { css } from "styled-components/macro";
 import { Error } from "../common/styles";
 import { errorClass } from "../Edit/Form";
 
-const FieldBlock = styled("div")`
+const FieldBlock = styled("div")<{ hidden?: boolean }>`
   box-sizing: border-box;
   /* padding-top: 24px;
   padding-bottom: 24px;
   padding-left: 24px; */
   padding: 24px;
+  ${p =>
+    p.hidden &&
+    css`
+      display: none;
+    `}
+`;
+const FieldBlockLabel = styled("label")<{ hidden?: boolean }>`
+  ${p =>
+    p.hidden &&
+    css`
+      display: none;
+    `}
 `;
 
 const FieldListBlock = styled("div")`
@@ -52,6 +64,7 @@ type Props = {
   fields: {
     key?: string;
     error?: string;
+    hidden?: boolean;
     label: any;
     element: any;
   }[];
@@ -84,11 +97,11 @@ export default class Fields extends Component<Props> {
       return (
         <div>
           {fields.map(f => (
-            <label key={f.key || f.label}>
+            <FieldBlockLabel key={f.key || f.label} hidden={f.hidden}>
               {f.element}
               <InlineLabel>{f.label}</InlineLabel>
               {errorHandler(f.error)}
-            </label>
+            </FieldBlockLabel>
           ))}
         </div>
       );
@@ -109,7 +122,7 @@ export default class Fields extends Component<Props> {
     return (
       <div>
         {fields.map(f => (
-          <FieldBlock key={f.key || f.label}>
+          <FieldBlock key={f.key || f.label} hidden={f.hidden}>
             <LabelBlock>{f.label}</LabelBlock>
             <div>{f.element}</div>
             {errorHandler(f.error)}
