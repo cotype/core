@@ -359,6 +359,12 @@ export const models: ModelOpts[] = [
           label: "String",
           index: true
         }
+      },
+
+      pdf: {
+        type: "media",
+        label: "PDF File",
+        i18n: true
       }
     }
   }

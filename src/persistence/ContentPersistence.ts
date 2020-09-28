@@ -44,7 +44,7 @@ export type RewriteDataIterator = (
   meta: MetaData
 ) => void | Data | Promise<Data>;
 
-function findValueByPath(path: string | undefined, data: Cotype.Data) {
+function findValueByPath(path: string | undefined, data: Cotype.Data, language?:string) {
   if (!path) return;
 
   const titlePath = path.split(".");
@@ -55,11 +55,10 @@ function findValueByPath(path: string | undefined, data: Cotype.Data) {
   ) as unknown) as string | undefined;
 
   if (title && typeof title !== "string") {
-    return title[Object.keys(title)[0]];
+    return title[language || Object.keys(title)[0]];
   }
   return title;
 }
-
 export default class ContentPersistence implements Cotype.VersionedDataSource {
   adapter: ContentAdapter;
   models: Cotype.Model[];
@@ -140,17 +139,18 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     const model = this.getModel(type);
     if (!model) return null;
-    const { title: titlePath, image, singular, orderBy } = model;
+    const { title: titlePath, image:imagePath, singular, orderBy } = model;
 
     const title = findValueByPath(titlePath, data);
     const orderValue = findValueByPath(orderBy || titlePath, data);
+    const image = findValueByPath(imagePath, data);
 
     return {
       id,
       model: type,
       type: model.type,
       title: title || singular,
-      image: image && ((data || {})[image] || null),
+      image: image,
       kind: singular,
       orderValue: orderValue || title
     };
@@ -166,9 +166,10 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     const model = this.getModel(type);
     if (!model) return null;
-    const { title: titlePath, image, singular } = model;
+    const { title: titlePath, image:imagePath, singular } = model;
 
-    const title = findValueByPath(titlePath, data);
+    const title = findValueByPath(titlePath, data, language);
+    const image = findValueByPath(imagePath, data, language);
 
     return {
       id,
@@ -176,7 +177,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       kind: external ? undefined : singular,
       title: title || singular,
       description: extractMatch(data, model, term, !external),
-      image: image && ((data || {})[image] || null),
+      image: image,
       model: model.name,
       url: external
         ? (getRefUrl(data, model.urlPath, language) as string)

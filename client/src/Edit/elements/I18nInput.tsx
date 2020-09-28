@@ -35,7 +35,7 @@ export default class I18nInput extends Component<Props> {
   }
 
   static getHint() {
-    return "Translateable";
+    return "🌍";
   }
 
   static validate(value: any, props: Props, activeLanguages?: Language[]) {

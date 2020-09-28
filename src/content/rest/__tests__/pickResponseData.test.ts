@@ -34,7 +34,8 @@ const data: Content = {
   },
   type: "foo",
   author: "bar",
-  date: "baz"
+  date: "baz",
+  activeLanguages:[]
 };
 
 const _mediaRefs = {

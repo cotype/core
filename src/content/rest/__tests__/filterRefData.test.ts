@@ -31,7 +31,8 @@ describe("removeUnnecessaryRefData", () => {
     id: "1",
     type: "news",
     author: "",
-    date: ""
+    date: "",
+    activeLanguages:[]
   } as Content;
 
   const productData = {
@@ -44,7 +45,8 @@ describe("removeUnnecessaryRefData", () => {
     id: "2",
     type: "products",
     author: "",
-    date: ""
+    date: "",
+    activeLanguages:[]
   } as Content;
 
   it("createJoin", async () => {
