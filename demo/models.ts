@@ -353,11 +353,11 @@ export const models: ModelOpts[] = [
         type: "list",
         sortable: true,
         schedule: true,
-        i18n: true,
         item: {
           type: "string",
           label: "String",
-          index: true
+          index: true,
+          i18n: true,
         }
       },
 

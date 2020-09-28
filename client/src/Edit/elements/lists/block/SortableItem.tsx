@@ -6,6 +6,7 @@ import { Field, ArrayHelpers, FormikProps, getIn } from "formik";
 import Icon from "../../../../common/icons";
 import { ITEM_VALUE_KEY } from "./Input";
 import { hasActuallyErrors } from "../../../formHelpers";
+import { Language } from "../../../../../../typings";
 
 const DragHandleIcon = styled(Icon.DragHandle)`
   user-select: none;
@@ -125,6 +126,9 @@ type SortableItem = {
   length: number;
   isSorting: boolean;
   schedule: Cotype.Schedule;
+
+  activeLanguages?: Language[];
+  activeLanguage?: Language;
 };
 const SortableItem = SortableElement(
   ({
@@ -137,10 +141,13 @@ const SortableItem = SortableElement(
     name,
     length,
     isSorting,
-    schedule
+    schedule,
+    activeLanguage,
+    activeLanguages
   }: SortableItem) => {
     const fieldName = `${name}.${sortIndex}.${ITEM_VALUE_KEY}`;
     const error = getIn(arrayHelpers.form.errors, fieldName);
+    console.log(fieldName, "AA", activeLanguage, activeLanguages);
     return (
       <Item
         schedule={schedule}
@@ -151,7 +158,14 @@ const SortableItem = SortableElement(
         <ItemField sortable={sortable} isSorting={isSorting}>
           <Field
             name={fieldName}
-            render={props => <ItemComponent {...props} {...itemType} />}
+            render={props => (
+              <ItemComponent
+                {...props}
+                {...itemType}
+                activeLanguages={activeLanguages}
+                activeLanguage={activeLanguage}
+              />
+            )}
             {...itemType}
             validate={value => {
               if (typeof ItemComponent.validate === "function") {

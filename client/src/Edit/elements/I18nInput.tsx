@@ -7,7 +7,6 @@ import serverSideProps from "./serverSideProps";
 import { hasActuallyErrors } from "../formHelpers";
 import Fields from "../../common/Fields";
 
-
 type Props = FieldProps<any> &
   Type & {
     activeLanguages?: Language[];
