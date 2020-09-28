@@ -7,7 +7,7 @@ import basePath from "../basePath";
 import ImageCircle from "../common/ImageCircle";
 import TimeAgo from "react-time-ago";
 import ColorHash from "color-hash";
-import { useModelPaths, withModelPaths } from "../ModelPathsContext";
+import { useModelPaths } from "../ModelPathsContext";
 const colorHash = new ColorHash({ saturation: 0.7, lightness: 0.6 });
 
 const ImageItem = styled("div")`

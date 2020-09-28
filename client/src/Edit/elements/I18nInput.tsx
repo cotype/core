@@ -2,17 +2,11 @@ import React, { Component } from "react";
 import { Field, FieldProps, getIn } from "formik";
 import inputs from "./inputs";
 import { Language, Type } from "../../../../typings";
-import { ITEM_VALUE_KEY } from "./lists/block/Input";
 import _omit from "lodash/omit";
 import serverSideProps from "./serverSideProps";
-import { titleCase } from "title-case";
 import { hasActuallyErrors } from "../formHelpers";
 import Fields from "../../common/Fields";
-import styled from "styled-components";
 
-const HideBox = styled.div`
-  display: none;
-`;
 
 type Props = FieldProps<any> &
   Type & {

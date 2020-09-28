@@ -63,9 +63,7 @@ const EditURLRedirect: React.FC<Props> = ({
           return Object.values(model.urlPath).some(s => {
             const matcher = createRoute(s);
             const match = matcher(parsed.q);
-            if (match) {
-              return true;
-            }
+            return !!match;
           });
         }
         return false;

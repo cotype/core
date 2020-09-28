@@ -23,18 +23,22 @@ const Row = styled(Button)`
   }
 `;
 
-const LanguageSwitch = (p: {
+const LanguageSwitch = ({
+  onClick,
+  onChangeLanguages,
+  ...p
+}: {
   languages: Cotype.Language[] | null;
   setLanguage: (lang: Cotype.Language) => void;
   onChangeLanguages?: () => void;
   onClick: () => void;
 }) => {
   const changeLanguages = useCallback(() => {
-    if (p.onChangeLanguages) {
-      p.onChangeLanguages();
+    if (onChangeLanguages) {
+      onChangeLanguages();
     }
-    p.onClick();
-  }, [p.onClick, p.onChangeLanguages]);
+    onClick();
+  }, [onClick, onChangeLanguages]);
 
   if (!p.languages) {
     return null;
@@ -46,7 +50,7 @@ const LanguageSwitch = (p: {
           <Row
             onClick={() => {
               p.setLanguage(l);
-              p.onClick();
+              onClick();
             }}
             key={l.key}
           >
@@ -54,7 +58,7 @@ const LanguageSwitch = (p: {
           </Row>
         );
       })}
-      {p.onChangeLanguages && (
+      {onChangeLanguages && (
         <Row onClick={changeLanguages}>Sprachen anpassen</Row>
       )}
     </Box>

@@ -14,7 +14,6 @@ import ConflictDialog from "../common/ConflictDialog";
 import { testable } from "../utils/helper";
 import { withModelPaths } from "../ModelPathsContext";
 import PopoverMenu from "../common/PopoverMenu";
-import Icon from "../common/Icon";
 import LanguageSwitch from "../common/LanguageSwitch";
 import isi18nModel from "../utils/isi18nModel";
 

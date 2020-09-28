@@ -150,7 +150,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       model: type,
       type: model.type,
       title: title || singular,
-      image: image,
+      image,
       kind: singular,
       orderValue: orderValue || title
     };
@@ -177,7 +177,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       kind: external ? undefined : singular,
       title: title || singular,
       description: extractMatch(data, model, term, !external),
-      image: image,
+      image,
       model: model.name,
       url: external
         ? (getRefUrl(data, model.urlPath, language) as string)

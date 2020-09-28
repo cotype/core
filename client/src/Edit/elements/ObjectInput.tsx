@@ -195,7 +195,6 @@ export default class ObjectInput extends Component<Props> {
       modalView,
       model,
       id,
-      i18n,
       activeLanguages,
       activeLanguage
     } = this.props;
