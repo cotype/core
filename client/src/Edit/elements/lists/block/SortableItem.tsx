@@ -112,7 +112,7 @@ type SortableItem = {
   sortIndex: number;
   sortable: boolean | undefined;
   ItemComponent: React.ComponentType<any> & {
-    validate: (value: any, itemType: any) => void;
+    validate: (value: any, itemType: any, activeLanguages?: Language[]) => void;
   };
   itemType;
   arrayHelpers: ArrayHelpers & { form: FormikProps<any> };
@@ -168,7 +168,7 @@ const SortableItem = SortableElement(
             {...itemType}
             validate={value => {
               if (typeof ItemComponent.validate === "function") {
-                return ItemComponent.validate(value, itemType);
+                return ItemComponent.validate(value, itemType, activeLanguages);
               }
             }}
           />

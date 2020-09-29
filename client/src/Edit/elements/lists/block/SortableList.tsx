@@ -26,7 +26,6 @@ type SortableList = {
   ) => React.ReactNode;
   isSorting: boolean;
 
-
   activeLanguages?: Language[];
   activeLanguage?: Language;
 };

@@ -10,6 +10,7 @@ import outputs from "../../outputs";
 import { DRAG_HELPER_CLASS } from "../block/SortableList";
 import _omit from "lodash/omit";
 import serverSideProps from "../../serverSideProps";
+import { Language } from "../../../../../../typings";
 
 export const ITEM_VALUE_KEY = "value";
 
@@ -24,7 +25,9 @@ const Cancel = styled("span")`
   color: var(--dark-grey);
 `;
 
-type Props = FieldProps<any> & Cotype.ListType;
+type Props = FieldProps<any> & Cotype.ListType & {
+  activeLanguages?: Language[];
+  activeLanguage?: Language;};;
 type State = {
   Factory?: React.ComponentClass | null;
   isSorting: boolean;
@@ -180,6 +183,8 @@ export default class ChipListInput extends Component<Props, State> {
                 return false;
               }}
               isSorting={isSorting}
+              activeLanguages={this.props.activeLanguages}
+              activeLanguage={this.props.activeLanguage}
             />
             {!isNotAllowedToAddMoreItems &&
               (Factory ? (
