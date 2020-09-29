@@ -114,7 +114,10 @@ export default function convert({
   };
 
   visit(content, contentModel, {
-    i18n(value: { [lang: string]: any }) {
+    i18n(value: { [lang: string]: any } | null) {
+      if (!value) {
+        return value;
+      }
       if (language && language in value) {
         return value[language];
       }
@@ -141,7 +144,11 @@ export default function convert({
               ) {
                 const data = contentRefs[model.name][match[2]];
                 if (data && data.data) {
-                  el.attributes.link = getRefUrl(data.data, model.urlPath, language);
+                  el.attributes.link = getRefUrl(
+                    data.data,
+                    model.urlPath,
+                    language
+                  );
                 }
               } else {
                 el.attributes.link = "";

@@ -147,7 +147,6 @@ const SortableItem = SortableElement(
   }: SortableItem) => {
     const fieldName = `${name}.${sortIndex}.${ITEM_VALUE_KEY}`;
     const error = getIn(arrayHelpers.form.errors, fieldName);
-    console.log(fieldName, "AA", activeLanguage, activeLanguages);
     return (
       <Item
         schedule={schedule}
