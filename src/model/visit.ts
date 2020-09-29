@@ -47,11 +47,29 @@ export default function visit(
     if ("i18n" in m && m.i18n && opts.language && opts.language in value) {
       parsedValue = value[opts.language];
     }
+    if ("i18n" in visitor && "i18n" in m && m.i18n) {
+      const ret = visitor.i18n(
+        value,
+        m,
+        () => {
+          if (parent && key) {
+            _.set(parent, key, undefined);
+          }
+        },
+        Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + key // Remove Dot and ArrayKey when Parent is List
+      );
+      if (typeof ret !== "undefined") {
+        if (parent && key) {
+          _.set(parent, key, ret);
+          parsedValue = ret;
+        }
+      }
+    }
     if (m.type === "object") {
       Object.keys(m.fields).forEach(fieldKey =>
         walk(
           m.fields[fieldKey],
-          (value || {})[fieldKey],
+          (parsedValue || {})[fieldKey],
           fieldKey,
           parsedValue,
           stringPath + key + "."
@@ -80,24 +98,7 @@ export default function visit(
       walk(m.child, parsedValue, key, parent, stringPath);
     }
 
-    if ("i18n" in visitor && "i18n" in m && m.i18n) {
-      const ret = visitor.i18n(
-        value,
-        m,
-        () => {
-          if (parent && key) {
-            _.set(parent, key, undefined);
-          }
-        },
-        Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + key // Remove Dot and ArrayKey when Parent is List
-      );
-      if (typeof ret !== "undefined") {
-        if (parent && key) {
-          _.set(parent, key, ret);
-          parsedValue = ret;
-        }
-      }
-    }
+
     if (m.type in visitor) {
       const innerVisitor = (v: any, k: string) => {
         const ret = visitor[m.type](
