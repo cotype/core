@@ -4,6 +4,7 @@ import React, { Component } from "react";
 import api from "../../api";
 import { Page, Title, Cols, Content, Outset } from "../../common/page";
 import { Output } from "../elements";
+import { Language } from "../../../../typings";
 
 type Props = {
   id: string;
@@ -11,11 +12,13 @@ type Props = {
   model: Cotype.Model;
   versions?: (Cotype.VersionItem & { published: boolean })[];
   onReceiveData?: (data: any) => void;
+  languages?: Language[] | null;
 };
 
 type State = {
   data?: any;
   compareTo?: any;
+  activeLanguages?: string[];
 };
 
 export default class History extends Component<Props, State> {
@@ -52,8 +55,10 @@ export default class History extends Component<Props, State> {
   };
 
   render() {
-    const { model, rev } = this.props;
-    const { data, compareTo } = this.state;
+    const { model, rev, languages = [] } = this.props;
+    const { data, compareTo, activeLanguages } = this.state;
+
+    console.log("Asd", this.state);
 
     if (!data) return null;
     return (
@@ -66,6 +71,9 @@ export default class History extends Component<Props, State> {
                 fields={model.fields}
                 value={data}
                 compareTo={compareTo}
+                activeLanguages={languages?.filter(l =>
+                  activeLanguages?.includes(l.key)
+                )}
               />
             </Outset>
           </Content>

@@ -290,6 +290,7 @@ class Form extends Component<Props, State> {
                   onUnpublish={onUnpublish}
                   onRestore={rev => this.restore(rev, setValues)}
                   onClose={() => this.setState({ modal: null })}
+                  languages={this.props.languages}
                 />
               )}
               {id && modal === "schedule" && (

@@ -124,6 +124,7 @@ class ReadOnly extends Component<Props> {
           id={id}
           rev={versions ? versions[0].rev : undefined}
           model={model}
+          languages={this.props.languages}
         />
       </div>
     );
