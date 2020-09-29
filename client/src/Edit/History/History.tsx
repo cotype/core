@@ -58,8 +58,6 @@ export default class History extends Component<Props, State> {
     const { model, rev, languages = [] } = this.props;
     const { data, compareTo, activeLanguages } = this.state;
 
-    console.log("Asd", this.state);
-
     if (!data) return null;
     return (
       <Page>
