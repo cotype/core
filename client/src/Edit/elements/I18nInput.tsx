@@ -77,7 +77,22 @@ export default class I18nInput extends Component<Props> {
                           this.props.activeLanguages
                         )
                 }}
-                render={props => <Input {...fieldProps} {...props} />}
+                render={props => (
+                  <Input
+                    {...fieldProps}
+                    {...props}
+                    field={{
+                      ...props.field,
+                      onChange: e => {
+                        const getActual = getIn(props.form.values, name);
+                        if (getActual !== "object") {
+                          props.form.setFieldValue(name, {});
+                        }
+                        props.field.onChange(e);
+                      }
+                    }}
+                  />
+                )}
                 validate={b => {
                   if (typeof Input.validate === "function") {
                     return Input.validate(b, this.props);
