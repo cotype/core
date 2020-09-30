@@ -26,7 +26,11 @@ const extractValues = (
     if (!values[path]) {
       values[path] = [];
     }
-    values[path].push(value);
+    if(Array.isArray(value)){
+      value.forEach(v=>values[path].push(v))
+    }else{
+      values[path].push(value);
+    }
   };
   visit(
     obj,

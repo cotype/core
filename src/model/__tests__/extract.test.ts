@@ -8,18 +8,18 @@ import getAlwaysUniqueFields from "../getAlwaysUniqueFields";
 describe("extractValues", () => {
   it("should extract correct Values from Data (uniqueFields, PositionField, orderBy Field, TitleField, indexed Fields)", () => {
     expect(extractValues(data, model)).toEqual({
-      name: "Test",
-      pos: "abc",
-      slug: "test",
-      immut: "test2",
-      "test.pos2": "abcd",
-      "test.field1": 3,
-      "test.field2": "test3",
-      "test.field3": true,
+      name: ["Test"],
+      pos: ["abc"],
+      slug: ["test"],
+      immut: ["test2"],
+      "test.pos2": ["abcd"],
+      "test.field1": [3],
+      "test.field2": ["test3"],
+      "test.field3": [true],
       "test.field4": ["Hallo", "Liste"],
-      "test.field5.test": "hallo",
+      "test.field5.test": ["hallo"],
       test2: ["Hallo2", "Liste2"],
-      empty: "null",
+      empty: ["null"],
       contentList: [456, 789, 123]
     });
   });
