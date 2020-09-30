@@ -231,62 +231,47 @@ export default class KnexContent implements ContentAdapter {
             ignoreSchedule: true
           });
           if (items.items[0]) {
-            visit(
-              items.items[0].data,
-              model,
-              {
-                position(s: string, f, d, stringPath) {
-                  if (stringPath === fieldPath) {
-                    if (!value) {
-                      // No Position Value passed, use end of list
-                      data = setPosition(data, model, s, "z", true, fieldPath);
-                    } else if (
-                      s === value &&
-                      String(items.items[0].id) !== String(id) // Value exists, and is not same document
-                    ) {
-                      if (items.items[1]) {
-                        // get next one and middle it
-                        visit(
-                          items.items[1].data,
-                          model,
-                          {
-                            position(
-                              nextPosition: string,
-                              g,
-                              h,
-                              nextStringPath
-                            ) {
-                              if (nextStringPath === fieldPath) {
-                                data = setPosition(
-                                  data,
-                                  model,
-                                  value,
-                                  nextPosition,
-                                  true,
-                                  fieldPath
-                                );
-                              }
-                            }
-                          },
-                          { calli18nMultipleTimes: true }
-                        );
-                      } else {
-                        // No next one, just middle to end
-                        data = setPosition(
-                          data,
-                          model,
-                          value,
-                          "z",
-                          true,
-                          fieldPath
-                        );
-                      }
+            visit(items.items[0].data, model, {
+              position(s: string, f, d, stringPath) {
+                if (stringPath === fieldPath) {
+                  if (!value) {
+                    // No Position Value passed, use end of list
+                    data = setPosition(data, model, s, "z", true, fieldPath);
+                  } else if (
+                    s === value &&
+                    String(items.items[0].id) !== String(id) // Value exists, and is not same document
+                  ) {
+                    if (items.items[1]) {
+                      // get next one and middle it
+                      visit(items.items[1].data, model, {
+                        position(nextPosition: string, g, h, nextStringPath) {
+                          if (nextStringPath === fieldPath) {
+                            data = setPosition(
+                              data,
+                              model,
+                              value,
+                              nextPosition,
+                              true,
+                              fieldPath
+                            );
+                          }
+                        }
+                      });
+                    } else {
+                      // No next one, just middle to end
+                      data = setPosition(
+                        data,
+                        model,
+                        value,
+                        "z",
+                        true,
+                        fieldPath
+                      );
                     }
                   }
                 }
-              },
-              { calli18nMultipleTimes: true }
-            );
+              }
+            });
           }
         })
       );
@@ -402,24 +387,15 @@ export default class KnexContent implements ContentAdapter {
     const rows: any[] = [];
     Object.entries(values).forEach(([field, value]) => {
       const fieldType = getFieldFromModelPath(field, model);
-      if (Array.isArray(value)) {
-        return value.forEach(val =>
-          rows.push({
-            id,
-            rev,
-            published,
-            field,
-            ...serialize(val, fieldType)
-          })
-        );
-      }
-      return rows.push({
-        id,
-        rev,
-        published,
-        field,
-        ...serialize(value, fieldType)
-      });
+      return value.forEach(val =>
+        rows.push({
+          id,
+          rev,
+          published,
+          field,
+          ...serialize(val, fieldType)
+        })
+      );
     });
     return this.knex.batchInsert("content_values", rows);
   }

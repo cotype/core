@@ -124,7 +124,7 @@ export default function convert({
       if (fallBackLanguage && fallBackLanguage.key in value) {
         return value[fallBackLanguage.key];
       }
-      return value[Object.keys(value)[0]];
+      return null;
     },
     richtext(delta: QuillDelta) {
       if (delta && delta.ops) {
@@ -168,9 +168,8 @@ export default function convert({
       }
       if (contentFormat) return formatQuillDelta(delta, contentFormat);
     },
-    list(list: { key: number; value: object }[]) {
+    list(list: { key: number; value: object }[], a, b, c) {
       const { publishedOnly, ignoreSchedule } = previewOpts;
-
       const visible = (item: any) => {
         if (!publishedOnly || ignoreSchedule) return true;
         const now = new Date();
@@ -178,7 +177,6 @@ export default function convert({
         const past = item.visibleUntil && new Date(item.visibleUntil) < now;
         return !(future || past);
       };
-
       return list && Array.isArray(list)
         ? list
             .filter(Boolean)

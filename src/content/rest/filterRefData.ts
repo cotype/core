@@ -1,7 +1,6 @@
 import * as Cotype from "../../../typings";
 import pick = require("lodash/pick");
 import visit from "../../model/visit";
-import visitConvertedRestContent from "./visit";
 import { Field } from "../../../typings";
 
 const getModelsFromFieldType = (field: Field): string[] =>
@@ -67,8 +66,7 @@ export const getDeepJoins = (
         list(s: string, field, d, stringPath) {
           deepJoinParser(stringPath, field);
         }
-      },
-      { calli18nMultipleTimes: true }
+      }
     );
   });
   if (Object.keys(deeperJoins).length > 0) {
@@ -130,7 +128,7 @@ export const getContainingMedia = (
 ) => {
   const containingMedia: Cotype.MediaRefs = {};
   if (model && content) {
-    visitConvertedRestContent(content, model, {
+    visit(content, model, {
       media(m: { _id: string } | null) {
         if (!m) return;
         if (media[m._id]) containingMedia[m._id] = media[m._id];

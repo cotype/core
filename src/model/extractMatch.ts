@@ -45,8 +45,7 @@ export default function extractMatch(
         const text = formatQuillDelta(delta, "plaintext");
         if (text && field.search !== false) add(text);
       }
-    },
-    { calli18nMultipleTimes:true }
+    }
   );
   if (!query) return;
 

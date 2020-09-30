@@ -44,7 +44,11 @@ export type RewriteDataIterator = (
   meta: MetaData
 ) => void | Data | Promise<Data>;
 
-function findValueByPath(path: string | undefined, data: Cotype.Data, language?:string) {
+function findValueByPath(
+  path: string | undefined,
+  data: Cotype.Data,
+  language?: string
+) {
   if (!path) return;
 
   const titlePath = path.split(".");
@@ -139,7 +143,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     const model = this.getModel(type);
     if (!model) return null;
-    const { title: titlePath, image:imagePath, singular, orderBy } = model;
+    const { title: titlePath, image: imagePath, singular, orderBy } = model;
 
     const title = findValueByPath(titlePath, data);
     const orderValue = findValueByPath(orderBy || titlePath, data);
@@ -166,7 +170,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     const model = this.getModel(type);
     if (!model) return null;
-    const { title: titlePath, image:imagePath, singular } = model;
+    const { title: titlePath, image: imagePath, singular } = model;
 
     const title = findValueByPath(titlePath, data, language);
     const image = findValueByPath(imagePath, data, language);
@@ -373,6 +377,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.Content | null> {
     const content = await this.adapter.load(model, id, previewOpts);
+
     if (content) {
       removeDeprecatedData(content.data, model, true);
     }

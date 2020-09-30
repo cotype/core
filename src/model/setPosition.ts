@@ -30,8 +30,7 @@ export default function setPosition(
           }
         }
       }
-    },
-    { calli18nMultipleTimes: true }
+    }
   );
   return obj;
 }

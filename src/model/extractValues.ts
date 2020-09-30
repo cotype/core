@@ -6,55 +6,47 @@ import visit from "./visit";
  */
 
 const scalars = ["string", "number", "boolean", "position"];
-const extractValues = (obj: object, model: Model) => {
-  const values: any = {};
+const extractValues = (
+  obj: object,
+  model: Model
+): { [s: string]: string[] } => {
+  const values: { [s: string]: string[] } = {};
   const uniqueFields = [
     ...getAlwaysUniqueFields(model),
     model.title,
     model.orderBy
   ];
-  const setValue = (
-    path: string,
-    value: any,
-    index: boolean,
-    i18n: boolean
-  ) => {
+  const setValue = (path: string, value: any, index: boolean) => {
     if (!index && !uniqueFields.includes(path)) {
       return;
     }
     if (typeof value === "undefined") {
       return;
     }
-    if (i18n) {
-      values[path] = Object.values(value);
-    } else {
-      values[path] = value;
+    if (!values[path]) {
+      values[path] = [];
     }
+    values[path].push(value);
   };
   visit(
     obj,
     model,
     {
       string(s: string, field, d, stringPath) {
-        setValue(stringPath, s, field.index, "i18n" in field && field.i18n);
+        setValue(stringPath, s, field.index);
       },
       number(s: string, field, d, stringPath) {
-        setValue(stringPath, s, field.index, "i18n" in field && field.i18n);
+        setValue(stringPath, s, field.index);
       },
       boolean(s: string, field, d, stringPath) {
-        setValue(stringPath, !!s, field.index, "i18n" in field && field.i18n);
+        setValue(stringPath, !!s, field.index);
       },
       position(s: string, field, d, stringPath) {
-        setValue(stringPath, s, field.index, "i18n" in field && field.i18n);
+        setValue(stringPath, s, field.index);
       },
       list(arr: any[], field, d, stringPath) {
         if (!arr || arr.length === 0) {
-          setValue(
-            stringPath,
-            "null",
-            field.item.index,
-            "i18n" in field && field.i18n
-          );
+          setValue(stringPath, "null", field.item.index);
         } else if (scalars.includes(field.item.type)) {
           setValue(
             stringPath,
@@ -65,8 +57,7 @@ const extractValues = (obj: object, model: Model) => {
                     return [k, ((v || []) as any[]).map((el: any) => el.value)];
                   })
                 ),
-            field.item.index,
-            "i18n" in field && field.i18n
+            field.item.index
           );
         } else if (field.item.type === "content") {
           setValue(
@@ -83,8 +74,7 @@ const extractValues = (obj: object, model: Model) => {
                     ];
                   })
                 ),
-            field.item.index,
-            "i18n" in field && field.i18n
+            field.item.index
           );
         } else if (field.item.type === "object") {
           const parse = (a: object[]) =>
@@ -121,8 +111,7 @@ const extractValues = (obj: object, model: Model) => {
                 setValue(
                   path,
                   args.map(v => v.value),
-                  args[0].index,
-                  args[0].i18n
+                  args[0].index
                 )
               );
             });

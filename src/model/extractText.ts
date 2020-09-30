@@ -28,8 +28,7 @@ export default function extractText(obj: object, model: Model) {
         const text = formatQuillDelta(delta, "plaintext");
         if (text && field.search !== false) tokens.push(text);
       }
-    },
-    { calli18nMultipleTimes: true }
+    }
   );
   return tokens.join(" ");
 }

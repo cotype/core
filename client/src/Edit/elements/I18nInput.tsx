@@ -101,7 +101,7 @@ export default class I18nInput extends Component<Props> {
                       )
                       .join(", ")}`
                   : undefined,
-                hidden: this.props.activeLanguage?.key !== l.key
+                hidden: false //this.props.activeLanguage?.key !== l.key
               };
             })
             .filter(Boolean)

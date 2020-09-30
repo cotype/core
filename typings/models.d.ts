@@ -1,3 +1,5 @@
+import { Language } from "./entities";
+
 export type VirtualType = {
   type: "virtual";
 } & (
@@ -311,6 +313,7 @@ export type ModelBuilderOpts = Partial<ModelOpts> & {
   required?: boolean;
   writable?: boolean;
   external?: boolean;
+  languages?: Language[] | null;
 };
 
 export type RequireOne<T, K extends keyof T> = T &

@@ -10,8 +10,7 @@ const getPositionFields = (model: Cotype.Model): string[] => {
       position(s: string, f, d, stringPath) {
         if (stringPath) uniqueFields.push(stringPath);
       }
-    },
-    { calli18nMultipleTimes: true }
+    }
   );
   return uniqueFields;
 };
@@ -34,8 +33,7 @@ export const getPositionFieldsWithValue = (
             fieldPath: stringPath
           });
       }
-    },
-    { calli18nMultipleTimes: true }
+    }
   );
   return fields;
 };

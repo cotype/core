@@ -172,10 +172,10 @@ export const clientMiddleware = (basePath: string = "/") =>
           } else next();
         });
 
-function getModels(opts: Pick<Opts, "externalDataSources" | "models">) {
+function getModels(opts: Pick<Opts, "externalDataSources" | "models"|"languages">) {
   const externalDataSources = (opts.externalDataSources || []).map(withAuth);
   return {
-    models: buildModels(opts.models, externalDataSources),
+    models: buildModels(opts.models, externalDataSources, opts.languages),
     externalDataSources
   };
 }

@@ -357,7 +357,7 @@ export const models: ModelOpts[] = [
           type: "string",
           label: "String",
           index: true,
-          i18n: true,
+          i18n: true
         }
       },
 

@@ -92,8 +92,7 @@ export default function extractRefs(
           }
         }
       }
-    },
-    { calli18nMultipleTimes: true }
+    }
   );
   return refs.map(({ fieldNames, ...ref }) =>
     fieldNames ? { fieldNames: fieldNames.join("~"), ...ref } : ref

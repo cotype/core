@@ -21,17 +21,15 @@ export default function visit(
   visitor: Visitor,
   options?: {
     flattenList?: boolean;
-    language?: string;
-    calli18nMultipleTimes?: boolean;
+    withI18nFlag?: boolean;
   }
 ) {
   const opts: {
     flattenList: boolean;
-    language?: string;
-    calli18nMultipleTimes?: boolean;
+    withI18nFlag?: boolean;
   } = {
     flattenList: true,
-    calli18nMultipleTimes: false,
+    withI18nFlag: false,
     ...options
   };
   if (!obj) return;
@@ -43,12 +41,69 @@ export default function visit(
     stringPath: string = ""
   ) => {
     if (!m) return;
-    let parsedValue = value;
-    if ("i18n" in m && m.i18n && opts.language && opts.language in value) {
-      parsedValue = value[opts.language];
+
+    if ("i18n" in m && m.i18n) {
+      if (model.languages) {
+        if ("i18n" in visitor) {
+          const ret = visitor.i18n(
+            value,
+            m,
+            () => {
+              if (parent && key) {
+                _.set(parent, key, undefined);
+              }
+            },
+            Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + key // Remove Dot and ArrayKey when Parent is List
+          );
+          if (typeof ret !== "undefined") {
+            if (parent && key) {
+              _.set(parent, key, ret);
+            }
+          }
+        }
+        model.languages.map(l => {
+          walk(
+            {
+              ...m,
+              i18n: false
+            },
+            (value || {})[l.key],
+            opts.withI18nFlag ? l.key : key,
+            opts.withI18nFlag ? value : parent,
+            stringPath + (opts.withI18nFlag ? `${l.key}.` : "")
+          );
+        });
+        return;
+      }
     }
-    if ("i18n" in visitor && "i18n" in m && m.i18n) {
-      const ret = visitor.i18n(
+    if (m.type === "object") {
+      Object.keys(m.fields).forEach(fieldKey =>
+        walk(
+          m.fields[fieldKey],
+          (value || {})[fieldKey],
+          fieldKey,
+          value,
+          stringPath + key + "."
+        )
+      );
+    }
+    if (m.type === "list" && opts.flattenList) {
+      if (Array.isArray(value))
+        value.forEach((item, i: number) =>
+          walk(m.item, item.value, String(i), value, stringPath + key + ".")
+        );
+    }
+    if (m.type === "union") {
+      if (value) {
+        const { _type } = value;
+        walk(m.types[_type], value, key, parent, stringPath + key + ".");
+      }
+    }
+    if (m.type === "immutable") {
+      walk(m.child, value, key, parent, stringPath);
+    }
+    if (m.type in visitor) {
+      const ret = visitor[m.type](
         value,
         m,
         () => {
@@ -60,72 +115,11 @@ export default function visit(
       );
       if (typeof ret !== "undefined") {
         if (parent && key) {
-          _.set(parent, key, ret);
-          parsedValue = ret;
-        }
-      }
-    }
-    if (m.type === "object") {
-      Object.keys(m.fields).forEach(fieldKey =>
-        walk(
-          m.fields[fieldKey],
-          (parsedValue || {})[fieldKey],
-          fieldKey,
-          parsedValue,
-          stringPath + key + "."
-        )
-      );
-    }
-    if (m.type === "list" && opts.flattenList) {
-      if (Array.isArray(parsedValue))
-        parsedValue.forEach((item, i: number) =>
-          walk(m.item, item.value, String(i), value, stringPath + key + ".")
-        );
-    }
-    if (m.type === "union") {
-      if (parsedValue) {
-        const { _type } = parsedValue;
-        walk(
-          m.types[_type],
-          parsedValue,
-          undefined,
-          undefined,
-          stringPath + key + "."
-        );
-      }
-    }
-    if (m.type === "immutable") {
-      walk(m.child, parsedValue, key, parent, stringPath);
-    }
-
-
-    if (m.type in visitor) {
-      const innerVisitor = (v: any, k: string) => {
-        const ret = visitor[m.type](
-          v,
-          m,
-          () => {
-            if (parent && key) {
-              _.set(parent, k, undefined);
-            }
-          },
-          Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + k // Remove Dot and ArrayKey when Parent is List
-        );
-        if (typeof ret !== "undefined") {
-          if (parent && key) {
-            if (ret === NO_STORE_VALUE) {
-              return _.set(parent, k, undefined);
-            }
-            _.set(parent, k, ret);
+          if (ret === NO_STORE_VALUE) {
+            return _.set(parent, key, undefined);
           }
+          _.set(parent, key, ret);
         }
-      };
-      if ("i18n" in m && m.i18n && opts.calli18nMultipleTimes && parsedValue) {
-        Object.entries(parsedValue).forEach(([lKey, v]) => {
-          innerVisitor(v, key + "." + lKey);
-        });
-      } else {
-        innerVisitor(parsedValue, key || "");
       }
     }
   };

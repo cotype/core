@@ -22,9 +22,11 @@ const Root = styled("div")`
   margin-bottom: 20px;
 `;
 
-type Props = FieldProps<any> & Cotype.ListType & {
-  activeLanguages?: Language[];
-  activeLanguage?: Language;};
+type Props = FieldProps<any> &
+  Cotype.ListType & {
+    activeLanguages?: Language[];
+    activeLanguage?: Language;
+  };
 type State = {
   Factory?: React.ComponentClass | null;
   isSorting: boolean;
