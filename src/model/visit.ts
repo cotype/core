@@ -90,7 +90,13 @@ export default function visit(
     if (m.type === "list" && opts.flattenList) {
       if (Array.isArray(value))
         value.forEach((item, i: number) =>
-          walk(m.item, item.value, String(i), value, stringPath + key + ".")
+          walk(
+            m.item,
+            item.value || item,
+            String(i),
+            value,
+            stringPath + key + "."
+          )
         );
     }
     if (m.type === "union") {
