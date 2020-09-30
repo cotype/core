@@ -55,57 +55,55 @@ export default class I18nInput extends Component<Props> {
     return (
       <Fields
         layout={"inline"}
-        fields={
-          this.props.activeLanguages
-            .map(l => {
-              const fieldName = `${name}.${l.key}`;
-              const langError = getIn(this.props.form.errors, name);
-              const error = getIn(this.props.form.errors, fieldName);
+        fields={this.props.activeLanguages
+          .map(l => {
+            const fieldName = `${name}.${l.key}`;
+            const langError = getIn(this.props.form.errors, name);
+            const error = getIn(this.props.form.errors, fieldName);
 
-              const element = (
-                <Field
-                  {...fieldProps}
-                  name={fieldName}
-                  field={{
-                    ...this.props.field,
-                    name: fieldName,
-                    value:
-                      value && l.key in value
-                        ? value[l.key]
-                        : Input.getDefaultValue &&
-                          Input.getDefaultValue(
-                            this.props,
-                            this.props.activeLanguages
-                          )
-                  }}
-                  render={props => <Input {...fieldProps} {...props} />}
-                  validate={b => {
-                    if (typeof Input.validate === "function") {
-                      return Input.validate(b, this.props);
-                    }
-                  }}
-                />
-              );
-              return {
-                label: "",
-                element,
-                key: l.key,
-                error: hasActuallyErrors(error)
-                  ? error
-                  : langError
-                  ? `Field in other language wrong: ${Object.keys(langError)
-                      .map(
-                        le =>
-                          this.props.activeLanguages?.find(aL => aL.key === le)
-                            ?.title
-                      )
-                      .join(", ")}`
-                  : undefined,
-                hidden: this.props.activeLanguage?.key !== l.key
-              };
-            })
-            .filter(Boolean)
-        }
+            const element = (
+              <Field
+                {...fieldProps}
+                name={fieldName}
+                field={{
+                  ...this.props.field,
+                  name: fieldName,
+                  value:
+                    value && typeof value === "object" && l.key in value
+                      ? value[l.key]
+                      : Input.getDefaultValue &&
+                        Input.getDefaultValue(
+                          this.props,
+                          this.props.activeLanguages
+                        )
+                }}
+                render={props => <Input {...fieldProps} {...props} />}
+                validate={b => {
+                  if (typeof Input.validate === "function") {
+                    return Input.validate(b, this.props);
+                  }
+                }}
+              />
+            );
+            return {
+              label: "",
+              element,
+              key: l.key,
+              error: hasActuallyErrors(error)
+                ? error
+                : langError
+                ? `Field in other language wrong: ${Object.keys(langError)
+                    .map(
+                      le =>
+                        this.props.activeLanguages?.find(aL => aL.key === le)
+                          ?.title
+                    )
+                    .join(", ")}`
+                : undefined,
+              hidden: this.props.activeLanguage?.key !== l.key
+            };
+          })
+          .filter(Boolean)}
       />
     );
   }
