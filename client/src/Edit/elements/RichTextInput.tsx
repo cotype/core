@@ -34,6 +34,7 @@ export default class RichTextInput extends Component<Props> {
     if (isRequired) return isRequired;
   }
   quillRef: any | null = null;
+  quillRefBox: any | null = null;
   state: State = {
     open: false,
     text: "",
@@ -45,7 +46,7 @@ export default class RichTextInput extends Component<Props> {
   };
   setQuillToolTips = () => {
     const that = this;
-    this.quillRef.theme.tooltip.show = function() {
+    this.quillRef.theme.tooltip.show = function () {
       const value = that.quillRef.getText(
         this.linkRange.index,
         this.linkRange.length
@@ -125,13 +126,20 @@ export default class RichTextInput extends Component<Props> {
           key={typeof value === "string" ? "html" : "delta"}
           innerRef={el => {
             if (el) {
+              this.quillRefBox = el;
               this.quillRef = el.getEditor();
               this.setQuillToolTips();
             }
           }}
           value={value}
+          id={this.props.field.name}
           bounds="#edit-form"
           onChange={this.handleChange}
+          onFocus={() => {
+            setTimeout(() => {
+              this.quillRefBox.focus();
+            }, 1);
+          }}
           theme="snow"
           formats={formats}
           modules={{
