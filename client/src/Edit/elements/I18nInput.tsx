@@ -85,7 +85,7 @@ export default class I18nInput extends Component<Props> {
                       ...props.field,
                       onChange: e => {
                         const getActual = getIn(props.form.values, name);
-                        if (getActual !== "object") {
+                        if (typeof getActual !== "object") {
                           props.form.setFieldValue(name, {});
                         }
                         props.field.onChange(e);
