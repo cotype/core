@@ -207,6 +207,10 @@ export default class ObjectInput extends Component<Props> {
               display: "flex",
               alignItems: "flex-end"
             }}
+            onClick={e => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
           >
             {this.renderSummary()}
             <div>

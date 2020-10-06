@@ -135,11 +135,6 @@ export default class RichTextInput extends Component<Props> {
           id={this.props.field.name}
           bounds="#edit-form"
           onChange={this.handleChange}
-          onFocus={() => {
-            setTimeout(() => {
-              this.quillRefBox.focus();
-            }, 1);
-          }}
           theme="snow"
           formats={formats}
           modules={{

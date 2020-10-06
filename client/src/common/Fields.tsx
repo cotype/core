@@ -80,7 +80,12 @@ export default class Fields extends Component<Props> {
     const { fields, layout = "vertical" } = this.props;
     if (layout === "horizontal") {
       return (
-        <table>
+        <table
+          onClick={e => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
           <tbody>
             {fields.map(f => (
               <tr key={f.key || f.label}>
@@ -95,7 +100,12 @@ export default class Fields extends Component<Props> {
     }
     if (layout === "inline") {
       return (
-        <div>
+        <div
+          onClick={e => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
           {fields.map(f => (
             <FieldBlockLabel key={f.key || f.label} hidden={f.hidden}>
               {f.element}
@@ -108,7 +118,13 @@ export default class Fields extends Component<Props> {
     }
     if (layout === "inList") {
       return (
-        <div style={{ width: "100%" }}>
+        <div
+          style={{ width: "100%" }}
+          onClick={e => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
           {fields.map(f => (
             <FieldListBlock key={f.key || f.label}>
               <LabelBlock>{f.label}</LabelBlock>
@@ -120,7 +136,12 @@ export default class Fields extends Component<Props> {
       );
     }
     return (
-      <div>
+      <div
+        onClick={e => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
         {fields.map(f => (
           <FieldBlock key={f.key || f.label} hidden={f.hidden}>
             <LabelBlock>{f.label}</LabelBlock>

@@ -103,7 +103,7 @@ export default class I18nInput extends Component<Props> {
             return {
               label: "",
               element,
-              key: l.key,
+              key: fieldName,
               error: hasActuallyErrors(error)
                 ? error
                 : langError

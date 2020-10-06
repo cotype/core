@@ -154,7 +154,10 @@ const SortableItem = SortableElement(
         hasError={hasActuallyErrors(error)}
       >
         {sortable && <DragHandle />}
-        <ItemField sortable={sortable} isSorting={isSorting}>
+        <ItemField
+          sortable={sortable}
+          isSorting={isSorting}
+        >
           <Field
             name={fieldName}
             render={props => (
