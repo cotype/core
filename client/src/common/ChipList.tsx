@@ -96,7 +96,7 @@ export default class ChipList extends Component<Props, State> {
             value={newValue}
             onChange={e => this.setState({ newValue: e.target.value })}
           />
-          <Button icon={paths.Plus} light type="submit">
+          <Button icon={paths.Plus} light onClick={this.onAdd}>
             Add
           </Button>
         </Form>
