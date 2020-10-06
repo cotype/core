@@ -64,7 +64,7 @@ type State = {
   orderBy?: string;
   order?: string;
   search?: string;
-  filters: ({ label: string; value: string })[];
+  filters: { label: string; value: string }[];
   topbarProgress: number | undefined;
   unUsed: boolean;
 };
@@ -264,7 +264,12 @@ export default class Media extends Component<Props, State> {
   render() {
     const { details, conflictingItems, filters } = this.state;
     return (
-      <Root {...testable("upload-zone")}>
+      <Root
+        {...testable("upload-zone")}
+        onClick={e => {
+          e.stopPropagation();
+        }}
+      >
         {conflictingItems && (
           <ConflictDialog
             onClose={this.closeConflict}

@@ -258,7 +258,12 @@ export default class MediaInput extends Component<Props, State> {
           maxHeight
         }}
         render={({ progress, complete, onFiles }: any) => (
-          <Root {...testable("upload-zone")}>
+          <Root
+            {...testable("upload-zone")}
+            onClick={e => {
+              e.stopPropagation();
+            }}
+          >
             {progress && !complete ? (
               <ProgressCircle size={150} percentage={progress} />
             ) : media ? (
