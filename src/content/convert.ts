@@ -213,13 +213,17 @@ export default function convert({
       if (!value) {
         return value;
       }
-      if (language && language in value) {
+      if (language && typeof value === "object" && language in value) {
         return value[language];
       }
-      if (fallBackLanguage && fallBackLanguage.key in value) {
+      if (
+        fallBackLanguage &&
+        typeof value === "object" &&
+        fallBackLanguage.key in value
+      ) {
         return value[fallBackLanguage.key];
       }
-      return null;
+      return value;
     }
   });
   return content;

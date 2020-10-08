@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import styled, { css } from "styled-components/macro";
 import ImageCircle from "../common/ImageCircle";
 import { testable } from "../utils/helper";
+import { mediaBasePath } from "../basePath";
 
 const activeClass = css`
   background-color: var(--accent-color) !important;
@@ -54,7 +55,7 @@ export default class Item extends Component<ItemProps> {
   render() {
     const { id, title, image, style, baseUrl, className, small } = this.props;
     const src =
-      image && (image.includes("://") ? image : `/thumbs/square/${image}`);
+      image && (image.includes("://") ? image : `${mediaBasePath}/thumbs/square/${image}`);
     return (
       <StyledNavLink
         to={`${baseUrl}/edit/${id}`}
