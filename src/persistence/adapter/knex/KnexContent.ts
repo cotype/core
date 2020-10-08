@@ -1351,9 +1351,8 @@ export default class KnexContent implements ContentAdapter {
     if (orderByColumn) {
       selectColumns.push(orderByColumn);
     }
-
+    k.groupBy("contents.id")
     const items = k.select(selectColumns);
-
     return {
       total,
       items: (await items).map((item: any) => this.parseData(item, model))
