@@ -67,32 +67,36 @@ export default class I18nInput extends Component<Props> {
                 name={fieldName}
                 field={{
                   ...this.props.field,
-                  name: fieldName,
-                  value:
-                    value && typeof value === "object" && l.key in value
-                      ? value[l.key]
-                      : Input.getDefaultValue &&
-                        Input.getDefaultValue(
-                          this.props,
-                          this.props.activeLanguages
-                        )
+                  name: fieldName
                 }}
-                render={props => (
-                  <Input
-                    {...fieldProps}
-                    {...props}
-                    field={{
-                      ...props.field,
-                      onChange: e => {
-                        const getActual = getIn(props.form.values, name);
-                        if (typeof getActual !== "object") {
-                          props.form.setFieldValue(name, {});
-                        }
-                        props.field.onChange(e);
-                      }
-                    }}
-                  />
-                )}
+                render={props => {
+                  return (
+                    <Input
+                      {...fieldProps}
+                      {...props}
+                      field={{
+                        ...props.field,
+                        onChange: e => {
+                          const getActual = getIn(props.form.values, name);
+                          if (typeof getActual !== "object") {
+                            props.form.setFieldValue(name, {});
+                          }
+                          props.field.onChange(e);
+                        },
+                        value:
+                          value && typeof value === "object" && l.key in value
+                            ? value[l.key]
+                            : value && typeof value === "string"
+                            ? value
+                            : Input.getDefaultValue &&
+                              Input.getDefaultValue(
+                                this.props,
+                                this.props.activeLanguages
+                              )
+                      }}
+                    />
+                  );
+                }}
                 validate={b => {
                   if (typeof Input.validate === "function") {
                     return Input.validate(b, this.props);
