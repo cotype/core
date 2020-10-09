@@ -11,7 +11,8 @@ type Visitor = {
     value: any,
     field: any,
     deleteFunc: () => void,
-    stringPath: string
+    stringPath: string,
+    langKey?: string
   ) => void | typeof NO_STORE_VALUE | any;
 };
 
@@ -38,7 +39,8 @@ export default function visit(
     value: any,
     key?: string,
     parent?: object,
-    stringPath: string = ""
+    stringPath: string = "",
+    langKey?: string
   ) => {
     if (!m) return;
 
@@ -70,7 +72,8 @@ export default function visit(
             (value || {})[l.key],
             opts.withI18nFlag ? l.key : key,
             opts.withI18nFlag ? value : parent,
-            stringPath + (opts.withI18nFlag ? `${l.key}.` : "")
+            stringPath + (opts.withI18nFlag ? `${l.key}.` : ""),
+            l.key
           );
         });
         return;
@@ -83,7 +86,8 @@ export default function visit(
           (value || {})[fieldKey],
           fieldKey,
           value,
-          stringPath + key + "."
+          stringPath + key + ".",
+          langKey
         )
       );
     }
@@ -95,18 +99,26 @@ export default function visit(
             item.value || item,
             String(i),
             value,
-            stringPath + key + "."
+            stringPath + key + ".",
+            langKey
           )
         );
     }
     if (m.type === "union") {
       if (value) {
         const { _type } = value;
-        walk(m.types[_type], value, key, parent, stringPath + key + ".");
+        walk(
+          m.types[_type],
+          value,
+          key,
+          parent,
+          stringPath + key + ".",
+          langKey
+        );
       }
     }
     if (m.type === "immutable") {
-      walk(m.child, value, key, parent, stringPath);
+      walk(m.child, value, key, parent, stringPath, langKey);
     }
     if (m.type in visitor) {
       const ret = visitor[m.type](
@@ -117,7 +129,8 @@ export default function visit(
             _.set(parent, key, undefined);
           }
         },
-        Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + key // Remove Dot and ArrayKey when Parent is List
+        Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + key, // Remove Dot and ArrayKey when Parent is List,
+        langKey
       );
       if (typeof ret !== "undefined") {
         if (parent && key) {

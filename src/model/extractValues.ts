@@ -9,14 +9,19 @@ const scalars = ["string", "number", "boolean", "position"];
 const extractValues = (
   obj: object,
   model: Model
-): { [s: string]: string[] } => {
-  const values: { [s: string]: string[] } = {};
+): { [s: string]: { v: string; lang?: string }[] } => {
+  const values: { [s: string]: { v: string; lang?: string }[] } = {};
   const uniqueFields = [
     ...getAlwaysUniqueFields(model),
     model.title,
     model.orderBy
   ];
-  const setValue = (path: string, value: any, index: boolean) => {
+  const setValue = (
+    path: string,
+    value: any,
+    index: boolean,
+    i18n?: string
+  ) => {
     if (!index && !uniqueFields.includes(path)) {
       return;
     }
@@ -26,31 +31,39 @@ const extractValues = (
     if (!values[path]) {
       values[path] = [];
     }
-    if(Array.isArray(value)){
-      value.forEach(v=>values[path].push(v))
-    }else{
-      values[path].push(value);
+    if (Array.isArray(value)) {
+      value.forEach(v =>
+        values[path].push({
+          lang: i18n,
+          v
+        })
+      );
+    } else {
+      values[path].push({
+        lang: i18n,
+        v: value
+      });
     }
   };
   visit(
     obj,
     model,
     {
-      string(s: string, field, d, stringPath) {
-        setValue(stringPath, s, field.index);
+      string(s: string, field, d, stringPath, langKey) {
+        setValue(stringPath, s, field.index, langKey);
       },
-      number(s: string, field, d, stringPath) {
-        setValue(stringPath, s, field.index);
+      number(s: string, field, d, stringPath, langKey) {
+        setValue(stringPath, s, field.index, langKey);
       },
-      boolean(s: string, field, d, stringPath) {
-        setValue(stringPath, !!s, field.index);
+      boolean(s: string, field, d, stringPath, langKey) {
+        setValue(stringPath, !!s, field.index, langKey);
       },
-      position(s: string, field, d, stringPath) {
-        setValue(stringPath, s, field.index);
+      position(s: string, field, d, stringPath, langKey) {
+        setValue(stringPath, s, field.index, langKey);
       },
-      list(arr: any[], field, d, stringPath) {
+      list(arr: any[], field, d, stringPath, langKey) {
         if (!arr || arr.length === 0) {
-          setValue(stringPath, "null", field.item.index);
+          setValue(stringPath, "null", field.item.index, langKey);
         } else if (scalars.includes(field.item.type)) {
           setValue(
             stringPath,
@@ -61,7 +74,8 @@ const extractValues = (
                     return [k, ((v || []) as any[]).map((el: any) => el.value)];
                   })
                 ),
-            field.item.index
+            field.item.index,
+            langKey
           );
         } else if (field.item.type === "content") {
           setValue(
@@ -78,7 +92,8 @@ const extractValues = (
                     ];
                   })
                 ),
-            field.item.index
+            field.item.index,
+            langKey
           );
         } else if (field.item.type === "object") {
           const parse = (a: object[]) =>
@@ -115,7 +130,8 @@ const extractValues = (
                 setValue(
                   path,
                   args.map(v => v.value),
-                  args[0].index
+                  args[0].index,
+                  langKey
                 )
               );
             });

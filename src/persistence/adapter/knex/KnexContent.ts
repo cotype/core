@@ -393,7 +393,8 @@ export default class KnexContent implements ContentAdapter {
           rev,
           published,
           field,
-          ...serialize(val, fieldType)
+          lang: val.lang,
+          ...serialize(val.v, fieldType)
         })
       );
     });
@@ -1075,7 +1076,6 @@ export default class KnexContent implements ContentAdapter {
         "content_revisions.rev"
       );
     });
-
     if (language) {
       k.andWhere("content_revisions.activeLanguages", "LIKE", `%${language}%`);
     }
@@ -1256,6 +1256,13 @@ export default class KnexContent implements ContentAdapter {
                 }
                 const v = value ? String(value).toLowerCase().trim() : value;
                 k.andWhere(`vals${counter}.literal_lc`, sqlOp, v);
+                if (language) {
+                  k.andWhere(w => {
+                    w.where(`vals${counter}.lang`, "=", language);
+                    w.orWhere(`vals${counter}.lang`, "=", "");
+                    w.orWhereNull(`vals${counter}.lang`);
+                  });
+                }
               }
             });
           });
@@ -1277,7 +1284,6 @@ export default class KnexContent implements ContentAdapter {
         join.andOnIn("orderValue.field", [orderBy]);
       });
     }
-
     const [count] = await k.clone().countDistinct("contents.id as total");
     const total = Number(count.total);
     if (total === 0) return { total, items: [] };
@@ -1351,7 +1357,7 @@ export default class KnexContent implements ContentAdapter {
     if (orderByColumn) {
       selectColumns.push(orderByColumn);
     }
-    k.groupBy("contents.id")
+    k.groupBy("contents.id");
     const items = k.select(selectColumns);
     return {
       total,
