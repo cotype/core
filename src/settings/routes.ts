@@ -38,45 +38,55 @@ export default (router: Router, persistence: Persistence, model: Model) => {
   });
 
   /** Create */
-  router.post(`/admin/rest/${modelType}/${modelName}`, async (req: any, res) => {
-    const { principal, body } = req;
-    const { data } = body;
-    // TODO move to hooks!
-    if (modelName === "users") {
-      const { email, role, newPassword } = data;
-      const missingFields: string[] = [];
-      if (!email) missingFields.push("email");
-      if (!role) missingFields.push("role");
-      if (!newPassword) missingFields.push("password");
+  router.post(
+    `/admin/rest/${modelType}/${modelName}`,
+    async (req: any, res) => {
+      try {
+        const { principal, body } = req;
+        const { data } = body;
+        // TODO move to hooks!
+        if (modelName === "users") {
+          const { email, role, newPassword } = data;
+          const missingFields: string[] = [];
+          if (!email) missingFields.push("email");
+          if (!role) missingFields.push("role");
+          if (!newPassword) missingFields.push("password");
 
-      if (missingFields.length > 0) {
-        let message =
-          "Following fields are missing in order to create a new user: ";
-        missingFields.forEach((e, index) => {
-          if (index + 1 === missingFields.length) {
-            message += `${e}!`;
-          } else if (index + 1 === missingFields.length - 1) {
-            message += `${e} and `;
-          } else {
-            message += `${e}, `;
+          if (missingFields.length > 0) {
+            let message =
+              "Following fields are missing in order to create a new user: ";
+            missingFields.forEach((e, index) => {
+              if (index + 1 === missingFields.length) {
+                message += `${e}!`;
+              } else if (index + 1 === missingFields.length - 1) {
+                message += `${e} and `;
+              } else {
+                message += `${e}, `;
+              }
+            });
+            return res.status(409).json({ message });
           }
-        });
-        return res.status(409).json({ message });
+        }
+
+        const id = await settings.create(principal, model, data);
+        res.json({ id, data });
+      } catch (e) {
+        res.json({ error: e });
       }
     }
-
-    const id = await settings.create(principal, model, data);
-    res.json({ id, data });
-  });
+  );
 
   /** Load */
-  router.get(`/admin/rest/${modelType}/${modelName}/:id`, async (req: any, res) => {
-    const { principal, params } = req;
-    const record = await settings.load(principal, model, params.id);
+  router.get(
+    `/admin/rest/${modelType}/${modelName}/:id`,
+    async (req: any, res) => {
+      const { principal, params } = req;
+      const record = await settings.load(principal, model, params.id);
 
-    if (!record) return res.status(404).end();
-    res.json({ id: record.id, data: getData(record) });
-  });
+      if (!record) return res.status(404).end();
+      res.json({ id: record.id, data: getData(record) });
+    }
+  );
 
   /** Load */
   router.get(
@@ -91,17 +101,23 @@ export default (router: Router, persistence: Persistence, model: Model) => {
   );
 
   /** Update */
-  router.put(`/admin/rest/${modelType}/${modelName}/:id`, async (req: any, res) => {
-    const { principal, body } = req;
-    const { id, ...data } = await settings.update(
-      principal,
-      model,
-      req.params.id,
-      body
-    );
+  router.put(
+    `/admin/rest/${modelType}/${modelName}/:id`,
+    async (req: any, res) => {
+      const {
+        principal,
+        body: { data }
+      } = req;
+      const { id, ...more } = await settings.update(
+        principal,
+        model,
+        req.params.id,
+        data
+      );
 
-    res.json({ id, data });
-  });
+      res.json({ id, data: more });
+    }
+  );
 
   /** Delete */
   router.delete(
