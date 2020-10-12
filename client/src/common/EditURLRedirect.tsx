@@ -101,6 +101,7 @@ const EditURLRedirect: React.FC<Props> = ({
               if (match) {
                 return match;
               }
+              return undefined;
             })
             .filter(Boolean);
 
