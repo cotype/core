@@ -549,7 +549,7 @@ export default class KnexContent implements ContentAdapter {
           }
 
           if (value.type === "references") {
-            hasRefs = true;
+            hasInverseRefs = true;
 
             // No types means this data is only needed to populate _urls in refs
             if (types.length === 0) {
@@ -559,7 +559,7 @@ export default class KnexContent implements ContentAdapter {
             }
           }
           if (value.type === "content") {
-            hasInverseRefs = true;
+            hasRefs = true;
             // No types means this data is only needed to populate _urls in refs
             if (types.length === 0) {
               implicitTypes = implicitTypes.concat(

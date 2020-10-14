@@ -41,7 +41,7 @@ describe("extractValues", () => {
   it("should extract all references", () => {
     expect(extractRefs(data, model, [model])).toEqual([
       { content: 123, optional: true, fieldNames: "ref~contentList" },
-      { content: 321, optional: false },
+      { content: 321, optional: false, fieldNames: 'richText' },
       { content: 456, optional: true, fieldNames: "contentList" },
       { content: 789, optional: true, fieldNames: "contentList" }
     ]);
