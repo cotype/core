@@ -71,7 +71,7 @@ export default (router: Router, persistence: Persistence, model: Model) => {
         const id = await settings.create(principal, model, data);
         res.json({ id, data });
       } catch (e) {
-        res.json({ error: e });
+        res.status(500).json({ error: e });
       }
     }
   );
