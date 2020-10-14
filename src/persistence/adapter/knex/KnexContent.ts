@@ -540,6 +540,14 @@ export default class KnexContent implements ContentAdapter {
         visitModel(typeModel, (_, value) => {
           if (!("type" in value)) return;
 
+          if (
+            value.type === "richtext" &&
+            value.formats &&
+            value.formats.includes("link")
+          ) {
+            hasRefs = true;
+          }
+
           if (value.type === "references") {
             hasRefs = true;
 
@@ -563,17 +571,15 @@ export default class KnexContent implements ContentAdapter {
           }
         });
       });
-
       // we don't need to load anything if a model has no refs and it is a first level fetch
       // otherwise we still need to load the main data of that join
       if (first && !hasRefs && !hasInverseRefs) return [];
-
       const refTypes = !!types.length ? types : implicitTypes;
 
-      const refs = hasInverseRefs
+      const refs = hasRefs
         ? this.loadRefs(ids, !first && refTypes, previewOpts)
         : [];
-      const inverseRefs = hasRefs
+      const inverseRefs = hasInverseRefs
         ? this.loadInverseRefs(ids, !first && refTypes, previewOpts)
         : [];
 

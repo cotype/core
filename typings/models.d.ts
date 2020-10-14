@@ -43,7 +43,7 @@ type LinkOpts = "mail" | "media" | "link" | "tel";
 export type RichtextType = {
   type: "richtext";
   required?: boolean;
-  formats?: any[][] | string[];
+  formats?: string[];
   linkFormats?: LinkOpts[];
   modules?: {
     [key: string]: any;
