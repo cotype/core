@@ -153,7 +153,37 @@ export default class KnexContent implements ContentAdapter {
     );
     return id;
   }
+  async innerTestUniqueFields(
+    model: Cotype.Model,
+    models: Cotype.Model[],
+    value: string,
+    fieldName: string,
+    lang?: string,
+    id?: string
+  ) {
+    const criteria: any = {};
+    criteria[`data.${fieldName}`] = { eq: value, ne: "" };
+    const opts = { offset: 0, limit: 1 };
+    const p1 = this.list(model, models, opts, criteria, undefined,lang);
+    const p2 = this.list(
+      model,
+      models,
+      opts,
+      criteria,
+      {
+        publishedOnly: true,
+        ignoreSchedule: true
+      },
+      lang
+    );
+    const res = await Promise.all([p1, p2]);
 
+    const items = _flatten(res.map(r => r.items));
+    const existing = items.find(i => i.id.toString() !== (id && id.toString()));
+    if (existing) {
+      return { field: fieldName, existingContentId: existing.id };
+    }
+  }
   /**
    * Test if the any fields in data that are marked as unique in the model
    * already exists.
@@ -169,32 +199,42 @@ export default class KnexContent implements ContentAdapter {
     if (uniqueFields) {
       const resp = await Promise.all(
         uniqueFields.map(async f => {
-          const criteria: any = {};
-
           const value = (f
             .split(".")
             .reduce(
               (obj, key) =>
                 obj && obj[key] !== "undefined" ? obj[key] : undefined,
               data
-            ) as unknown) as string;
+            ) as unknown);
 
-          criteria[`data.${f}`] = { eq: value, ne: "" };
-          const opts = { offset: 0, limit: 1 };
-          const p1 = this.list(model, models, opts, criteria);
-          const p2 = this.list(model, models, opts, criteria, {
-            publishedOnly: true,
-            ignoreSchedule: true
-          });
-          const res = await Promise.all([p1, p2]);
-
-          const items = _flatten(res.map(r => r.items));
-          const existing = items.find(
-            i => i.id.toString() !== (id && id.toString())
-          );
-          if (existing) {
-            return { field: f, existingContentId: existing.id };
+          if (typeof value === "object") {
+            const errors = (
+              await Promise.all(
+                Object.entries(value).map(async ([lang, v]) => {
+                  return this.innerTestUniqueFields(
+                    model,
+                    models,
+                    String(v),
+                    f,
+                    lang,
+                    id
+                  );
+                })
+              )
+            ).filter(Boolean);
+            if (errors.length > 0) {
+              return errors[0];
+            }
+            return;
           }
+          return this.innerTestUniqueFields(
+            model,
+            models,
+            String(value),
+            f,
+            undefined,
+            id
+          );
         })
       );
 
