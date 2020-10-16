@@ -164,7 +164,7 @@ export default class KnexContent implements ContentAdapter {
     const criteria: any = {};
     criteria[`data.${fieldName}`] = { eq: value, ne: "" };
     const opts = { offset: 0, limit: 1 };
-    const p1 = this.list(model, models, opts, criteria, undefined,lang);
+    const p1 = this.list(model, models, opts, criteria, undefined, lang);
     const p2 = this.list(
       model,
       models,
@@ -199,15 +199,15 @@ export default class KnexContent implements ContentAdapter {
     if (uniqueFields) {
       const resp = await Promise.all(
         uniqueFields.map(async f => {
-          const value = (f
+          const value = f
             .split(".")
             .reduce(
               (obj, key) =>
                 obj && obj[key] !== "undefined" ? obj[key] : undefined,
               data
-            ) as unknown);
+            ) as unknown;
 
-          if (typeof value === "object") {
+          if (typeof value === "object" && value !== null) {
             const errors = (
               await Promise.all(
                 Object.entries(value).map(async ([lang, v]) => {
