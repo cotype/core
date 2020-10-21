@@ -173,6 +173,7 @@ export type ObjectType = {
   layout?: "vertical" | "horizontal" | "inline";
   modalView?: boolean;
   typeName?: string;
+  required?: boolean;
 };
 
 export type MapKeyValue = { label: string; value: string } | string;

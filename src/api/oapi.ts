@@ -273,7 +273,8 @@ export function modelSchema(
     required: Object.entries(model.fields)
       .map(([key, value]) =>
         ((value as any).type === "virtual" && (value as any).get) ||
-        (value as any).required
+        (value as any).required ||
+        (value.type === "immutable" && (value.child as any).required)
           ? key
           : null
       )

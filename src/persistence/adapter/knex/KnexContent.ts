@@ -68,9 +68,13 @@ const getRecursiveOrderField = (
   ]
 ): false | { isNumeric: boolean; withUpperCase: boolean } => {
   const [field, ...restPath] = orderPath.split(".");
-  const type = m.fields[field];
+  let type = m.fields[field];
   if (!type) {
     return false;
+  }
+
+  if (type.type === "immutable") {
+    type = type.child;
   }
   if (type.type === "list" && type.item) {
     if (type.item.type === "object" && type.item.fields) {
@@ -1328,6 +1332,11 @@ export default class KnexContent implements ContentAdapter {
           "orderValue.rev"
         );
         join.andOnIn("orderValue.field", [orderBy]);
+        if (language) {
+          join.andOn(a =>
+            a.onIn("orderValue.lang", [language]).orOnNull("orderValue.lang")
+          );
+        }
       });
     }
     const [count] = await k.clone().countDistinct("contents.id as total");
