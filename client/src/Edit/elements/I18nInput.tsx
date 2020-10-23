@@ -34,13 +34,16 @@ export default class I18nInput extends Component<Props> {
   static validate(value: any, props: Props, activeLanguages?: Language[]) {
     const Input = inputs.get(props, false);
     if (!activeLanguages) {
-      return null;
+      return undefined;
     }
-
-    return activeLanguages.reduce<Record<string, unknown>>((acc, l) => {
+    const errors = activeLanguages.reduce<Record<string, unknown>>((acc, l) => {
       acc[l.key] = Input.validate((value || {})[l.key], props, activeLanguages);
       return acc;
     }, {});
+
+    const hasErros = Object.values(errors).filter(Boolean).length > 0;
+
+    return hasErros ? errors : undefined;
   }
 
   render() {
@@ -102,7 +105,11 @@ export default class I18nInput extends Component<Props> {
                 }}
                 validate={b => {
                   if (typeof Input.validate === "function") {
-                    return Input.validate(b, this.props);
+                    return Input.validate(
+                      b,
+                      this.props,
+                      this.props.activeLanguages
+                    );
                   }
                 }}
               />

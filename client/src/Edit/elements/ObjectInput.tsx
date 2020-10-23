@@ -65,7 +65,7 @@ export default class ObjectInput extends Component<Props> {
     return initialValues;
   }
 
-  static validate(value, props) {
+  static validate(value, props, activeLanguages) {
     const isRequired = required(value, props);
     if (isRequired) return isRequired;
 
@@ -75,7 +75,11 @@ export default class ObjectInput extends Component<Props> {
         return;
       }
       const component = inputs.get(props.fields[f]);
-      const error = component.validate((value || {})[f], props.fields[f]);
+      const error = component.validate(
+        (value || {})[f],
+        props.fields[f],
+        activeLanguages
+      );
       if (error) errors[f] = error;
     });
     if (Object.keys(errors).length > 0) return errors;
