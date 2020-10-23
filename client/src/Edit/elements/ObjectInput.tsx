@@ -272,7 +272,7 @@ export default class ObjectInput extends Component<Props> {
                   {...fieldProps}
                   validate={value => {
                     if (typeof component.validate === "function") {
-                      return component.validate(value, props);
+                      return component.validate(value, props, activeLanguages);
                     }
                   }}
                   activeLanguages={activeLanguages}

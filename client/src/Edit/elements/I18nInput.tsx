@@ -33,10 +33,10 @@ export default class I18nInput extends Component<Props> {
 
   static validate(value: any, props: Props, activeLanguages?: Language[]) {
     const Input = inputs.get(props, false);
-
     if (!activeLanguages) {
       return null;
     }
+
     return activeLanguages.reduce<Record<string, unknown>>((acc, l) => {
       acc[l.key] = Input.validate((value || {})[l.key], props, activeLanguages);
       return acc;
@@ -58,7 +58,10 @@ export default class I18nInput extends Component<Props> {
         fields={this.props.activeLanguages
           .map(l => {
             const fieldName = `${name}.${l.key}`;
-            const langError = getIn(this.props.form.errors, name);
+            const langErrors = getIn(this.props.form.errors, name);
+            const langError =
+              langErrors &&
+              Object.values(langErrors).filter(Boolean).length > 0;
             const error = getIn(this.props.form.errors, fieldName);
 
             const element = (
@@ -111,12 +114,14 @@ export default class I18nInput extends Component<Props> {
               error: hasActuallyErrors(error)
                 ? error
                 : langError
-                ? `Field in other language wrong: ${Object.keys(langError)
+                ? `Field in other language wrong: ${Object.entries(langErrors)
                     .map(
-                      le =>
+                      ([le, e]) =>
+                        e &&
                         this.props.activeLanguages?.find(aL => aL.key === le)
                           ?.title
                     )
+                    .filter(Boolean)
                     .join(", ")}`
                 : undefined,
               hidden: this.props.activeLanguage?.key !== l.key
