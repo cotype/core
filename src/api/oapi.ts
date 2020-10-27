@@ -256,6 +256,15 @@ export function createDefinition(
       type: model.outputType
     };
   }
+  if (model.type === "string" && "input" in model && model.input === "select") {
+    return {
+      type: model.type,
+      enum:
+        "values" in model && model.values
+          ? model.values.map(v => (typeof v === "string" ? v : v.value))
+          : undefined
+    };
+  }
 
   return ref.schema(model.type);
 }
