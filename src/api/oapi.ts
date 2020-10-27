@@ -92,6 +92,16 @@ export function createDefinition(
   api: OpenApiBuilder
 ): SchemaObject {
   if (!model) return empty;
+
+  if (model.type === "string" && "input" in model && model.input === "select") {
+    return {
+      type: model.type,
+      enum:
+        "values" in model && model.values
+          ? model.values.map(v => (typeof v === "string" ? v : v.value))
+          : undefined
+    };
+  }
   if (model.type in scalars) return scalars[model.type];
   if (model.type === "object") {
     const schema = {
@@ -254,15 +264,6 @@ export function createDefinition(
     }
     return {
       type: model.outputType
-    };
-  }
-  if (model.type === "string" && "input" in model && model.input === "select") {
-    return {
-      type: model.type,
-      enum:
-        "values" in model && model.values
-          ? model.values.map(v => (typeof v === "string" ? v : v.value))
-          : undefined
     };
   }
 
