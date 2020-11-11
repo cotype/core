@@ -106,7 +106,7 @@ type DateString = {
 type SelectValue = { label: string; value: string | number } | string;
 
 type Select = {
-  type: "string";
+  type: "string" | "number";
   input: "select";
   nullLabel?: string;
   fetch?: string;
