@@ -103,7 +103,7 @@ export function getPreviewUrl(
   const slugUrl = slugPath.reduce(
     (obj, key) =>
       obj && obj[key] !== "undefined"
-        ? language
+        ? language && typeof obj[key] === 'object' && language.key in obj[key]
           ? obj[key][language.key]
           : obj[key]
         : undefined,
