@@ -1,17 +1,30 @@
 import React, { Component } from "react";
 import { FieldProps, getIn } from "formik";
 import Quill from "../../common/Quill";
+import QuillRef from "quill";
 import { required } from "./validation";
 import _set from "lodash/set";
-import { RichtextType } from "../../../../typings";
+import { Media as MediaType, RichtextType } from "../../../../typings";
 import RichTextLinkModal from "../RichTextLinkModal";
+import Media from "../../Media";
+import ModalDialog from "../../common/ModalDialog";
+
+import { mediaBasePath } from "../../basePath";
 
 type Props = FieldProps<any> & RichtextType;
 type State = {
   open: boolean;
+  openImageModal: boolean;
   text: string;
   link: string;
   subStr: { index: number; length: number };
+};
+
+const modalDialogStyle = {
+  width: "80vw",
+  height: "90vh",
+  background: "#f5f5f5",
+  maxWidth: 1600
 };
 
 export default class RichTextInput extends Component<Props> {
@@ -33,10 +46,11 @@ export default class RichTextInput extends Component<Props> {
     const isRequired = required(value, props);
     if (isRequired) return isRequired;
   }
-  quillRef: any | null = null;
+  quillRef: QuillRef | null = null;
   quillRefBox: any | null = null;
   state: State = {
     open: false,
+    openImageModal: false,
     text: "",
     link: "",
     subStr: {
@@ -46,7 +60,13 @@ export default class RichTextInput extends Component<Props> {
   };
   setQuillToolTips = () => {
     const that = this;
-    this.quillRef.theme.tooltip.show = function () {
+    if (!this.quillRef) {
+      return;
+    }
+    (this.quillRef as any).theme.tooltip.show = function () {
+      if (!that.quillRef) {
+        return;
+      }
       const value = that.quillRef.getText(
         this.linkRange.index,
         this.linkRange.length
@@ -86,6 +106,9 @@ export default class RichTextInput extends Component<Props> {
       selection: ""
     });
     const { index, length } = this.state.subStr;
+    if (!this.quillRef) {
+      return;
+    }
     this.quillRef.deleteText(index, length);
     if (text) {
       this.quillRef.insertText(index, text, "link", link && link);
@@ -96,7 +119,8 @@ export default class RichTextInput extends Component<Props> {
     if (!this.quillRef) {
       return;
     }
-    const { index, length } = this.quillRef.getSelection();
+    const range = this.quillRef.getSelection();
+    const { index, length } = range || { index: 0, length: 0 };
     const text = this.quillRef.getText();
     this.setState({
       open: true,
@@ -106,10 +130,30 @@ export default class RichTextInput extends Component<Props> {
     });
   };
   closeLinkModal = () => this.setState({ open: false });
+  openImageModal = val => {
+    if (!this.quillRef) {
+      return;
+    }
+    this.setState({
+      openImageModal: true
+    });
+  };
+  closeImageModal = () => this.setState({ openImageModal: false });
+  chooseMedia = ([media]: MediaType[] | string[]) => {
+    this.closeImageModal();
+    if (!this.quillRef) {
+      return;
+    }
+    const src =
+      typeof media === "string" ? media : mediaBasePath + "/media/" + media.id;
+    const range = this.quillRef.getSelection();
+    const { index } = range || { index: 0 };
+    this.quillRef.insertEmbed(index, "image", src);
+  };
 
   render() {
     const { field, formats, modules, linkFormats } = this.props;
-    const { open, text, link } = this.state;
+    const { open, text, link, openImageModal } = this.state;
     let { value } = field;
     value = value ? value : this.defaultValue;
     return (
@@ -121,6 +165,19 @@ export default class RichTextInput extends Component<Props> {
             onSave={this.linkHandler}
             onClose={this.closeLinkModal}
           />
+        )}
+        {openImageModal && (
+          <ModalDialog
+            onClose={this.closeImageModal}
+            title="Gallery"
+            style={modalDialogStyle}
+          >
+            <Media
+              openFromInput
+              onSelect={this.chooseMedia}
+              mediaType={"image"}
+            />
+          </ModalDialog>
         )}
         <Quill
           key={typeof value === "string" ? "html" : "delta"}
@@ -142,7 +199,8 @@ export default class RichTextInput extends Component<Props> {
             toolbar: {
               container: (modules && modules.toolbar) || [],
               handlers: {
-                link: this.openLinkModal
+                link: this.openLinkModal,
+                image: this.openImageModal
               }
             }
           }}
