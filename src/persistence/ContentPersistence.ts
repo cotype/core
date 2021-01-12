@@ -633,7 +633,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       term,
       true,
       {
-        models: models
+        models
       },
       previewOpts
     );
