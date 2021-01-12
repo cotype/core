@@ -166,7 +166,7 @@ export default class Media extends Component<Props, State> {
    * @description Delete file if possible, otherwise show conflict dialog
    */
   deleteMedia = (media: Cotype.Media) => {
-    if (confirm("Are you sure u want to delete the media?")) {
+    if (window.confirm("Are you sure u want to delete the media?")) {
       api
         .deleteMedia(media.id)
         .then(res => {

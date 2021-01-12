@@ -62,7 +62,7 @@ class Edit extends Component<Props, State> {
   };
 
   onDelete = (record: any) => {
-    if(confirm('Are you sure you want to delete this content?')){
+    if(window.confirm('Are you sure you want to delete this content?')){
       const { onDelete } = this.props;
       onDelete(record).then(res => {
         if (res && res.conflictingRefs) {
