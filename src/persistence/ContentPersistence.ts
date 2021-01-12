@@ -626,9 +626,17 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
   async suggest(
     principal: Cotype.Principal,
     term: string,
-    previewOpts?: Cotype.PreviewOpts
+    previewOpts?: Cotype.PreviewOpts,
+    models?: string[]
   ): Promise<string[]> {
-    const { items } = await this.adapter.search(term, true, {}, previewOpts);
+    const { items } = await this.adapter.search(
+      term,
+      true,
+      {
+        models: models
+      },
+      previewOpts
+    );
     const pattern = `${_escapeRegExp(
       term
     )}([\\w|ü|ö|ä|ß|Ü|Ö|Ä]*['|\\-|\\/|_|+]*[\\w|ü|ö|ä|ß|Ü|Ö|Ä]+|[\\w|ü|ö|ä|ß|Ü|Ö|Ä]*)`;

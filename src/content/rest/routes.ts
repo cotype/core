@@ -69,10 +69,12 @@ export default function routes(
 
     const all = linkableOnly === "true" ? linkableModels : searchableModels;
 
-    const pickModels = (names: string[]) =>
-      all.filter(name =>
-        names.some(n => n.toLowerCase() === name.toLowerCase())
-      );
+    const pickModels = (names: string[] | string) =>
+      typeof names === "string"
+        ? all.filter(name => names.toLowerCase() === name.toLowerCase())
+        : all.filter(name =>
+            names.some(n => n.toLowerCase() === name.toLowerCase())
+          );
 
     const includes = pickModels(includeModels);
     const excludes = pickModels(excludeModels);
@@ -168,7 +170,12 @@ export default function routes(
         return res.json([]);
       }
 
-      const results = await content.suggest(principal, term, req.previewOpts);
+      const results = await content.suggest(
+        principal,
+        term,
+        req.previewOpts,
+        searchModels
+      );
       res.json(results);
     });
 
