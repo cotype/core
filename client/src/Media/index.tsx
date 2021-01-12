@@ -166,20 +166,22 @@ export default class Media extends Component<Props, State> {
    * @description Delete file if possible, otherwise show conflict dialog
    */
   deleteMedia = (media: Cotype.Media) => {
-    api
-      .deleteMedia(media.id)
-      .then(res => {
-        const { items: curItems } = this.state;
-        if (Array.isArray(curItems)) {
-          const items = curItems.slice();
-          items.splice(items.indexOf(media), 1);
-          this.setState({ items, details: null });
-        }
-      })
-      .catch(err => {
-        if (err.status === 400)
-          this.setState({ conflictingItems: err.body, details: null });
-      });
+    if (confirm("Are you sure u want to delete the media?")) {
+      api
+        .deleteMedia(media.id)
+        .then(res => {
+          const { items: curItems } = this.state;
+          if (Array.isArray(curItems)) {
+            const items = curItems.slice();
+            items.splice(items.indexOf(media), 1);
+            this.setState({ items, details: null });
+          }
+        })
+        .catch(err => {
+          if (err.status === 400)
+            this.setState({ conflictingItems: err.body, details: null });
+        });
+    }
   };
 
   onUpload = (res: { files: MediaType[]; duplicates: MediaType[] }) => {

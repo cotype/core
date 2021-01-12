@@ -62,12 +62,14 @@ class Edit extends Component<Props, State> {
   };
 
   onDelete = (record: any) => {
-    const { onDelete } = this.props;
-    onDelete(record).then(res => {
-      if (res && res.conflictingRefs) {
-        this.onConflict(res.conflictingRefs, "delete");
-      }
-    });
+    if(confirm('Are you sure you want to delete this content?')){
+      const { onDelete } = this.props;
+      onDelete(record).then(res => {
+        if (res && res.conflictingRefs) {
+          this.onConflict(res.conflictingRefs, "delete");
+        }
+      });
+    }
   };
 
   onConflict = (refs: VersionItem[], type: conflictTypes) => {
