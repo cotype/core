@@ -9,7 +9,7 @@
     "watch": "react-scripts start"
   },
   "dependencies": {
-    "color-hash": "^1.0.3",
+    "@cotype/ui": "^1.0.1",
     "date.js": "^0.3.3",
     "downshift": "^5.2.6",
     "formik": "^1.5.8",
@@ -21,8 +21,6 @@
     "quill-delta": "^4.2.2",
     "rc-input-number": "^4.6.1",
     "react": "^16.13.1",
-    "react-circular-progressbar": "^2.0.3",
-    "react-day-picker": "^7.4.8",
     "react-dom": "^16.13.1",
     "react-draggable": "^4.3.1",
     "react-dropzone": "^11.0.1",
@@ -32,10 +30,9 @@
     "react-sortable-hoc": "^1.11.0",
     "react-textarea-autosize": "^7.1.2",
     "react-time-ago": "^5.0.8",
-    "react-tiny-popover": "^4.1.0",
     "react-use-upload": "^0.5.9",
     "react-virtualized": "^9.21.2",
-    "styled-components": "^5.1.0",
+    "styled-components": "^5.2.1",
     "title-case": "^3.0.2",
     "use-async-effect": "^2.2.2"
   },

@@ -3,7 +3,7 @@ import React, { Component, Fragment } from "react";
 import styled from "styled-components/macro";
 import { FieldProps, FieldArray } from "formik";
 import inputs from "../../inputs";
-import Button from "../../../../common/Button";
+import { Button } from "@cotype/ui";
 import ListButton from "../../../../common/ListButton";
 import SortableList from "./SortableList";
 import outputs from "../../outputs";

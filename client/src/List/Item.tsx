@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { NavLink } from "react-router-dom";
 import styled, { css } from "styled-components/macro";
-import ImageCircle from "../common/ImageCircle";
 import { testable } from "../utils/helper";
 import { mediaBasePath } from "../basePath";
+import { ImageCircle } from "@cotype/ui";
 
 const activeClass = css`
   background-color: var(--accent-color) !important;

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { outputClass } from "../../common/styles";
+
+import { outputClass } from "@cotype/ui";
 import styled from "styled-components/macro";
 
 const Container = styled("div")`

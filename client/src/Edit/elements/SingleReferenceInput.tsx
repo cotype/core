@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import styled from "styled-components/macro";
 import { FieldProps } from "formik";
-import { inputClass } from "../../common/styles";
+
+import { inputClass , ImageCircle} from "@cotype/ui";
 import Autocomplete from "../../common/Autocomplete";
-import ImageCircle from "../../common/ImageCircle";
 import api from "../../api";
 import { required } from "./validation";
 import { stringify } from "qs";

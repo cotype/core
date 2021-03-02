@@ -3,7 +3,13 @@ import { Formik, FormikActions, FormikProps } from "formik";
 import styled from "styled-components/macro";
 
 import api from "../api";
-import { Field, Label, Input, Error, Button } from "../common/styles";
+import {
+  SimpleField as Field,
+  SimpleLabel as Label,
+  SimpleInput as Input,
+  SimpleError as Error,
+  SimpleButton as Button
+} from "@cotype/ui";
 
 const Lock = () => (
   <svg
@@ -39,9 +45,7 @@ const Root = styled("div")`
   background-size: cover;
   background-image: ${process.env.REACT_APP_TEST_ENV
     ? "none"
-    : `url(https://source.unsplash.com/collection/2339015/${
-        window.innerWidth
-      }x${window.innerHeight})`};
+    : `url(https://source.unsplash.com/collection/2339015/${window.innerWidth}x${window.innerHeight})`};
 `;
 
 const Form = styled("form")`
@@ -133,8 +137,9 @@ export default class Login extends Component<Props> {
                   onBlur={handleBlur}
                   value={values.password}
                 />
-                {touched.password &&
-                  errors.password && <Error>{errors.password}</Error>}
+                {touched.password && errors.password && (
+                  <Error>{errors.password}</Error>
+                )}
               </Field>
               <Button type="submit" disabled={isSubmitting}>
                 Login

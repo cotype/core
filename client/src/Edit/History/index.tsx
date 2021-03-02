@@ -2,8 +2,7 @@ import * as Cotype from "../../../../typings";
 import React, { Component } from "react";
 import HistoryChooser from "./HistoryChooser";
 import ModalDialog from "../../common/ModalDialog";
-import Button from "../../common/Button";
-import { paths } from "../../common/icons";
+import { Button, paths } from "@cotype/ui";
 import { Language } from "../../../../typings";
 
 const historyStyle = {

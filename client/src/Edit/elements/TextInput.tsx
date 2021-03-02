@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { FieldProps } from "formik";
 import { required as validateRequired } from "./validation";
-import { Input } from "../../common/styles";
+
+import { SimpleInput as Input } from "@cotype/ui";
 
 type Props = FieldProps<any> & {
   required?: boolean;

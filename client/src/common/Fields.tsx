@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import styled, { css } from "styled-components/macro";
-import { Error } from "../common/styles";
+import { SimpleError as Error } from "@cotype/ui";
 import { errorClass } from "../Edit/Form";
 
 const FieldBlock = styled("div")<{ hidden?: boolean }>`

@@ -4,10 +4,10 @@ import styled from "styled-components/macro";
 import { Link } from "react-router-dom";
 import _escape from "lodash/escape";
 import basePath from "../basePath";
-import ImageCircle from "../common/ImageCircle";
 import TimeAgo from "react-time-ago";
 import ColorHash from "color-hash";
 import { useModelPaths } from "../ModelPathsContext";
+import { ImageCircle } from "@cotype/ui";
 const colorHash = new ColorHash({ saturation: 0.7, lightness: 0.6 });
 
 const ImageItem = styled("div")`

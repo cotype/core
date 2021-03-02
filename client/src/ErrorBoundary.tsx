@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import styled from "styled-components/macro";
-import Button from "./common/Button";
-import { paths } from "./common/icons";
+import { Button, paths } from "@cotype/ui";
 import { HEIGHT as HEADER_HEIGHT } from "./Header";
 
 const Container = styled("div")`

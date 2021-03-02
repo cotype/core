@@ -3,8 +3,8 @@ import React, { Component, Fragment, version } from "react";
 import { withRouter } from "react-router-dom";
 import { RouteComponentProps } from "react-router";
 import styled, { css } from "styled-components/macro";
-import Button from "../common/Button";
-import { paths } from "../common/icons";
+import { Button, paths, PopoverMenu } from "@cotype/ui";
+
 import { withUser } from "../auth/UserContext";
 import { isAllowed, Permission } from "../auth/acl";
 
@@ -13,7 +13,6 @@ import { conflictTypes } from ".";
 import ConflictDialog from "../common/ConflictDialog";
 import { testable } from "../utils/helper";
 import { withModelPaths } from "../ModelPathsContext";
-import PopoverMenu from "../common/PopoverMenu";
 import LanguageSwitch from "../common/LanguageSwitch";
 import isi18nModel from "../utils/isi18nModel";
 

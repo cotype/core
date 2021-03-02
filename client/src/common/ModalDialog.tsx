@@ -1,7 +1,8 @@
 import React, { Fragment } from "react";
 import styled from "styled-components/macro";
 import Overlay from "./Overlay";
-import Icon from "./Icon";
+
+import { Icon } from "@cotype/ui";
 
 const Title = styled("div")`
   color: #fff;

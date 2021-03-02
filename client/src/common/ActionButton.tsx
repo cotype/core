@@ -1,7 +1,11 @@
-import React, { Component } from "react";
+import React, { Component, ReactElement } from "react";
 import styled from "styled-components/macro";
-import PopoverMenu, { Menu, Item } from "./PopoverMenu";
-import Icon from "./icons";
+import {
+  PopoverMenu,
+  PopoverMenuMenu as Menu,
+  PopoverMenuItem as Item,
+  icons
+} from "@cotype/ui";
 import { testable } from "../utils/helper";
 
 type P = {
@@ -60,24 +64,26 @@ type Props = {
   actions: Action[];
 };
 export default class ActionButton extends Component<Props> {
-  renderMenu = (close: () => void) => {
+  renderMenu = (close: () => void):ReactElement => {
     const { disabled, actions } = this.props;
-    if (disabled) return null;
+    if (disabled) return <></>;
     return (
       <Menu>
-        {actions.filter(a => !a.disabled).map(a => (
-          <Item
-            {...testable("action-item")}
-            style={styles.item}
-            key={a.label}
-            onClick={() => {
-              if (a.onClick) a.onClick();
-              close();
-            }}
-          >
-            {a.label}
-          </Item>
-        ))}
+        {actions
+          .filter(a => !a.disabled)
+          .map(a => (
+            <Item
+              {...testable("action-item")}
+              style={styles.item}
+              key={a.label}
+              onClick={() => {
+                if (a.onClick) a.onClick();
+                close();
+              }}
+            >
+              {a.label}
+            </Item>
+          ))}
       </Menu>
     );
   };
@@ -90,7 +96,7 @@ export default class ActionButton extends Component<Props> {
           <Button disabled={disabled}>
             <ButtonFace disabled={disabled} {...rest}>
               <Label>{label}</Label>
-              <Icon.Down />
+              <icons.Down />
             </ButtonFace>
           </Button>
         </PopoverMenu>

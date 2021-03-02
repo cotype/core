@@ -7,10 +7,9 @@ import Fields, { FieldLayout } from "../../common/Fields";
 import inputs from "./inputs";
 import ObjectOutput from "./ObjectOutput";
 import ModalDialog from "../../common/ModalDialog";
-import Button from "../../common/Button";
+import { Button, paths } from "@cotype/ui";
 import styled from "styled-components/macro";
 import { required } from "./validation";
-import { paths } from "../../common/icons";
 import { hasActuallyErrors } from "../formHelpers";
 import serverSideProps from "./serverSideProps";
 

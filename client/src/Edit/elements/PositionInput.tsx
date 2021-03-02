@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import { FieldProps } from "formik";
-import Button from "../../common/Button";
+import { Button, paths } from "@cotype/ui";
 import PositionModal from "../PositionModal";
 import * as Cotype from "../../../../typings";
-import { paths } from "../../common/icons";
 
 type Props = FieldProps<any> & {
   model: Cotype.Model;

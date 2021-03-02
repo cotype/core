@@ -1,10 +1,8 @@
 import React, { Component } from "react";
-import Button from "../common/Button";
+import { Button, paths, ToggleSwitch } from "@cotype/ui";
 import ModalDialog from "../common/ModalDialog";
-import { paths } from "../common/icons";
 import * as Cotype from "../../../typings";
 import { Language } from "../../../typings";
-import ToggleSwitch from "../common/ToggleSwitch";
 import styled from "styled-components/macro";
 
 const Row = styled("div")`

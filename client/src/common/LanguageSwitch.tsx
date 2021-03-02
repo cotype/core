@@ -1,7 +1,7 @@
 import * as Cotype from "../../../typings";
 import styled from "styled-components/macro";
 import React, { useCallback } from "react";
-import Button from "./Button";
+import { Button } from "@cotype/ui";
 
 const Box = styled.div`
   background: #fff;

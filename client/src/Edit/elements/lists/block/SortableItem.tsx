@@ -3,12 +3,12 @@ import React from "react";
 import { SortableElement, SortableHandle } from "react-sortable-hoc";
 import styled, { css } from "styled-components/macro";
 import { Field, ArrayHelpers, FormikProps, getIn } from "formik";
-import Icon from "../../../../common/icons";
+import { icons } from "@cotype/ui";
 import { ITEM_VALUE_KEY } from "./Input";
 import { hasActuallyErrors } from "../../../formHelpers";
 import { Language } from "../../../../../../typings";
 
-const DragHandleIcon = styled(Icon.DragHandle)`
+const DragHandleIcon = styled(icons.DragHandle)`
   user-select: none;
   opacity: 0.8;
   cursor: move;
@@ -154,10 +154,7 @@ const SortableItem = SortableElement(
         hasError={hasActuallyErrors(error)}
       >
         {sortable && <DragHandle />}
-        <ItemField
-          sortable={sortable}
-          isSorting={isSorting}
-        >
+        <ItemField sortable={sortable} isSorting={isSorting}>
           <Field
             name={fieldName}
             render={props => (

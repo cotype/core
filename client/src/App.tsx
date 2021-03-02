@@ -31,6 +31,7 @@ import Dashboard from "./Dashboard";
 import SplitPane from "./common/SplitPane";
 import ErrorBoundary from "./ErrorBoundary";
 import EditURLRedirect from "./common/EditURLRedirect";
+import { BaseStyle } from "@cotype/ui";
 
 const Root = styled("div")`
   height: 100%;
@@ -90,12 +91,18 @@ class App extends React.Component<{}, State> {
     } = this.state;
 
     if (!user) {
-      return <Login onSuccess={this.fetchInfo} />;
+      return (
+        <>
+          <Login onSuccess={this.fetchInfo} />
+          <BaseStyle />
+        </>
+      );
     }
     if (!models) return null;
 
     return (
       <ErrorBoundary>
+        <BaseStyle />
         <UploadProvider client={createXhrClient({ baseUrl: api.baseURI })}>
           <UserContext.Provider value={user}>
             <ModelPathsContext.Provider

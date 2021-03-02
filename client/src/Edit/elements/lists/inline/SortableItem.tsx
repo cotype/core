@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components/macro";
 import { Field, ArrayHelpers, FormikProps } from "formik";
-import Icon from "../../../../common/icons";
+import { icons } from "@cotype/ui";
 import { SortableElement } from "react-sortable-hoc";
 import { ITEM_VALUE_KEY } from "../block/Input";
 import { Language } from "../../../../../../typings";
@@ -44,7 +44,7 @@ const StyledButton = styled("button")`
   }
 `;
 
-const ClearCircleIcon = styled(Icon.ClearCircle)`
+const ClearCircleIcon = styled(icons.ClearCircle)`
   color: rgba(0, 0, 0, 0.26);
   margin: 0 4px;
 `;
@@ -62,7 +62,6 @@ type SortableItem = {
   length: number;
   isSorting: boolean;
 
-
   activeLanguages?: Language[];
   activeLanguage?: Language;
 };
@@ -75,8 +74,8 @@ const SortableItem = SortableElement(
     removeItem,
     name,
     isSorting,
-     activeLanguage,
-     activeLanguages
+    activeLanguage,
+    activeLanguages
   }: SortableItem) => {
     return (
       <Item isSorting={isSorting} sortable={sortable}>

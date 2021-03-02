@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import styled from "styled-components/macro";
 import api from "../../api";
-import ImageCircle from "../../common/ImageCircle";
+import { ImageCircle } from "@cotype/ui";
 
 const ImageItem = styled("div")`
   display: flex;
