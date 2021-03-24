@@ -294,7 +294,7 @@ export async function init(opts: Opts) {
       models: filteredModels,
       baseUrls: baseURLS,
       user: req.principal,
-      languages: opts.languages || []
+      languages: opts.languages
     });
   });
 
