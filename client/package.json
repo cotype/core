@@ -9,7 +9,7 @@
     "watch": "react-scripts start"
   },
   "dependencies": {
-    "@cotype/ui": "^1.0.1",
+    "@cotype/ui": "^1.0.2",
     "date.js": "^0.3.3",
     "downshift": "^5.2.6",
     "formik": "^1.5.8",
