@@ -427,7 +427,13 @@ export default (api: OpenApiBuilder, models: Models, languages: Language[]) => {
       summary: `Search contents`,
       operationId: `listContentBySearch`,
       tags: ["Suche"],
-      parameters: [...searchParams, ...defaultQueryParams,languageParameter(languages)],
+      parameters: [
+        ...searchParams,
+        ...defaultQueryParams,
+        ...(languages && languages.length > 0
+          ? [languageParameter(languages)]
+          : [])
+      ],
       responses: {
         "200": {
           description: "Content List",
