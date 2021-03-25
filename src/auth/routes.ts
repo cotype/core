@@ -27,6 +27,7 @@ export default async (
     if (!valid) return res.status(403).end();
     if (!req.session) throw new Error("No session middleware");
     req.session.userId = String(user.id);
+    req.session.userName = String(user.name);
     res.status(204).end();
   });
 
