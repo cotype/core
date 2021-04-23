@@ -15,9 +15,6 @@
   <a href="https://github.com/semantic-release/semantic-release">
     <img src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg" alt="semantic-release">
   </a>
-  <a href="https://greenkeeper.io/">
-    <img src="https://badges.greenkeeper.io/cotype/core.svg" alt="Greenkeeper">
-  </a>
 </p>
 <p>&nbsp;</p>
 
