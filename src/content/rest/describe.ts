@@ -19,7 +19,6 @@ import visitModel from "../../model/visitModel";
 import { isComparable } from "../../persistence/adapter/knex/lookup";
 import pluralize from "pluralize";
 import { searchableModelNames } from "./utils";
-import isi18nModel from "../../model/isi18nModel";
 
 export const listSearchParams: ParameterObject = {
   in: "query",
