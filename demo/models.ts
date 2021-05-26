@@ -207,6 +207,7 @@ export const models: ModelOpts[] = [
     title: "pagetitle",
     uniqueFields: ["slug"],
     urlPath: "/:slug",
+    previewBaseUrl: "https://preview.cotype.dev",
     notSearchAble: true,
     orderBy: "posit",
     fields: {

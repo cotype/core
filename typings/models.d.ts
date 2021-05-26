@@ -256,6 +256,7 @@ export type ModelOpts = {
   plural?: string;
   collection?: "list" | "singleton" | "none" | "iframe";
   urlPath?: string | { [langKey: string]: string };
+  previewBaseUrl?: string;
   noFeed?: true;
   fields?: {
     [key: string]: Field & { unique?: boolean };

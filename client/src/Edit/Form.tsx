@@ -118,12 +118,19 @@ class Form extends Component<Props, State> {
   onPreview = (
     form: FormikProps<any>,
     modelPreviewUrl: string | { [langKey: string]: string },
-    language?: Language | null
+    language?: Language | null,
+    previewBaseUrl?: string
   ) => {
     const { baseUrls } = this.props;
     const previewUrl = getPreviewUrl(
       form.values,
-      `${baseUrls.preview ? baseUrls.preview : ""}${
+      `${
+        previewBaseUrl
+          ? previewBaseUrl
+          : baseUrls.preview
+          ? baseUrls.preview
+          : ""
+      }${
         typeof modelPreviewUrl === "string"
           ? modelPreviewUrl
           : modelPreviewUrl[
@@ -317,7 +324,12 @@ class Form extends Component<Props, State> {
                 onUnpublish={onUnpublish}
                 onPreview={() => {
                   if (model.urlPath) {
-                    this.onPreview(form, model.urlPath, this.state.language);
+                    this.onPreview(
+                      form,
+                      model.urlPath,
+                      this.state.language,
+                      model.previewBaseUrl
+                    );
                   }
                 }}
                 onHistory={() => {

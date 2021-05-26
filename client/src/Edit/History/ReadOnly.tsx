@@ -44,7 +44,8 @@ class ReadOnly extends Component<Props> {
 
   onPreview = (
     modelPreviewUrl?: string | { [s: string]: string },
-    language?: Language | null
+    language?: Language | null,
+    previewBaseUrl?: string
   ) => {
     const { formData } = this.state;
     const { baseUrls } = this.props;
@@ -52,7 +53,13 @@ class ReadOnly extends Component<Props> {
 
     const previewUrl = getPreviewUrl(
       formData.data,
-      `${baseUrls.preview ? baseUrls.preview : ""}${
+      `${
+        previewBaseUrl
+          ? previewBaseUrl
+          : baseUrls.preview
+          ? baseUrls.preview
+          : ""
+      }${
         typeof modelPreviewUrl === "string"
           ? modelPreviewUrl
           : modelPreviewUrl[
@@ -109,7 +116,13 @@ class ReadOnly extends Component<Props> {
           setLanguage={this.setLanguage}
           language={this.state.language}
           documentLanguages={this.state.documentLanguages}
-          onPreview={() => this.onPreview(model.urlPath)}
+          onPreview={() =>
+            this.onPreview(
+              model.urlPath,
+              this.state.language,
+              model.previewBaseUrl
+            )
+          }
         />
         <History
           onReceiveData={data =>

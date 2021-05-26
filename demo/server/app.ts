@@ -51,6 +51,11 @@ const defaultConfig: Opts = {
     },
     { title: "Englisch", key: "en" }
   ],
+  basePath: {
+    cms: "/",
+    media: "/media",
+    preview: "https://cotype.dev"
+  },
   contentHooks: {
     preHooks: {
       onSave: async (_, data) => {
