@@ -526,7 +526,7 @@ export default (api: OpenApiBuilder, models: Models, languages: Language[]) => {
         }
       });
     }
-    if (languages && languages.length > 0 && isi18nModel(model)) {
+    if (languages && languages.length > 0) {
       commonParams.push(languageParameter(languages));
     }
 
