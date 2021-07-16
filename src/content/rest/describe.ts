@@ -1,4 +1,4 @@
-import { Model, Models, Field } from "../../../typings";
+import { Model, Models, Field, Language } from "../../../typings";
 import {
   ref,
   string,
@@ -37,6 +37,14 @@ export const listSearchParams: ParameterObject = {
     }
   }
 };
+export const languageParameter = (languages: Language[]): ParameterObject => ({
+  in: "query",
+  name: `i18n`,
+  schema: {
+    type: "string",
+    enum: languages.map(l => l.key)
+  }
+});
 
 const refsSchema = (mediaType: ReferenceObject) => ({
   type: "object",
@@ -62,6 +70,7 @@ const describeModel = (
 ) => {
   let orderByEnums: string[] = [];
   let values: ParameterObject[] = [];
+
   Object.entries(model.fields).forEach(([field, type]) => {
     if (type.type === "list" && type.item) {
       if (type.item.type === "object" && type.item.fields) {
@@ -369,7 +378,7 @@ function createJoinParams(model: Model, { content: models }: Models) {
   return { params, refs };
 }
 
-export default (api: OpenApiBuilder, models: Models) => {
+export default (api: OpenApiBuilder, models: Models, languages: Language[]) => {
   const searchableModels = searchableModelNames(models.content);
 
   const mediaType = addExternalModel(api, models.media);
@@ -417,7 +426,13 @@ export default (api: OpenApiBuilder, models: Models) => {
       summary: `Search contents`,
       operationId: `listContentBySearch`,
       tags: ["Suche"],
-      parameters: [...searchParams, ...defaultQueryParams],
+      parameters: [
+        ...searchParams,
+        ...defaultQueryParams,
+        ...(languages && languages.length > 0
+          ? [languageParameter(languages)]
+          : [])
+      ],
       responses: {
         "200": {
           description: "Content List",
@@ -509,6 +524,9 @@ export default (api: OpenApiBuilder, models: Models) => {
           enum: formats
         }
       });
+    }
+    if (languages && languages.length > 0) {
+      commonParams.push(languageParameter(languages));
     }
 
     const Type = refs[`${model.name}`];

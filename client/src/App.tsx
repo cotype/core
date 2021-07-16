@@ -5,7 +5,8 @@ import {
   Principal,
   Data,
   ModelPaths,
-  BaseUrls
+  BaseUrls,
+  Language
 } from "../../typings";
 import * as React from "react";
 import {
@@ -30,6 +31,7 @@ import Dashboard from "./Dashboard";
 import SplitPane from "./common/SplitPane";
 import ErrorBoundary from "./ErrorBoundary";
 import EditURLRedirect from "./common/EditURLRedirect";
+import { BaseStyle } from "@cotype/ui";
 
 const Root = styled("div")`
   height: 100%;
@@ -54,6 +56,7 @@ type State = {
   navigation?: NavigationItem[];
   modelPaths?: ModelPaths;
   baseUrls?: BaseUrls;
+  languages?: Language[];
 };
 class App extends React.Component<{}, State> {
   state: State = {};
@@ -83,19 +86,28 @@ class App extends React.Component<{}, State> {
       user,
       navigation = [],
       modelPaths = null,
-      baseUrls = null
+      baseUrls = null,
+      languages = null
     } = this.state;
 
     if (!user) {
-      return <Login onSuccess={this.fetchInfo} />;
+      return (
+        <>
+          <Login onSuccess={this.fetchInfo} />
+          <BaseStyle />
+        </>
+      );
     }
     if (!models) return null;
 
     return (
       <ErrorBoundary>
+        <BaseStyle />
         <UploadProvider client={createXhrClient({ baseUrl: api.baseURI })}>
           <UserContext.Provider value={user}>
-            <ModelPathsContext.Provider value={{ modelPaths, baseUrls }}>
+            <ModelPathsContext.Provider
+              value={{ modelPaths, baseUrls, languages }}
+            >
               <Router>
                 <Root>
                   <Header navigation={navigation} />
@@ -168,7 +180,7 @@ class App extends React.Component<{}, State> {
                         />
                         <Route
                           path={`${basePath}/editURL`}
-                          render={(props) => (
+                          render={props => (
                             <EditURLRedirect
                               {...props}
                               contentModels={models.content}

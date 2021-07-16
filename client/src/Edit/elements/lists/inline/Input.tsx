@@ -3,13 +3,14 @@ import React, { Component, Fragment } from "react";
 import styled from "styled-components/macro";
 import { FieldProps, FieldArray } from "formik";
 import inputs from "../../inputs";
-import Button from "../../../../common/Button";
+import { Button } from "@cotype/ui";
 import ListButton from "../../../../common/ListButton";
 import SortableList from "./SortableList";
 import outputs from "../../outputs";
 import { DRAG_HELPER_CLASS } from "../block/SortableList";
 import _omit from "lodash/omit";
 import serverSideProps from "../../serverSideProps";
+import { Language } from "../../../../../../typings";
 
 export const ITEM_VALUE_KEY = "value";
 
@@ -24,7 +25,9 @@ const Cancel = styled("span")`
   color: var(--dark-grey);
 `;
 
-type Props = FieldProps<any> & Cotype.ListType;
+type Props = FieldProps<any> & Cotype.ListType & {
+  activeLanguages?: Language[];
+  activeLanguage?: Language;};;
 type State = {
   Factory?: React.ComponentClass | null;
   isSorting: boolean;
@@ -180,6 +183,8 @@ export default class ChipListInput extends Component<Props, State> {
                 return false;
               }}
               isSorting={isSorting}
+              activeLanguages={this.props.activeLanguages}
+              activeLanguage={this.props.activeLanguage}
             />
             {!isNotAllowedToAddMoreItems &&
               (Factory ? (

@@ -62,7 +62,8 @@ export default class Number extends Component<Props> {
 
   static validate(value: any, props: Props) {
     const isRequired = required(value, props);
-    if (isRequired) return isRequired;
+
+    if (value !== 0 && isRequired) return isRequired;
   }
 
   static getHint(model) {

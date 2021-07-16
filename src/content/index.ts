@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ResponseHeaders, ExternalDataSource, Models } from "../../typings";
+import { ResponseHeaders, ExternalDataSource, Models, Language } from "../../typings";
 import { Persistence } from "../persistence";
 import routes from "./routes";
 import describe from "./describe";
@@ -15,6 +15,7 @@ type Opts = {
   basePath: string;
   mediaUrl: string;
   responseHeaders?: ResponseHeaders;
+  languages: Language[]
 };
 
 export default (opts: Opts) => {

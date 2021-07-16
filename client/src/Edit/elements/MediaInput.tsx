@@ -5,10 +5,9 @@ import { FieldProps } from "formik";
 import api from "../../api";
 import Media from "../../Media";
 import Image from "../../Media/Image";
-import Button, { StyledButton } from "../../common/Button";
+import { Button, StyledButton } from "@cotype/ui";
 import ModalDialog from "../../common/ModalDialog";
-import ProgressCircle from "../../common/ProgressCircle";
-import { inputClass, Input } from "../../common/styles";
+import { SimpleInput as Input, inputClass, ProgressCircle } from "@cotype/ui";
 import UploadZone from "../../Media/UploadZone";
 import UploadField from "../../Media/UploadField";
 import { required } from "./validation";
@@ -258,7 +257,12 @@ export default class MediaInput extends Component<Props, State> {
           maxHeight
         }}
         render={({ progress, complete, onFiles }: any) => (
-          <Root {...testable("upload-zone")}>
+          <Root
+            {...testable("upload-zone")}
+            onClick={e => {
+              e.stopPropagation();
+            }}
+          >
             {progress && !complete ? (
               <ProgressCircle size={150} percentage={progress} />
             ) : media ? (

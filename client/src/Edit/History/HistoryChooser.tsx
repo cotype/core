@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import History from "./History";
 import SplitPane from "../../common/SplitPane";
 import VersionList from "../VersionList";
+import { Language } from "../../../../typings";
 
 type Props = {
   id: string;
@@ -10,6 +11,7 @@ type Props = {
   versions: (Cotype.VersionItem & { published: boolean })[];
   onSelect?: (rev: string) => void;
   onUnpublish: () => void;
+  languages?: Language[] | null;
 };
 
 type State = {
@@ -54,6 +56,7 @@ export default class HistoryChooser extends Component<Props, State> {
           rev={activeVersion}
           model={model}
           versions={versions}
+          languages={this.props.languages}
         />
       </SplitPane>
     );

@@ -18,7 +18,11 @@ type Props = RouteComponentProps & {
   model: Cotype.Model;
   match: match<any>;
   onDelete: (id) => Promise<Cotype.ErrorResponseBody | void>;
-  onSave?: (record: { id: any; data: any }) => void;
+  onSave?: (record: {
+    id: string;
+    isUpdate: boolean;
+    data: any;
+  }) => void;
   modelPaths: Cotype.ModelPaths;
   baseUrls: Cotype.BaseUrls;
 };
@@ -47,19 +51,25 @@ class Edit extends Component<Props, State> {
     }
   }
 
-  onSave = (record: any) => {
+  onSave = (record: {
+    id: string;
+    isUpdate: boolean;
+    data: any;
+  }) => {
     const { onSave } = this.props;
     this.fetchVersions();
     if (onSave) onSave(record);
   };
 
   onDelete = (record: any) => {
-    const { onDelete } = this.props;
-    onDelete(record).then(res => {
-      if (res && res.conflictingRefs) {
-        this.onConflict(res.conflictingRefs, "delete");
-      }
-    });
+    if(window.confirm('Are you sure you want to delete this content?')){
+      const { onDelete } = this.props;
+      onDelete(record).then(res => {
+        if (res && res.conflictingRefs) {
+          this.onConflict(res.conflictingRefs, "delete");
+        }
+      });
+    }
   };
 
   onConflict = (refs: VersionItem[], type: conflictTypes) => {

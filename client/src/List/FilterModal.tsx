@@ -2,8 +2,7 @@ import React, { Component } from "react";
 import { Formik, FormikActions, FormikProps } from "formik";
 import { Cols, Content } from "../common/page";
 import { Input } from "../Edit/elements";
-import Button from "../common/Button";
-import { paths } from "../common/icons";
+import { Button, paths } from "@cotype/ui";
 import ModalDialog from "../common/ModalDialog";
 import { Filter } from "../utils/extractFilter";
 

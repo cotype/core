@@ -64,7 +64,7 @@ type State = {
   orderBy?: string;
   order?: string;
   search?: string;
-  filters: ({ label: string; value: string })[];
+  filters: { label: string; value: string }[];
   topbarProgress: number | undefined;
   unUsed: boolean;
 };
@@ -166,20 +166,22 @@ export default class Media extends Component<Props, State> {
    * @description Delete file if possible, otherwise show conflict dialog
    */
   deleteMedia = (media: Cotype.Media) => {
-    api
-      .deleteMedia(media.id)
-      .then(res => {
-        const { items: curItems } = this.state;
-        if (Array.isArray(curItems)) {
-          const items = curItems.slice();
-          items.splice(items.indexOf(media), 1);
-          this.setState({ items, details: null });
-        }
-      })
-      .catch(err => {
-        if (err.status === 400)
-          this.setState({ conflictingItems: err.body, details: null });
-      });
+    if (window.confirm("Are you sure u want to delete the media?")) {
+      api
+        .deleteMedia(media.id)
+        .then(res => {
+          const { items: curItems } = this.state;
+          if (Array.isArray(curItems)) {
+            const items = curItems.slice();
+            items.splice(items.indexOf(media), 1);
+            this.setState({ items, details: null });
+          }
+        })
+        .catch(err => {
+          if (err.status === 400)
+            this.setState({ conflictingItems: err.body, details: null });
+        });
+    }
   };
 
   onUpload = (res: { files: MediaType[]; duplicates: MediaType[] }) => {
@@ -264,7 +266,12 @@ export default class Media extends Component<Props, State> {
   render() {
     const { details, conflictingItems, filters } = this.state;
     return (
-      <Root {...testable("upload-zone")}>
+      <Root
+        {...testable("upload-zone")}
+        onClick={e => {
+          e.stopPropagation();
+        }}
+      >
         {conflictingItems && (
           <ConflictDialog
             onClose={this.closeConflict}

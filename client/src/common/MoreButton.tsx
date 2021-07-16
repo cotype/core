@@ -1,7 +1,11 @@
 import React, { Component } from "react";
 import styled from "styled-components/macro";
-import Icon from "../common/icons";
-import PopoverMenu, { Menu, Item } from "./PopoverMenu";
+import {
+  icons,
+  PopoverMenu,
+  PopoverMenuMenu as Menu,
+  PopoverMenuItem as Item
+} from "@cotype/ui";
 
 export const ItemAction = styled("button")`
   background: none;
@@ -70,7 +74,7 @@ export default class MoreButton extends Component<Props, State> {
     return (
       <PopoverMenu renderMenu={this.renderMenu}>
         <ItemAction type="button" onClick={this.onToggle} style={buttonStyle}>
-          {icon || <Icon.More />}
+          {icon || <icons.More />}
         </ItemAction>
       </PopoverMenu>
     );

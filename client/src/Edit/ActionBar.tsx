@@ -3,8 +3,8 @@ import React, { Component, Fragment, version } from "react";
 import { withRouter } from "react-router-dom";
 import { RouteComponentProps } from "react-router";
 import styled, { css } from "styled-components/macro";
-import Button from "../common/Button";
-import { paths } from "../common/icons";
+import { Button, paths, PopoverMenu } from "@cotype/ui";
+
 import { withUser } from "../auth/UserContext";
 import { isAllowed, Permission } from "../auth/acl";
 
@@ -12,6 +12,9 @@ import api from "../api";
 import { conflictTypes } from ".";
 import ConflictDialog from "../common/ConflictDialog";
 import { testable } from "../utils/helper";
+import { withModelPaths } from "../ModelPathsContext";
+import LanguageSwitch from "../common/LanguageSwitch";
+import isi18nModel from "../utils/isi18nModel";
 
 const { edit, publish } = Permission;
 
@@ -67,11 +70,13 @@ const previewButtonClass = css`
 const modelActionButtons = css`
   background: none;
   padding-left: 0;
+  color: var(--primary-color);
   & > svg {
     color: var(--primary-color);
   }
   :hover {
     background: none;
+    color: var(--accent-color);
     & > svg {
       color: var(--accent-color);
     }
@@ -112,6 +117,15 @@ type Props = RouteComponentProps<any> & {
   model: Cotype.Model;
   submitForm?: () => void;
   errors?: { key: string };
+
+  modelPaths: Cotype.ModelPaths | null;
+  baseUrls: Cotype.BaseUrls | null;
+
+  languages?: Cotype.Language[] | null;
+  setLanguage?: (lang: Cotype.Language) => void;
+  openLanguageModal?: () => void;
+  language?: Cotype.Language | null;
+  documentLanguages?: Cotype.Language[] | null;
 };
 
 type State = {
@@ -177,7 +191,11 @@ class ActionBar extends Component<Props, State> {
       onHistory,
       model,
       user,
-      versions
+      versions,
+      languages,
+      setLanguage,
+      language,
+      documentLanguages
     } = this.props;
 
     const canEdit = isAllowed(user, model, edit);
@@ -236,7 +254,33 @@ class ActionBar extends Component<Props, State> {
         />
       );
     }
-
+    if (
+      documentLanguages &&
+      language &&
+      languages &&
+      languages.length > 0 &&
+      setLanguage &&
+      isi18nModel(model)
+    ) {
+      actions.push(
+        <PopoverMenu
+          align={"center"}
+          position={"bottom"}
+          renderMenu={close => (
+            <LanguageSwitch
+              languages={documentLanguages}
+              setLanguage={setLanguage}
+              onChangeLanguages={this.props.openLanguageModal}
+              onClick={close}
+            />
+          )}
+        >
+          <Button css={modelActionButtons} icon={paths.Translate} type="button">
+            {language.title}
+          </Button>
+        </PopoverMenu>
+      );
+    }
     return (
       <div>
         {actions.map((action, index) => (
@@ -368,4 +412,4 @@ class ActionBar extends Component<Props, State> {
   }
 }
 
-export default withRouter(withUser(ActionBar));
+export default withRouter(withUser(withModelPaths(ActionBar)));

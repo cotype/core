@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import styled, { css, CSSProp } from "styled-components/macro";
 import Downshift, { DownshiftProps } from "downshift";
-import { inputClass, Input } from "./styles";
+import { SimpleInput as Input, inputClass } from "@cotype/ui";
 
 type P = {
   isActive: boolean;

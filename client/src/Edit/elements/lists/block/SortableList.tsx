@@ -5,6 +5,7 @@ import { SortableContainer } from "react-sortable-hoc";
 import SortableItem from "./SortableItem";
 import styled from "styled-components/macro";
 import { dragClass } from "./Input";
+import { Language } from "../../../../../../typings";
 
 type Item = {
   key: number | string;
@@ -24,10 +25,14 @@ type SortableList = {
     length: number
   ) => React.ReactNode;
   isSorting: boolean;
+
+  activeLanguages?: Language[];
+  activeLanguage?: Language;
 };
 const BasicSortableList = SortableContainer(
   ({ items, ...props }: SortableList) => {
     const { types } = props.itemType;
+
     return (
       <div>
         {items &&

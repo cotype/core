@@ -2,10 +2,11 @@ import * as Cotype from "../../../typings";
 import React from "react";
 import TimeAgo from "react-time-ago";
 import styled, { css, CSSProp } from "styled-components/macro";
-import StatusLight from "../common/StatusLight";
+
 import MoreButton from "../common/MoreButton";
 import { withUser } from "../auth/UserContext";
 import { isAllowed, Permission } from "../auth/acl";
+import { StatusLight } from "@cotype/ui";
 const { publish } = Permission;
 
 const Root = styled("div")`

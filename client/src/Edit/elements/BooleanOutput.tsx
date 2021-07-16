@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import ToggleSwitch from "../../common/ToggleSwitch";
+import { ToggleSwitch } from "@cotype/ui";
+
 
 type Props = {
   value: any;

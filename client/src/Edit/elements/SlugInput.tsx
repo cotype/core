@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { FieldProps } from "formik";
 import { slugify } from "../../utils/helper";
-import { Input } from "../../common/styles";
+
+import { SimpleInput as Input } from "@cotype/ui";
 import { required } from "./validation";
 import TextOutput from "./TextOutput";
 

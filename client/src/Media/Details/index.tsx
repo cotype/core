@@ -6,12 +6,9 @@ import { formatBytes, testable } from "../../utils/helper";
 import ModalDialog from "../../common/ModalDialog";
 import { Cols, Content, Outset } from "../../common/page";
 import FocusPoint from "./FocusPoint";
-import Button from "../../common/Button";
-import { paths } from "../../common/icons";
-import ChipList from "../../common/ChipList";
+import { Button, paths, SimpleInput as Input, ChipList } from "@cotype/ui";
 import api from "../../api";
 import { mediaBasePath } from "../../basePath";
-import { Input } from "../../common/styles";
 
 const MetaInput = styled("div")`
   margin-bottom: 10px;

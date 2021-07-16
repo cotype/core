@@ -1,9 +1,8 @@
 import { Media } from "../../../../typings";
 import React, { Component } from "react";
 import Draggable from "react-draggable";
-import Icon, { paths } from "../../common/icons";
 import styled from "styled-components/macro";
-import Button from "../../common/Button";
+import { Button, paths, icons } from "@cotype/ui";
 import { mediaBasePath } from "../../basePath";
 
 const DEFAULT_PREVIEW_PATH = "/thumbs/preview/";
@@ -93,7 +92,7 @@ const FocusTarget = styled("div")`
   }
 `;
 
-const MoreIcon = styled(Icon.More)`
+const MoreIcon = styled(icons.More)`
   position: absolute;
   top: 7px;
   right: 7px;
@@ -246,7 +245,7 @@ export default class ImageFocus extends Component<Props, State> {
             >
               {ratio ? (
                 <FocusTarget inEdit={inEdit}>
-                  <Icon.Focus />
+                  <icons.Focus />
                 </FocusTarget>
               ) : (
                 <div />

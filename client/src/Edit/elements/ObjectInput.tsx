@@ -7,10 +7,9 @@ import Fields, { FieldLayout } from "../../common/Fields";
 import inputs from "./inputs";
 import ObjectOutput from "./ObjectOutput";
 import ModalDialog from "../../common/ModalDialog";
-import Button from "../../common/Button";
+import { Button, paths } from "@cotype/ui";
 import styled from "styled-components/macro";
 import { required } from "./validation";
-import { paths } from "../../common/icons";
 import { hasActuallyErrors } from "../formHelpers";
 import serverSideProps from "./serverSideProps";
 
@@ -33,6 +32,9 @@ type Props = Partial<FieldProps<any>> & {
   modalView?: boolean;
   model?: Cotype.Model;
   id?: string;
+  activeLanguages?: Cotype.Language[] | null;
+  activeLanguage?: Cotype.Language | null;
+  i18n?: boolean;
 };
 
 type State = {
@@ -42,7 +44,10 @@ type State = {
 };
 
 export default class ObjectInput extends Component<Props> {
-  static getDefaultValue({ fields }) {
+  static getDefaultValue(
+    { fields, i18n }: { fields: Cotype.Fields; i18n?: boolean },
+    languages?: Cotype.Language[] | null
+  ) {
     const initialValues = {};
     Object.keys(fields).forEach(id => {
       const f = fields[id];
@@ -50,15 +55,16 @@ export default class ObjectInput extends Component<Props> {
         return;
       }
       const component = inputs.get(f);
-      initialValues[id] =
+      const initialField =
         component && component.getDefaultValue
-          ? component.getDefaultValue(f)
+          ? component.getDefaultValue(f, languages)
           : null;
+      initialValues[id] = initialField;
     });
     return initialValues;
   }
 
-  static validate(value, props) {
+  static validate(value, props, activeLanguages) {
     const isRequired = required(value, props);
     if (isRequired) return isRequired;
 
@@ -68,7 +74,11 @@ export default class ObjectInput extends Component<Props> {
         return;
       }
       const component = inputs.get(props.fields[f]);
-      const error = component.validate((value || {})[f], props.fields[f]);
+      const error = component.validate(
+        (value || {})[f],
+        props.fields[f],
+        activeLanguages
+      );
       if (error) errors[f] = error;
     });
     if (Object.keys(errors).length > 0) return errors;
@@ -180,7 +190,17 @@ export default class ObjectInput extends Component<Props> {
   }
 
   render() {
-    const { form, field, fields, layout, modalView, model, id } = this.props;
+    const {
+      form,
+      field,
+      fields,
+      layout,
+      modalView,
+      model,
+      id,
+      activeLanguages,
+      activeLanguage
+    } = this.props;
 
     if (modalView) {
       return (
@@ -189,6 +209,10 @@ export default class ObjectInput extends Component<Props> {
             style={{
               display: "flex",
               alignItems: "flex-end"
+            }}
+            onClick={e => {
+              e.stopPropagation();
+              e.preventDefault();
             }}
           >
             {this.renderSummary()}
@@ -251,9 +275,11 @@ export default class ObjectInput extends Component<Props> {
                   {...fieldProps}
                   validate={value => {
                     if (typeof component.validate === "function") {
-                      return component.validate(value, props);
+                      return component.validate(value, props, activeLanguages);
                     }
                   }}
+                  activeLanguages={activeLanguages}
+                  activeLanguage={activeLanguage}
                 />
               );
               return {

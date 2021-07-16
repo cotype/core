@@ -9,6 +9,7 @@ import ListButton from "../../../../common/ListButton";
 import MoreButton from "../../../../common/MoreButton";
 import Schedule from "../../../../common/Schedule";
 import SortableList, { DRAG_HELPER_CLASS } from "./SortableList";
+import { Language } from "../../../../../../typings";
 
 export const ITEM_VALUE_KEY = "value";
 
@@ -21,7 +22,11 @@ const Root = styled("div")`
   margin-bottom: 20px;
 `;
 
-type Props = FieldProps<any> & Cotype.ListType;
+type Props = FieldProps<any> &
+  Cotype.ListType & {
+    activeLanguages?: Language[];
+    activeLanguage?: Language;
+  };
 type State = {
   Factory?: React.ComponentClass | null;
   isSorting: boolean;
@@ -141,7 +146,6 @@ export default class ListInput extends Component<Props, State> {
 
   render() {
     const { field, item: itemType, sortable, addLabel } = this.props;
-
     const { name, value } = field;
     const ItemComponent = inputs.get(itemType);
     const { Factory, isSorting, schedule, onSchedule } = this.state;
@@ -179,6 +183,8 @@ export default class ListInput extends Component<Props, State> {
                   this.setState({ isSorting: false });
                 }}
                 isSorting={isSorting}
+                activeLanguages={this.props.activeLanguages}
+                activeLanguage={this.props.activeLanguage}
               />
             )}
             <ListButton

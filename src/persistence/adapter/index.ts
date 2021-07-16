@@ -37,7 +37,8 @@ export interface ContentAdapter {
     indexData: Cotype.Data,
     model: Cotype.Model,
     models: Cotype.Model[],
-    author: string
+    author: string,
+    activeLanguages?: string[]
   ): Promise<string>;
   createRevision(
     storeData: Cotype.Data,
@@ -45,7 +46,8 @@ export interface ContentAdapter {
     model: Cotype.Model,
     models: Cotype.Model[],
     id: string,
-    author: string
+    author: string,
+    activeLanguages?: string[]
   ): Promise<number>;
   findByMedia(media: string): Promise<any[]>;
   list(
@@ -53,12 +55,14 @@ export interface ContentAdapter {
     models: Cotype.Model[],
     listOpts?: Cotype.ListOpts,
     criteria?: Cotype.Criteria,
-    previewOpts?: Cotype.PreviewOpts
+    previewOpts?: Cotype.PreviewOpts,
+    language?: string
   ): Promise<Cotype.ListChunk<Cotype.Content>>;
   load(
     model: Cotype.Model,
     id: string,
-    previewOpts?: Cotype.PreviewOpts
+    previewOpts?: Cotype.PreviewOpts,
+    language?: string
   ): Promise<Cotype.Content | null>;
   loadContentReferences(
     ids: string[],

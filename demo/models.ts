@@ -17,7 +17,7 @@ function objectWithTypeAndLabel(type: string, label: string): ObjectType {
 
 // reusable structures
 const pageFields: Fields = {
-  pagetitle: { type: "string", label: "Title", required: true },
+  pagetitle: { type: "string", label: "Title", required: true, i18n: true },
   slug: {
     type: "immutable",
     child: { type: "string", input: "slug", label: "Slug" }
@@ -207,6 +207,7 @@ export const models: ModelOpts[] = [
     title: "pagetitle",
     uniqueFields: ["slug"],
     urlPath: "/:slug",
+    previewBaseUrl: "https://preview.cotype.dev",
     notSearchAble: true,
     orderBy: "posit",
     fields: {
@@ -266,7 +267,7 @@ export const models: ModelOpts[] = [
       },
       ref: {
         type: "content",
-        models: [],
+        models: ["contentPages"],
         allowAbsoluteRefs: true
       },
       sections: {
@@ -301,13 +302,13 @@ export const models: ModelOpts[] = [
       slugEditable: {
         type: "string",
         input: "slug",
-        label:"editable slug",
+        label: "editable slug",
         alwaysEditable: true
       },
       slug3: {
         type: "string",
-        input: "slug",
-        label:"not editable slug"
+        label: "not editable slug",
+        i18n: true
       }
     }
   },
@@ -316,6 +317,56 @@ export const models: ModelOpts[] = [
     collection: "iframe",
     iframeOptions: {
       url: "http://localhost:4000/docs/?session={sessionID}"
+    }
+  },
+  {
+    name: "translateAblep",
+    urlPath: {
+      de: "/abc/def/:slug",
+      en: "/en/en/:slug"
+    },
+    fields: {
+      slug: {
+        type: "string",
+        input: "slug",
+        i18n: true,
+        required: true,
+        index: true
+      },
+      translateField: {
+        type: "string",
+        i18n: true,
+        required: true,
+        index: true
+      },
+      translateObject: {
+        type: "object",
+        i18n: true,
+        fields: {
+          testString: {
+            type: "string",
+            required: true
+          }
+        }
+      },
+      stringList: {
+        label: "String List",
+        type: "list",
+        sortable: true,
+        schedule: true,
+        item: {
+          type: "string",
+          label: "String",
+          index: true,
+          i18n: true
+        }
+      },
+
+      pdf: {
+        type: "media",
+        label: "PDF File",
+        i18n: true
+      }
     }
   }
 ];

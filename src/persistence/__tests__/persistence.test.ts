@@ -19,7 +19,8 @@ describe("migration", () => {
     await persistence(models, adapter, {
       migrationDir: path.join(__dirname, "migrations"),
       basePath: "",
-      mediaUrl: "/media"
+      mediaUrl: "/media",
+      languages: []
     });
     expect(adapter.content.migrate).toBeCalledWith(
       [

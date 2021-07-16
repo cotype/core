@@ -1,7 +1,11 @@
 import React from "react";
 import styled from "styled-components/macro";
-import PopoverMenu, { Menu, Item } from "./PopoverMenu";
-import Icon from "./icons";
+import {
+  icons,
+  PopoverMenu,
+  PopoverMenuMenu as Menu,
+  PopoverMenuItem as Item
+} from "@cotype/ui";
 
 type P = {
   disabled?: boolean;
@@ -71,18 +75,20 @@ type Action = {
 const renderMenu = (close: () => void, pending: any, actions: Action[]) =>
   !pending && (
     <Menu>
-      {actions.filter(a => !a.disabled).map(a => (
-        <Item
-          style={styles.item}
-          key={a.label}
-          onClick={() => {
-            if (a.onClick) a.onClick();
-            close();
-          }}
-        >
-          {a.label}
-        </Item>
-      ))}
+      {actions
+        .filter(a => !a.disabled)
+        .map(a => (
+          <Item
+            style={styles.item}
+            key={a.label}
+            onClick={() => {
+              if (a.onClick) a.onClick();
+              close();
+            }}
+          >
+            {a.label}
+          </Item>
+        ))}
     </Menu>
   );
 
@@ -114,7 +120,7 @@ export default function ActionButton({
           }
         >
           <Extra>
-            <Icon.Down />
+            <icons.Down />
           </Extra>
         </PopoverMenu>
       )}

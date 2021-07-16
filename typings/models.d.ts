@@ -1,3 +1,5 @@
+import { Language } from "./entities";
+
 export type VirtualType = {
   type: "virtual";
 } & (
@@ -41,7 +43,7 @@ type LinkOpts = "mail" | "media" | "link" | "tel";
 export type RichtextType = {
   type: "richtext";
   required?: boolean;
-  formats?: any[][] | string[];
+  formats?: string[];
   linkFormats?: LinkOpts[];
   modules?: {
     [key: string]: any;
@@ -63,6 +65,7 @@ type Text = {
   validationRegex?: string;
   regexError?: string;
   store?: boolean;
+  i18n?: boolean;
 };
 type TextArea = {
   type: "string";
@@ -103,7 +106,7 @@ type DateString = {
 type SelectValue = { label: string; value: string | number } | string;
 
 type Select = {
-  type: "string";
+  type: "string" | "number";
   input: "select";
   nullLabel?: string;
   fetch?: string;
@@ -158,7 +161,7 @@ export type SettingsType = {
   required?: boolean;
 };
 
-export type Field = Type & { label?: string };
+export type Field = Type & { label?: string; i18n?: boolean };
 
 export type Fields = {
   [key: string]: Field;
@@ -170,6 +173,7 @@ export type ObjectType = {
   layout?: "vertical" | "horizontal" | "inline";
   modalView?: boolean;
   typeName?: string;
+  required?: boolean;
 };
 
 export type MapKeyValue = { label: string; value: string } | string;
@@ -195,6 +199,8 @@ export type ListType = {
   layout?: "inline" | "block";
   hidden?: boolean;
   typeName?: string;
+
+  i18n?: boolean;
 };
 
 export type UnionTypeType = ObjectType & { label?: string; icon?: string };
@@ -249,11 +255,13 @@ export type ModelOpts = {
   singular?: string;
   plural?: string;
   collection?: "list" | "singleton" | "none" | "iframe";
-  urlPath?: string;
+  urlPath?: string | { [langKey: string]: string };
+  previewBaseUrl?: string;
   noFeed?: true;
   fields?: {
     [key: string]: Field & { unique?: boolean };
   };
+  i18n?: boolean;
   customQuery?: {
     [s: string]: string;
   };
@@ -307,6 +315,7 @@ export type ModelBuilderOpts = Partial<ModelOpts> & {
   required?: boolean;
   writable?: boolean;
   external?: boolean;
+  languages?: Language[] | null;
 };
 
 export type RequireOne<T, K extends keyof T> = T &

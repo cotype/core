@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { ChangeEvent, Component } from "react";
 import { FieldProps } from "formik";
 import api from "../../api";
 import { required } from "./validation";
@@ -8,6 +8,7 @@ type Props = FieldProps<any> & {
   fetch?: string;
   values?: string[] | any[];
   required?: boolean;
+  type: "string" | "number";
 };
 type State = {
   options: any[];
@@ -44,31 +45,40 @@ export default class OptionsInput extends Component<Props, State> {
   };
 
   componentDidMount() {
-    const { values, fetch, nullLabel, form, field } = this.props;
+    const { values, fetch, nullLabel, form, field, type } = this.props;
 
     if (fetch) {
       api.get(fetch).then(this.setOptions);
     } else {
       this.setOptions(values);
       if (!nullLabel && !field.value && values && values.length > 0) {
+        const parseVal = type === "number" ? parseFloat : String;
         form.setFieldValue(
           field.name,
-          typeof values[0] === "string" ? values[0] : values[0].value
+          parseVal(typeof values[0] === "string" ? values[0] : values[0].value)
         );
       }
     }
   }
 
   componentDidUpdate(prevProps: Props) {
-    const { nullLabel, values, form, field } = this.props;
+    const { nullLabel, values, form, field, type } = this.props;
 
     if (!nullLabel && !field.value && values && values !== prevProps.values) {
+      const parseVal = type === "number" ? parseFloat : String;
       form.setFieldValue(
         field.name,
-        typeof values[0] === "string" ? values[0] : values[0].value
+        parseVal(typeof values[0] === "string" ? values[0] : values[0].value)
       );
     }
   }
+  handleChange = ({
+    currentTarget: { value }
+  }: ChangeEvent<HTMLSelectElement>) => {
+    const { field, form, type } = this.props;
+    const parseVal = type === "number" ? parseFloat : String;
+    form.setFieldValue(field.name, parseVal(value));
+  };
 
   render() {
     const { field } = this.props;
@@ -85,6 +95,7 @@ export default class OptionsInput extends Component<Props, State> {
             : ""
         }
         {...props}
+        onChange={this.handleChange}
       >
         {options.map(o => (
           <option key={o.value} value={o.value}>

@@ -4,12 +4,13 @@ import builder from "./builder";
 import mediaModels from "./media";
 import settingsModels from "./settings";
 
-export default function(
+export default function (
   contentModels: Cotype.ModelOpts[],
-  externalDataSource?: Cotype.ExternalDataSource[]
+  externalDataSource?: Cotype.ExternalDataSource[],
+  languages?: Cotype.Language[] | null
 ): Cotype.Models {
   const content = builder(
-    { type: "content", versioned: true, writable: true },
+    { type: "content", versioned: true, writable: true, languages },
     externalDataSource
   )(contentModels);
   const settings = builder({ type: "settings", writable: true })(

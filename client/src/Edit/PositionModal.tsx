@@ -1,7 +1,6 @@
 import React, { Component } from "react";
-import Button from "../common/Button";
+import { Button, paths } from "@cotype/ui";
 import ModalDialog from "../common/ModalDialog";
-import { paths } from "../common/icons";
 import middleString from "../utils/middleString";
 import * as Cotype from "../../../typings";
 import api from "../api";

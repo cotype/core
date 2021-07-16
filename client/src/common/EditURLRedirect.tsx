@@ -16,7 +16,15 @@ export type Props = RouteComponentProps & {
   contentModels: Model[];
   navigation?: NavigationItem[];
 };
-
+const getURLLength = (p: string | { [s: string]: string }) => {
+  if (typeof p === "string") {
+    return (p.match(/\//g) || []).length;
+  } else {
+    return Object.values(p)
+      .map(s => (s.match(/\//g) || []).length)
+      .sort((a, b) => b - a)[0];
+  }
+};
 const findPathInNavigation = (model: Model) => (
   found: string,
   navigationItem: NavigationItem
@@ -46,18 +54,23 @@ const EditURLRedirect: React.FC<Props> = ({
     const parsed = parse(query) as { q: string };
     if (parsed.q && navigation) {
       let foundModels = contentModels.filter(model => {
-        if (model.urlPath && model.urlPath === parsed.q) {
+        if (!model.urlPath) {
+          return false;
+        }
+        const urlPathArray =
+          typeof model.urlPath === "object"
+            ? Object.values(model.urlPath)
+            : [model.urlPath];
+        if (urlPathArray.includes(parsed.q)) {
           return true;
         }
-        if (model.urlPath && model.urlPath.includes(":")) {
-          const matcher = createRoute(model.urlPath);
+        return urlPathArray.some(s => {
+          const matcher = createRoute(s);
           const match = matcher(parsed.q);
-          if (match) {
-            return true;
-          }
-        }
-        return false;
+          return !!match;
+        });
       });
+
       if (foundModels.length > 0) {
         foundModels = foundModels.sort((a, b) => {
           if (!a.urlPath) {
@@ -66,8 +79,8 @@ const EditURLRedirect: React.FC<Props> = ({
           if (!b.urlPath) {
             return -1;
           }
-          const deepnesA = (a.urlPath.match(/\//g) || []).length;
-          const deepnesB = (b.urlPath.match(/\//g) || []).length;
+          const deepnesA = getURLLength(a.urlPath);
+          const deepnesB = getURLLength(b.urlPath);
           if (deepnesA < deepnesB) return 1;
           if (deepnesA > deepnesB) return -1;
           return 0;
@@ -76,14 +89,23 @@ const EditURLRedirect: React.FC<Props> = ({
           findPathInNavigation(foundModels[0]),
           ""
         );
-        if (
-          path &&
-          foundModels[0].urlPath &&
-          foundModels[0].urlPath.includes(":")
-        ) {
-          const matcher = createRoute(foundModels[0].urlPath);
-          const match = matcher(parsed.q);
-          const fetchQuery = Object.entries(match).reduce(
+        if (path && foundModels[0] && foundModels[0].urlPath) {
+          const urlPathArray: string[] =
+            typeof foundModels[0].urlPath === "object"
+              ? Object.values(foundModels[0].urlPath)
+              : [foundModels[0].urlPath];
+          const m = urlPathArray
+            .map(s => {
+              const matcher = createRoute(s);
+              const match = matcher(parsed.q);
+              if (match) {
+                return match;
+              }
+              return undefined;
+            })
+            .filter(Boolean);
+
+          const fetchQuery = Object.entries(m[0]).reduce(
             (acc, [key, value]) => ({ ...acc, ["data." + key]: { eq: value } }),
             {}
           );

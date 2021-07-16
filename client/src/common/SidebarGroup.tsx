@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import styled, { css } from "styled-components/macro";
-import Icon from "../common/icons";
+import { icons } from "@cotype/ui";
 import { testable } from "../utils/helper";
 
 const active = css`
@@ -21,10 +21,10 @@ const GroupHeader = styled("div")`
   }
 `;
 
-type Icon = {
+type IconProp = {
   expanded: boolean;
 };
-const ChevronRightIcon = styled(Icon.ChevronRight)<Icon>`
+const ChevronRightIcon = styled(icons.ChevronRight)<IconProp>`
   margin-left: -10px;
   margin-right: 2px;
   transform: ${p => (p.expanded ? "rotate(90deg)" : "none")};

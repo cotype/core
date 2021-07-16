@@ -10,6 +10,8 @@ type Props = {
   compareTo?: any;
   layout?: FieldLayout;
   fields: Cotype.Fields;
+
+  activeLanguages?: Cotype.Language[] | null;
 };
 export default class ObjectOutput extends Component<Props> {
   static getSummary = (type, props) => {
@@ -52,8 +54,10 @@ export default class ObjectOutput extends Component<Props> {
               const element = (
                 <FieldComponent
                   {...props}
+                  type={type}
                   value={(value || {})[key]}
                   compareTo={compareTo && compareTo[key]}
+                  activeLanguages={this.props.activeLanguages}
                 />
               );
               return { label, element, key };

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { FieldProps } from "formik";
-import ToggleSwitch from "../../common/ToggleSwitch";
+import { ToggleSwitch } from "@cotype/ui";
+
 
 type Props = FieldProps<any> & {
   input?: "checkbox" | "toggle";

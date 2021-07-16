@@ -15,7 +15,9 @@ function plaintext(data: QuillDelta): string {
 }
 
 function html(delta: QuillDelta): string {
-  const converter = new QuillDeltaToHtmlConverter(delta.ops);
+  const converter = new QuillDeltaToHtmlConverter(delta.ops, {
+    linkTarget: ""
+  });
   return converter.convert();
 }
 

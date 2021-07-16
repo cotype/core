@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FieldProps } from "formik";
-import { inputClass } from "../../common/styles";
+import { inputClass } from "@cotype/ui";
 import { required as validateRequired } from "./validation";
 import Textarea from "react-textarea-autosize";
 import styled from "styled-components/macro";

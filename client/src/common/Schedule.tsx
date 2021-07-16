@@ -3,11 +3,7 @@ import React, { Component } from "react";
 import styled from "styled-components/macro";
 import moment from "moment";
 import ModalDialog from "./ModalDialog";
-import Button from "./Button";
-import ToggleSwitch from "./ToggleSwitch";
-import { paths } from "./icons";
-import DatePicker from "./DatePicker";
-import TimeInput from "./TimeInput";
+import { Button, paths, ToggleSwitch, DatePicker, TimeInput } from "@cotype/ui";
 import ConflictDialog from "./ConflictDialog";
 
 const modalStyle = {
@@ -76,20 +72,14 @@ export default class ScheduleModal extends Component<Props, State> {
     const { visibleFrom, visibleFromDate, visibleFromTime } = this.state;
     if (!visibleFrom) return null;
     const [hh, mm] = visibleFromTime.split(":").map(Number);
-    return moment(visibleFromDate)
-      .hours(hh)
-      .minutes(mm)
-      .toDate();
+    return moment(visibleFromDate).hours(hh).minutes(mm).toDate();
   }
 
   get visibleUntil() {
     const { visibleUntil, visibleUntilDate, visibleUntilTime } = this.state;
     if (!visibleUntil) return null;
     const [hh, mm] = visibleUntilTime.split(":").map(Number);
-    return moment(visibleUntilDate)
-      .hours(hh)
-      .minutes(mm)
-      .toDate();
+    return moment(visibleUntilDate).hours(hh).minutes(mm).toDate();
   }
 
   onSchedule = () => {

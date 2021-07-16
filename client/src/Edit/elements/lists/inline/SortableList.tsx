@@ -2,6 +2,7 @@ import React from "react";
 import { ArrayHelpers, FormikProps } from "formik";
 import { SortableContainer } from "react-sortable-hoc";
 import SortableItem from "./SortableItem";
+import { Language } from "../../../../../../typings";
 
 type SortableList = {
   items: ({ key: number | string; value: { _type: string } })[];
@@ -12,6 +13,9 @@ type SortableList = {
   arrayHelpers: ArrayHelpers & { form: FormikProps<any> };
   removeItem: (index: number) => void;
   isSorting: boolean;
+
+  activeLanguages?: Language[];
+  activeLanguage?: Language;
 };
 const SortableList = SortableContainer(({ items, ...props }: SortableList) => {
   return (

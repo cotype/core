@@ -665,7 +665,7 @@ describe.each(implementations)("%s adapter", (_, impl) => {
         const listDesc = await find("desc");
         const descTitles = listDesc.items.map(i => i.data.title);
 
-        await expect(descTitles).toEqual(["bcd", "BCD", "abc", "ABC"]);
+        await expect(descTitles).toEqual(["BCD", "bcd", "ABC", "abc"]);
       });
 
       it("auto indexed field (title) should be name", async () => {

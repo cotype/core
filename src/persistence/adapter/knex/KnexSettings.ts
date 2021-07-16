@@ -74,9 +74,19 @@ export default class KnexSettings implements SettingsAdapter {
   }
 
   async deleteUser(id: string) {
+    const [user] = await this.knex("users")
+      .select("users.id", "users.name", "users.email")
+      .where({ "users.id": id, "users.deleted": false })
+      .limit(1)
+      .select();
     await this.knex("users")
       .where({ id })
-      .update({ deleted: true, role: null });
+      .update({
+        deleted: true,
+        role: null,
+        email: id + user.email,
+        name: id + user.name
+      });
   }
 
   async loadUser(id: string) {

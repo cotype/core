@@ -44,6 +44,18 @@ const defaultConfig: Opts = {
       res.json({ hello: "world" });
     });
   },
+  languages: [
+    {
+      title: "Deutsch",
+      key: "de"
+    },
+    { title: "Englisch", key: "en" }
+  ],
+  basePath: {
+    cms: "/",
+    media: "/media",
+    preview: "https://cotype.dev"
+  },
   contentHooks: {
     preHooks: {
       onSave: async (_, data) => {

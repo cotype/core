@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components/macro";
-import Icon from "../common/icons";
+import { icons } from "@cotype/ui";
 import { testable } from "../utils/helper";
 const Backdrop = styled("div")`
   position: fixed;
@@ -62,7 +62,7 @@ export default class Overlay extends Component<Props> {
         <Modal onClick={ev => ev.stopPropagation()} style={style}>
           {children}
           <Close onClick={this.close}>
-            <Icon.Clear />
+            <icons.Clear />
           </Close>
         </Modal>
       </Backdrop>

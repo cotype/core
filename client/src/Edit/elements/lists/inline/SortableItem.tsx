@@ -1,9 +1,10 @@
 import React from "react";
 import styled from "styled-components/macro";
 import { Field, ArrayHelpers, FormikProps } from "formik";
-import Icon from "../../../../common/icons";
+import { icons } from "@cotype/ui";
 import { SortableElement } from "react-sortable-hoc";
 import { ITEM_VALUE_KEY } from "../block/Input";
+import { Language } from "../../../../../../typings";
 
 type Item = {
   isSorting?: boolean;
@@ -43,7 +44,7 @@ const StyledButton = styled("button")`
   }
 `;
 
-const ClearCircleIcon = styled(Icon.ClearCircle)`
+const ClearCircleIcon = styled(icons.ClearCircle)`
   color: rgba(0, 0, 0, 0.26);
   margin: 0 4px;
 `;
@@ -52,7 +53,7 @@ type SortableItem = {
   sortIndex: number;
   sortable: boolean | undefined;
   ItemComponent: React.ComponentType<any> & {
-    validate: (value: any, itemType: any) => void;
+    validate: (value: any, itemType: any, activeLanguages?: Language[]) => void;
   };
   itemType;
   arrayHelpers: ArrayHelpers & { form: FormikProps<any> };
@@ -60,6 +61,9 @@ type SortableItem = {
   name: string;
   length: number;
   isSorting: boolean;
+
+  activeLanguages?: Language[];
+  activeLanguage?: Language;
 };
 const SortableItem = SortableElement(
   ({
@@ -69,7 +73,9 @@ const SortableItem = SortableElement(
     itemType,
     removeItem,
     name,
-    isSorting
+    isSorting,
+    activeLanguage,
+    activeLanguages
   }: SortableItem) => {
     return (
       <Item isSorting={isSorting} sortable={sortable}>
@@ -81,12 +87,14 @@ const SortableItem = SortableElement(
               {...itemType}
               value={props.field.value}
               layout="inList"
+              activeLanguages={activeLanguages}
+              activeLanguage={activeLanguage}
             />
           )}
           {...itemType}
           validate={value => {
             if (typeof ItemComponent.validate === "function") {
-              return ItemComponent.validate(value, itemType);
+              return ItemComponent.validate(value, itemType, activeLanguages);
             }
           }}
         />

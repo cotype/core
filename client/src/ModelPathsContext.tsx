@@ -1,9 +1,10 @@
 import * as Cotype from "../../typings";
-import React from "react";
+import React, { useContext } from "react";
 const ModelPathsContext = React.createContext<{
   modelPaths: Cotype.ModelPaths | null;
   baseUrls: Cotype.BaseUrls | null;
-} | null>(null);
+  languages?: Cotype.Language[] | null;
+}>({ modelPaths: null, baseUrls: null });
 export default ModelPathsContext;
 
 /**
@@ -14,6 +15,7 @@ export default ModelPathsContext;
 interface WithModelPaths {
   modelPaths: Cotype.ModelPaths | null;
   baseUrls: Cotype.BaseUrls | null;
+  languages?: Cotype.Language[] | null;
 }
 
 export function withModelPaths<P extends WithModelPaths>(
@@ -28,12 +30,14 @@ export function withModelPaths<P extends WithModelPaths>(
       <ModelPathsContext.Consumer>
         {p => (
           <Component
-            {...props as any}
+            {...(props as any)}
             modelPaths={p && p.modelPaths}
             baseUrls={p && p.baseUrls}
+            languages={p && p.languages}
           />
         )}
       </ModelPathsContext.Consumer>
     );
   };
 }
+export const useModelPaths = () => useContext(ModelPathsContext);

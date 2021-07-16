@@ -69,10 +69,12 @@ export default function routes(
 
     const all = linkableOnly === "true" ? linkableModels : searchableModels;
 
-    const pickModels = (names: string[]) =>
-      all.filter(name =>
-        names.some(n => n.toLowerCase() === name.toLowerCase())
-      );
+    const pickModels = (names: string[] | string) =>
+      typeof names === "string"
+        ? all.filter(name => names.toLowerCase() === name.toLowerCase())
+        : all.filter(name =>
+            names.some(n => n.toLowerCase() === name.toLowerCase())
+          );
 
     const includes = pickModels(includeModels);
     const excludes = pickModels(excludeModels);
@@ -114,7 +116,7 @@ export default function routes(
     /** Search */
     router.get(`/rest/${mode}/search/content`, async (req, res) => {
       const { principal, query } = req;
-      const { term, limit = 50, offset = 0 } = query as any;
+      const { term, limit = 50, offset = 0, i18n } = query as any;
       const searchModels = getSearchModels(query as any);
 
       if (!searchModels.length) {
@@ -136,7 +138,8 @@ export default function routes(
           offset,
           models: searchModels
         },
-        req.previewOpts
+        req.previewOpts,
+        i18n
       );
 
       const preparedResults = prepareSearchResults(results, models, mediaUrl);
@@ -167,7 +170,12 @@ export default function routes(
         return res.json([]);
       }
 
-      const results = await content.suggest(principal, term, req.previewOpts);
+      const results = await content.suggest(
+        principal,
+        term,
+        req.previewOpts,
+        searchModels
+      );
       res.json(results);
     });
 
@@ -187,6 +195,7 @@ export default function routes(
             order,
             orderBy,
             fields,
+            i18n,
             ...rest
           } = query as any;
 
@@ -208,7 +217,8 @@ export default function routes(
               format,
               join,
               criteria,
-              req.previewOpts
+              req.previewOpts,
+              i18n
             );
 
             if (result.total > 0) {
@@ -238,7 +248,8 @@ export default function routes(
               format,
               join,
               criteria,
-              req.previewOpts
+              req.previewOpts,
+              i18n
             );
 
             if (fields) {
@@ -260,7 +271,7 @@ export default function routes(
         // load
         router.get(`/rest/${mode}/${type}/:id`, async (req, res) => {
           const { principal, params, query } = req;
-          const { join, fields } = query as any;
+          const { join, fields, i18n } = query as any;
 
           checkPermissionToJoin(req.principal, join);
           const dataSource = getDataSource(type);
@@ -273,7 +284,8 @@ export default function routes(
             params.id,
             join,
             format,
-            req.previewOpts
+            req.previewOpts,
+            i18n
           );
 
           if (!result) return res.status(404).end();
@@ -300,7 +312,7 @@ export default function routes(
               `/rest/${mode}/${type}/${uniqueField}/:uniqueValue`,
               async (req, res) => {
                 const { principal, query, params } = req;
-                const { join, fields } = query as any;
+                const { join, fields, i18n } = query as any;
 
                 checkPermissionToJoin(req.principal, join);
 
@@ -320,7 +332,8 @@ export default function routes(
                   format,
                   join,
                   criteria,
-                  req.previewOpts
+                  req.previewOpts,
+                  i18n
                 );
 
                 if (!result.total) return res.status(404).end();

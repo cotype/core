@@ -11,7 +11,8 @@ type Visitor = {
     value: any,
     field: any,
     deleteFunc: () => void,
-    stringPath: string
+    stringPath: string,
+    langKey?: string
   ) => void | typeof NO_STORE_VALUE | any;
 };
 
@@ -19,10 +20,17 @@ export default function visit(
   obj: any,
   model: Cotype.Model,
   visitor: Visitor,
-  options?: { flattenList?: boolean }
+  options?: {
+    flattenList?: boolean;
+    withI18nFlag?: boolean;
+  }
 ) {
-  const opts = {
+  const opts: {
+    flattenList: boolean;
+    withI18nFlag?: boolean;
+  } = {
     flattenList: true,
+    withI18nFlag: false,
     ...options
   };
   if (!obj) return;
@@ -31,9 +39,46 @@ export default function visit(
     value: any,
     key?: string,
     parent?: object,
-    stringPath: string = ""
+    stringPath: string = "",
+    langKey?: string
   ) => {
     if (!m) return;
+
+    if ("i18n" in m && m.i18n) {
+      if (model.languages) {
+        if ("i18n" in visitor) {
+          const ret = visitor.i18n(
+            value,
+            m,
+            () => {
+              if (parent && key) {
+                _.set(parent, key, undefined);
+              }
+            },
+            Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + key // Remove Dot and ArrayKey when Parent is List
+          );
+          if (typeof ret !== "undefined") {
+            if (parent && key) {
+              _.set(parent, key, ret);
+            }
+          }
+        }
+        model.languages.map(l => {
+          walk(
+            {
+              ...m,
+              i18n: false
+            },
+            (value || {})[l.key],
+            opts.withI18nFlag ? l.key : key,
+            opts.withI18nFlag ? value : parent,
+            stringPath + (opts.withI18nFlag ? `${l.key}.` : ""),
+            l.key
+          );
+        });
+        return;
+      }
+    }
     if (m.type === "object") {
       Object.keys(m.fields).forEach(fieldKey =>
         walk(
@@ -41,14 +86,22 @@ export default function visit(
           (value || {})[fieldKey],
           fieldKey,
           value,
-          stringPath + key + "."
+          stringPath + key + ".",
+          langKey
         )
       );
     }
     if (m.type === "list" && opts.flattenList) {
       if (Array.isArray(value))
         value.forEach((item, i: number) =>
-          walk(m.item, item.value, String(i), value, stringPath + key + ".")
+          walk(
+            m.item,
+            item.value || item,
+            String(i),
+            value,
+            stringPath + key + ".",
+            langKey
+          )
         );
     }
     if (m.type === "union") {
@@ -57,14 +110,15 @@ export default function visit(
         walk(
           m.types[_type],
           value,
-          undefined,
-          undefined,
-          stringPath + key + "."
+          key,
+          parent,
+          stringPath + key + ".",
+          langKey
         );
       }
     }
     if (m.type === "immutable") {
-      walk(m.child, value, key, parent, stringPath);
+      walk(m.child, value, key, parent, stringPath, langKey);
     }
     if (m.type in visitor) {
       const ret = visitor[m.type](
@@ -75,7 +129,8 @@ export default function visit(
             _.set(parent, key, undefined);
           }
         },
-        Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + key // Remove Dot and ArrayKey when Parent is List
+        Array.isArray(parent) ? stringPath.slice(0, -1) : stringPath + key, // Remove Dot and ArrayKey when Parent is List,
+        langKey
       );
       if (typeof ret !== "undefined") {
         if (parent && key) {

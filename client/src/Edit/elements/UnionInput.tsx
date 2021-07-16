@@ -4,7 +4,7 @@ import { FieldProps } from "formik";
 import styled from "styled-components/macro";
 import { titleCase } from "title-case";
 import basePath from "../../basePath";
-import Button from "../../common/Button";
+import { Button } from "@cotype/ui";
 import ModalDialog from "../../common/ModalDialog";
 import ObjectInput from "./ObjectInput";
 import inputs from "./inputs";
