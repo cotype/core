@@ -17,7 +17,7 @@ function objectWithTypeAndLabel(type: string, label: string): ObjectType {
 
 // reusable structures
 const pageFields: Fields = {
-  pagetitle: { type: "string", label: "Title", required: true },
+  pagetitle: { type: "string", label: "Title", required: true, i18n: true },
   slug: {
     type: "immutable",
     child: { type: "string", input: "slug", label: "Slug" }

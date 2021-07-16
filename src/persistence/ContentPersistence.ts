@@ -59,8 +59,13 @@ function findValueByPath(
   ) as unknown) as string | undefined;
 
   if (title && typeof title !== "string") {
-    return title[language || Object.keys(title)[0]];
+    if (language && title[language]) {
+      return title[language];
+    }
+
+    return Object.values(title).find((s) => !!s) as string || '';
   }
+
   return title;
 }
 export default class ContentPersistence implements Cotype.VersionedDataSource {
