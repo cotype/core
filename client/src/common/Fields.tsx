@@ -107,7 +107,13 @@ export default class Fields extends Component<Props> {
           }}
         >
           {fields.map(f => (
-            <FieldBlockLabel key={f.key || f.label} hidden={f.hidden}>
+            <FieldBlockLabel
+              key={f.key || f.label}
+              hidden={f.hidden}
+              as={f.element.props?.type === "media" && f.element.props?.i18n
+                ? "span"
+                : "label"
+              }>
               {f.element}
               <InlineLabel>{f.label}</InlineLabel>
               {errorHandler(f.error)}
