@@ -552,6 +552,9 @@ export default class KnexContent implements ContentAdapter {
               );
             }
           }
+          if (value.type === "richtext") {
+            hasInverseRefs = true;
+          }
         });
       });
 
