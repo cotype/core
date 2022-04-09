@@ -15,7 +15,7 @@
     "formik": "^1.5.8",
     "hoist-non-react-statics": "^3.3.2",
     "javascript-time-ago": "^2.0.7",
-    "moment": "^2.25.3",
+    "moment": "^2.29.2",
     "mudder": "^1.0.9",
     "path-match": "^1.2.4",
     "quill-delta": "^4.2.2",
