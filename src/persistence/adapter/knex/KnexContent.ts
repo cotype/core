@@ -1036,10 +1036,10 @@ export default class KnexContent implements ContentAdapter {
       "content_revisions.data",
       ...(!exact
         ? ([
-            this.knex.raw(
-              `(case when text like '%${text}%' then 1 else 2 end) as isExact`
-            )
-          ] as any)
+          this.knex.raw(
+            `(case when text like ? then 1 else 2 end) as isExact`
+            ,`%${text}%`)
+        ] as any)
         : [])
     ]);
 
