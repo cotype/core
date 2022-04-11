@@ -25,6 +25,11 @@
           "type": "model",
           "name": "Iframe",
           "model": "iframe"
+        },
+        {
+          "type": "model",
+          "name": "Translatable",
+          "model": "translateAblep"
         }
       ]
     }

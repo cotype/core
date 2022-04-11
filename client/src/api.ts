@@ -127,13 +127,14 @@ class Api {
   save(
     model: Cotype.Model,
     id: string | undefined,
-    data: Cotype.Data
+    data: Cotype.Data,
+    activeLanguages?: string[]
   ): Promise<Cotype.DataRecord> {
     const { type, name } = model;
     if (id) {
-      return this.put(`/${type}/${name}/${id}`, data);
+      return this.put(`/${type}/${name}/${id}`, { data, activeLanguages });
     }
-    const body: any = { data };
+    const body: any = { data, activeLanguages };
     return this.post(`/${type}/${name}`, body);
   }
 

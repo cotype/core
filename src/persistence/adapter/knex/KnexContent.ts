@@ -68,9 +68,13 @@ const getRecursiveOrderField = (
   ]
 ): false | { isNumeric: boolean; withUpperCase: boolean } => {
   const [field, ...restPath] = orderPath.split(".");
-  const type = m.fields[field];
+  let type = m.fields[field];
   if (!type) {
     return false;
+  }
+
+  if (type.type === "immutable") {
+    type = type.child;
   }
   if (type.type === "list" && type.item) {
     if (type.item.type === "object" && type.item.fields) {
@@ -128,7 +132,8 @@ export default class KnexContent implements ContentAdapter {
     indexData: Cotype.Data,
     model: Cotype.Model,
     models: Cotype.Model[],
-    author: string
+    author: string,
+    activeLanguages?: string[]
   ) {
     await this.testUniqueFields(model, models, storeData);
 
@@ -140,10 +145,49 @@ export default class KnexContent implements ContentAdapter {
 
     storeData = await this.testPositionFields(model, models, storeData, id);
 
-    await this.createRev(storeData, indexData, model, models, id, 1, author);
+    await this.createRev(
+      storeData,
+      indexData,
+      model,
+      models,
+      id,
+      1,
+      author,
+      activeLanguages
+    );
     return id;
   }
+  async innerTestUniqueFields(
+    model: Cotype.Model,
+    models: Cotype.Model[],
+    value: string,
+    fieldName: string,
+    lang?: string,
+    id?: string
+  ) {
+    const criteria: any = {};
+    criteria[`data.${fieldName}`] = { eq: value, ne: "" };
+    const opts = { offset: 0, limit: 1 };
+    const p1 = this.list(model, models, opts, criteria, undefined, lang);
+    const p2 = this.list(
+      model,
+      models,
+      opts,
+      criteria,
+      {
+        publishedOnly: true,
+        ignoreSchedule: true
+      },
+      lang
+    );
+    const res = await Promise.all([p1, p2]);
 
+    const items = _flatten(res.map(r => r.items));
+    const existing = items.find(i => i.id.toString() !== (id && id.toString()));
+    if (existing) {
+      return { field: fieldName, existingContentId: existing.id };
+    }
+  }
   /**
    * Test if the any fields in data that are marked as unique in the model
    * already exists.
@@ -159,32 +203,42 @@ export default class KnexContent implements ContentAdapter {
     if (uniqueFields) {
       const resp = await Promise.all(
         uniqueFields.map(async f => {
-          const criteria: any = {};
-
-          const value = (f
+          const value = f
             .split(".")
             .reduce(
               (obj, key) =>
                 obj && obj[key] !== "undefined" ? obj[key] : undefined,
               data
-            ) as unknown) as string;
+            ) as unknown;
 
-          criteria[`data.${f}`] = { eq: value, ne: "" };
-          const opts = { offset: 0, limit: 1 };
-          const p1 = this.list(model, models, opts, criteria);
-          const p2 = this.list(model, models, opts, criteria, {
-            publishedOnly: true,
-            ignoreSchedule: true
-          });
-          const res = await Promise.all([p1, p2]);
-
-          const items = _flatten(res.map(r => r.items));
-          const existing = items.find(
-            i => i.id.toString() !== (id && id.toString())
-          );
-          if (existing) {
-            return { field: f, existingContentId: existing.id };
+          if (typeof value === "object" && value !== null) {
+            const errors = (
+              await Promise.all(
+                Object.entries(value).map(async ([lang, v]) => {
+                  return this.innerTestUniqueFields(
+                    model,
+                    models,
+                    String(v),
+                    f,
+                    lang,
+                    id
+                  );
+                })
+              )
+            ).filter(Boolean);
+            if (errors.length > 0) {
+              return errors[0];
+            }
+            return;
           }
+          return this.innerTestUniqueFields(
+            model,
+            models,
+            String(value),
+            f,
+            undefined,
+            id
+          );
         })
       );
 
@@ -275,7 +329,8 @@ export default class KnexContent implements ContentAdapter {
     model: Cotype.Model,
     models: Cotype.Model[],
     id: string,
-    author: string
+    author: string,
+    activeLanguages?: string[]
   ) {
     storeData = await this.testPositionFields(model, models, storeData, id);
 
@@ -286,7 +341,16 @@ export default class KnexContent implements ContentAdapter {
       .where({ id });
 
     const rev = (content.latest_rev || 0) + 1;
-    return this.createRev(storeData, indexData, model, models, id, rev, author);
+    return this.createRev(
+      storeData,
+      indexData,
+      model,
+      models,
+      id,
+      rev,
+      author,
+      activeLanguages
+    );
   }
 
   async createRev(
@@ -296,19 +360,19 @@ export default class KnexContent implements ContentAdapter {
     models: Cotype.Model[],
     id: string,
     rev: number,
-    author: string
+    author: string,
+    activeLanguages: string[] = []
   ) {
     await this.knex("content_revisions").insert({
       id,
       rev,
       data: JSON.stringify(data),
-      author
+      author,
+      activeLanguages: activeLanguages.join(",") + ","
     });
 
     // Set the new revision as latest on the content
-    await this.knex("contents")
-      .where({ id })
-      .update({ latest_rev: rev });
+    await this.knex("contents").where({ id }).update({ latest_rev: rev });
 
     await this.indexRevision(data, searchData, model, models, id, rev);
 
@@ -325,14 +389,10 @@ export default class KnexContent implements ContentAdapter {
     published = false
   ) {
     // Delete content_values except the published ones
-    await this.knex("content_values")
-      .where({ id, published })
-      .del();
+    await this.knex("content_values").where({ id, published }).del();
 
     // Delete content_search except the published one
-    await this.knex("content_search")
-      .where({ id, published })
-      .del();
+    await this.knex("content_search").where({ id, published }).del();
 
     await this.extractValues(data, model, id, rev, published);
     await this.extractText(searchData, model, id, rev, published);
@@ -371,26 +431,17 @@ export default class KnexContent implements ContentAdapter {
     const rows: any[] = [];
     Object.entries(values).forEach(([field, value]) => {
       const fieldType = getFieldFromModelPath(field, model);
-      if (Array.isArray(value)) {
-        return value.forEach(val =>
-          rows.push({
-            id,
-            rev,
-            published,
-            field,
-            ...serialize(val, fieldType)
-          })
-        );
-      }
-      return rows.push({
-        id,
-        rev,
-        published,
-        field,
-        ...serialize(value, fieldType)
-      });
+      return value.forEach(val =>
+        rows.push({
+          id,
+          rev,
+          published,
+          field,
+          lang: val.lang,
+          ...serialize(val.v, fieldType)
+        })
+      );
     });
-
     return this.knex.batchInsert("content_values", rows);
   }
 
@@ -533,8 +584,16 @@ export default class KnexContent implements ContentAdapter {
         visitModel(typeModel, (_, value) => {
           if (!("type" in value)) return;
 
-          if (value.type === "references") {
+          if (
+            value.type === "richtext" &&
+            value.formats &&
+            value.formats.includes("link")
+          ) {
             hasRefs = true;
+          }
+
+          if (value.type === "references") {
+            hasInverseRefs = true;
 
             // No types means this data is only needed to populate _urls in refs
             if (types.length === 0) {
@@ -544,11 +603,13 @@ export default class KnexContent implements ContentAdapter {
             }
           }
           if (value.type === "content") {
-            hasInverseRefs = true;
+            hasRefs = true;
             // No types means this data is only needed to populate _urls in refs
             if (types.length === 0) {
               implicitTypes = implicitTypes.concat(
-                getModelNames('models' in value && value.models || [value.model!])
+                getModelNames(
+                  ("models" in value && value.models) || [value.model!]
+                )
               );
             }
           }
@@ -557,17 +618,15 @@ export default class KnexContent implements ContentAdapter {
           }
         });
       });
-
       // we don't need to load anything if a model has no refs and it is a first level fetch
       // otherwise we still need to load the main data of that join
       if (first && !hasRefs && !hasInverseRefs) return [];
-
       const refTypes = !!types.length ? types : implicitTypes;
 
-      const refs = hasInverseRefs
+      const refs = hasRefs
         ? this.loadRefs(ids, !first && refTypes, previewOpts)
         : [];
-      const inverseRefs = hasRefs
+      const inverseRefs = hasInverseRefs
         ? this.loadInverseRefs(ids, !first && refTypes, previewOpts)
         : [];
 
@@ -620,7 +679,8 @@ export default class KnexContent implements ContentAdapter {
   async load(
     model: Cotype.Model,
     id: string,
-    previewOpts: Cotype.PreviewOpts = {}
+    previewOpts: Cotype.PreviewOpts = {},
+    language?: string
   ) {
     const k = this.knex("contents")
       .join("content_revisions", join => {
@@ -637,7 +697,9 @@ export default class KnexContent implements ContentAdapter {
         "contents.type": model.name,
         "contents.deleted": false
       });
-
+    if (language) {
+      k.andWhere("content_revisions.activeLanguages", "LIKE", `%${language}%`);
+    }
     if (previewOpts.publishedOnly && !previewOpts.ignoreSchedule) {
       k.andWhere((k2: any) => {
         k2.where("contents.visibleFrom", "<=", new Date()).orWhereNull(
@@ -674,7 +736,11 @@ export default class KnexContent implements ContentAdapter {
     }
 
     const content = await k
-      .select(["contents.*", "content_revisions.data"])
+      .select([
+        "contents.*",
+        "content_revisions.data",
+        "content_revisions.activeLanguages"
+      ])
       .first();
 
     return content ? this.parseData(content, model) : null;
@@ -689,8 +755,17 @@ export default class KnexContent implements ContentAdapter {
         "c.type": model.name,
         "c.deleted": false
       })
-      .first("c.id", "cr.data");
-    return content && { id: content.id, rev, data: JSON.parse(content.data) };
+      .first("c.id", "cr.data", "cr.activeLanguages");
+    return (
+      content && {
+        id: content.id,
+        rev,
+        data: JSON.parse(content.data),
+        activeLanguages:
+          content.activeLanguages &&
+          content.activeLanguages.split(",").filter(Boolean)
+      }
+    );
   }
 
   async listVersions(model: Cotype.Model, id: string) {
@@ -735,21 +810,15 @@ export default class KnexContent implements ContentAdapter {
     // TODO: check if referenced content still exists
 
     // Delete values from previously published revision
-    await this.knex("content_values")
-      .where({ id, published: true })
-      .del();
+    await this.knex("content_values").where({ id, published: true }).del();
 
     // Delete search from previously published revision
-    await this.knex("content_search")
-      .where({ id, published: true })
-      .del();
+    await this.knex("content_search").where({ id, published: true }).del();
 
     if (publishedRev !== null) {
       // Insert values for newly published revision
       const { data } = await this.loadRevision(model, id, publishedRev);
-      const c = await this.knex("contents")
-        .where({ id })
-        .first();
+      const c = await this.knex("contents").where({ id }).first();
 
       await this.checkReferences(id, publishedRev, c);
       await this.extractValues(data, model, id, publishedRev, true);
@@ -853,9 +922,7 @@ export default class KnexContent implements ContentAdapter {
       .where({ type: model.name, id })
       .update({ deleted: true });
 
-    await this.knex("content_references")
-      .where({ id })
-      .del();
+    await this.knex("content_references").where({ id }).del();
   }
 
   async schedule(
@@ -956,7 +1023,11 @@ export default class KnexContent implements ContentAdapter {
 
     const { limit = 50, offset = 0, models = [] } = listOpts;
     if (models.length > 0) {
-      k.andWhere("contents.type", "in", models.map(m => m));
+      k.andWhere(
+        "contents.type",
+        "in",
+        models.map(m => m)
+      );
     }
 
     const [count] = await k.clone().countDistinct(`${searchTable}.id as total`);
@@ -1015,7 +1086,8 @@ export default class KnexContent implements ContentAdapter {
     models: Cotype.Model[],
     listOpts: Cotype.ListOpts = {},
     criteria: Cotype.Criteria = {},
-    previewOpts: Cotype.PreviewOpts = {}
+    previewOpts: Cotype.PreviewOpts = {},
+    language?: string
   ): Promise<Cotype.ListChunk<Cotype.Content>> {
     const {
       limit = 50,
@@ -1057,6 +1129,9 @@ export default class KnexContent implements ContentAdapter {
         "content_revisions.rev"
       );
     });
+    if (language) {
+      k.andWhere("content_revisions.activeLanguages", "LIKE", `%${language}%`);
+    }
 
     if (search && search.term) {
       if (search.scope === "title") {
@@ -1232,12 +1307,15 @@ export default class KnexContent implements ContentAdapter {
                     value.map(val => val.toLowerCase().trim())
                   );
                 }
-                const v = value
-                  ? String(value)
-                      .toLowerCase()
-                      .trim()
-                  : value;
+                const v = value ? String(value).toLowerCase().trim() : value;
                 k.andWhere(`vals${counter}.literal_lc`, sqlOp, v);
+                if (language) {
+                  k.andWhere(w => {
+                    w.where(`vals${counter}.lang`, "=", language);
+                    w.orWhere(`vals${counter}.lang`, "=", "");
+                    w.orWhereNull(`vals${counter}.lang`);
+                  });
+                }
               }
             });
           });
@@ -1257,6 +1335,11 @@ export default class KnexContent implements ContentAdapter {
           "orderValue.rev"
         );
         join.andOnIn("orderValue.field", [orderBy]);
+        if (language) {
+          join.andOn(a =>
+            a.onIn("orderValue.lang", [language]).orOnNull("orderValue.lang")
+          );
+        }
       });
     }
     const [count] = await k.clone().countDistinct("contents.id as total");
@@ -1332,8 +1415,8 @@ export default class KnexContent implements ContentAdapter {
     if (orderByColumn) {
       selectColumns.push(orderByColumn);
     }
+    k.groupBy("contents.id");
     const items = k.select(selectColumns);
-
     return {
       total,
       items: (await items).map((item: any) => this.parseData(item, model))
@@ -1425,9 +1508,7 @@ export default class KnexContent implements ContentAdapter {
         log.error(err);
         await tx.rollback();
         // Delete pending migrations
-        await this.knex("content_migrations")
-          .whereIn("name", names)
-          .del();
+        await this.knex("content_migrations").whereIn("name", names).del();
       }
     } catch (err) {
       log.info("Waiting for migrations to be applied ...");

@@ -3,7 +3,7 @@ import styled, { css } from "styled-components/macro";
 import { FieldProps } from "formik";
 import orderSearchResults from "../../utils/orderSearchResults";
 import { stringify } from "qs";
-import { inputClass, Input } from "../../common/styles";
+import { SimpleInput as Input, inputClass } from "@cotype/ui";
 import Autocomplete from "../../common/Autocomplete";
 import api from "../../api";
 import { required } from "./validation";

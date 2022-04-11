@@ -3,11 +3,12 @@ import React from "react";
 import { SortableElement, SortableHandle } from "react-sortable-hoc";
 import styled, { css } from "styled-components/macro";
 import { Field, ArrayHelpers, FormikProps, getIn } from "formik";
-import Icon from "../../../../common/icons";
+import { icons } from "@cotype/ui";
 import { ITEM_VALUE_KEY } from "./Input";
 import { hasActuallyErrors } from "../../../formHelpers";
+import { Language } from "../../../../../../typings";
 
-const DragHandleIcon = styled(Icon.DragHandle)`
+const DragHandleIcon = styled(icons.DragHandle)`
   user-select: none;
   opacity: 0.8;
   cursor: move;
@@ -111,7 +112,7 @@ type SortableItem = {
   sortIndex: number;
   sortable: boolean | undefined;
   ItemComponent: React.ComponentType<any> & {
-    validate: (value: any, itemType: any) => void;
+    validate: (value: any, itemType: any, activeLanguages?: Language[]) => void;
   };
   itemType;
   arrayHelpers: ArrayHelpers & { form: FormikProps<any> };
@@ -125,6 +126,9 @@ type SortableItem = {
   length: number;
   isSorting: boolean;
   schedule: Cotype.Schedule;
+
+  activeLanguages?: Language[];
+  activeLanguage?: Language;
 };
 const SortableItem = SortableElement(
   ({
@@ -137,7 +141,9 @@ const SortableItem = SortableElement(
     name,
     length,
     isSorting,
-    schedule
+    schedule,
+    activeLanguage,
+    activeLanguages
   }: SortableItem) => {
     const fieldName = `${name}.${sortIndex}.${ITEM_VALUE_KEY}`;
     const error = getIn(arrayHelpers.form.errors, fieldName);
@@ -151,11 +157,18 @@ const SortableItem = SortableElement(
         <ItemField sortable={sortable} isSorting={isSorting}>
           <Field
             name={fieldName}
-            render={props => <ItemComponent {...props} {...itemType} />}
+            render={props => (
+              <ItemComponent
+                {...props}
+                {...itemType}
+                activeLanguages={activeLanguages}
+                activeLanguage={activeLanguage}
+              />
+            )}
             {...itemType}
             validate={value => {
               if (typeof ItemComponent.validate === "function") {
-                return ItemComponent.validate(value, itemType);
+                return ItemComponent.validate(value, itemType, activeLanguages);
               }
             }}
           />

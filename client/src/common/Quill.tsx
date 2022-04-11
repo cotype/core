@@ -3,7 +3,8 @@ import styled, { css } from "styled-components/macro";
 import Loadable from "react-loadable";
 // import "react-quill/dist/quill.bubble.css";
 import "react-quill/dist/quill.snow.css";
-import { outputClass } from "./styles";
+
+import { outputClass } from "@cotype/ui";
 
 const nonInteractive = css`
   ${outputClass} & .ql-editor {

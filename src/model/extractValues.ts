@@ -6,89 +6,145 @@ import visit from "./visit";
  */
 
 const scalars = ["string", "number", "boolean", "position"];
-const extractValues = (obj: object, model: Model) => {
-  const values: any = {};
+const extractValues = (
+  obj: object,
+  model: Model
+): { [s: string]: { v: string; lang?: string }[] } => {
+  const values: { [s: string]: { v: string; lang?: string }[] } = {};
   const uniqueFields = [
     ...getAlwaysUniqueFields(model),
     model.title,
     model.orderBy
   ];
-  const setValue = (path: string, value: any, index: boolean) => {
+  const setValue = (
+    path: string,
+    value: any,
+    index: boolean,
+    i18n?: string
+  ) => {
     if (!index && !uniqueFields.includes(path)) {
       return;
     }
     if (typeof value === "undefined") {
       return;
     }
-    values[path] = value;
+    if (!values[path]) {
+      values[path] = [];
+    }
+    if (Array.isArray(value)) {
+      value.forEach(v =>
+        values[path].push({
+          lang: i18n,
+          v
+        })
+      );
+    } else {
+      values[path].push({
+        lang: i18n,
+        v: value
+      });
+    }
   };
   visit(
     obj,
     model,
     {
-      string(s: string, field, d, stringPath) {
-        setValue(stringPath, s, field.index);
+      string(s: string, field, d, stringPath, langKey) {
+        setValue(stringPath, s, field.index, langKey);
       },
-      number(s: string, field, d, stringPath) {
-        setValue(stringPath, s, field.index);
+      number(s: string, field, d, stringPath, langKey) {
+        setValue(stringPath, s, field.index, langKey);
       },
-      boolean(s: string, field, d, stringPath) {
-        setValue(stringPath, !!s, field.index);
+      boolean(s: string, field, d, stringPath, langKey) {
+        setValue(stringPath, !!s, field.index, langKey);
       },
-      position(s: string, field, d, stringPath) {
-        setValue(stringPath, s, field.index);
+      position(s: string, field, d, stringPath, langKey) {
+        setValue(stringPath, s, field.index, langKey);
       },
-      list(arr: any[], field, d, stringPath) {
+      list(arr: any[], field, d, stringPath, langKey) {
         if (!arr || arr.length === 0) {
-          setValue(stringPath, "null", field.item.index);
+          setValue(stringPath, "null", field.item.index, langKey);
         } else if (scalars.includes(field.item.type)) {
           setValue(
             stringPath,
-            arr.map((el: any) => el.value),
-            field.item.index
+            Array.isArray(arr || [])
+              ? (arr || []).map((el: any) => el.value)
+              : Object.fromEntries(
+                  Object.entries(arr).map(([k, v]) => {
+                    return [k, ((v || []) as any[]).map((el: any) => el.value)];
+                  })
+                ),
+            field.item.index,
+            langKey
           );
         } else if (field.item.type === "content") {
           setValue(
             stringPath,
-            arr.map((el: any) => el.value && el.value.id).filter(Boolean),
-            field.item.index
+            Array.isArray(arr)
+              ? arr.map((el: any) => el.value && el.value.id)
+              : Object.fromEntries(
+                  Object.entries(arr).map(([k, v]) => {
+                    return [
+                      k,
+                      (v as any[])
+                        .map((el: any) => el.value && el.value.id)
+                        .filter(Boolean)
+                    ];
+                  })
+                ),
+            field.item.index,
+            langKey
           );
         } else if (field.item.type === "object") {
-          arr.forEach((el: any) => {
-            const objectValues: {
-              [path: string]: { value: string | null; index: boolean }[];
-            } = {};
+          const parse = (a: object[]) =>
+            a.forEach((el: any) => {
+              const objectValues: {
+                [path: string]: {
+                  value: string | null;
+                  index: boolean;
+                  i18n: boolean;
+                }[];
+              } = {};
 
-            Object.entries(el.value).forEach(([key, v]: any) => {
-              const t = (field.item.fields[key] || {}).type;
-              if (!t) return;
+              Object.entries(el.value).forEach(([key, v]: any) => {
+                const t = (field.item.fields[key] || {}).type;
+                if (!t) return;
 
-              let value: string | null = null;
+                let value: string | null = null;
 
-              if (scalars.includes(t)) value = v;
-              if (v && t === "content") value = v.id;
+                if (scalars.includes(t)) value = v;
+                if (v && t === "content") value = v.id;
 
-              const n = `${stringPath}.${key}`;
+                const n = `${stringPath}.${key}`;
 
-              if (!objectValues[n]) {
-                objectValues[n] = [];
-              }
-              objectValues[n].push({
-                value,
-                index: field.item.fields[key].index
+                if (!objectValues[n]) {
+                  objectValues[n] = [];
+                }
+                objectValues[n].push({
+                  value,
+                  index: field.item.fields[key].index,
+                  i18n: "i18n" in field && field.i18n
+                });
               });
+              Object.entries(objectValues).forEach(([path, args]) =>
+                setValue(
+                  path,
+                  args.map(v => v.value),
+                  args[0].index,
+                  langKey
+                )
+              );
             });
-
-            Object.entries(objectValues).forEach(([path, args]) =>
-              setValue(path, args.map(v => v.value), args[0].index)
-            );
-          });
+          Array.isArray(arr)
+            ? parse(arr)
+            : Object.values(arr).forEach(v => {
+                parse(v as any);
+              });
         }
       }
     },
     { flattenList: false }
   );
-
   return values;
 };
 export default extractValues;

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { outputClass } from "../../common/styles";
+
+import { outputClass } from "@cotype/ui";
 import moment from "moment";
 import "moment/locale/de";
 import styled from "styled-components/macro";

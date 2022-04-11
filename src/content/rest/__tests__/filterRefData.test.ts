@@ -31,7 +31,8 @@ describe("removeUnnecessaryRefData", () => {
     id: "1",
     type: "news",
     author: "",
-    date: ""
+    date: "",
+    activeLanguages: []
   } as Content;
 
   const productData = {
@@ -44,7 +45,8 @@ describe("removeUnnecessaryRefData", () => {
     id: "2",
     type: "products",
     author: "",
-    date: ""
+    date: "",
+    activeLanguages: []
   } as Content;
 
   it("createJoin", async () => {
@@ -72,7 +74,7 @@ describe("removeUnnecessaryRefData", () => {
   it("getContainingMedia", async () => {
     const mediaRefs = {
       [newsData.data.image._id]: { someCrazyProps: "forBar" },
-      [newsData.data.imageList[0]._id]: { someCrazyProps: "forBar2" },
+      [newsData.data.imageList[0].value._id]: { someCrazyProps: "forBar2" },
       [faker.random.image()]: { someCrazyProps: "forBar3" },
       [faker.random.image()]: { someCrazyProps: "forBar4" }
     } as any;
@@ -85,7 +87,7 @@ describe("removeUnnecessaryRefData", () => {
 
     await expect(containingMedia).toStrictEqual({
       [newsData.data.image._id]: { someCrazyProps: "forBar" },
-      [newsData.data.imageList[0]._id]: { someCrazyProps: "forBar2" }
+      [newsData.data.imageList[0].value._id]: { someCrazyProps: "forBar2" }
     });
   });
 

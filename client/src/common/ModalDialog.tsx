@@ -1,7 +1,8 @@
 import React, { Fragment } from "react";
 import styled from "styled-components/macro";
 import Overlay from "./Overlay";
-import Icon from "./Icon";
+
+import { Icon } from "@cotype/ui";
 
 const Title = styled("div")`
   color: #fff;
@@ -71,9 +72,22 @@ export default function ModalDialog({
         {icon && <StyledIcon path={icon} />}
         {title}
       </Title>
-      <Body style={bodyStyle ? bodyStyle : undefined}>{children}</Body>
+      <Body
+        style={bodyStyle ? bodyStyle : undefined}
+        onClick={e => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
+        {children}
+      </Body>
       {actionButtons && (
-        <ActionBar>
+        <ActionBar
+          onClick={e => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
           <div style={{ flex: 1 }} />
           {actionButtons.map((b, index) => (
             <Fragment key={index}>{b}</Fragment>

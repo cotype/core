@@ -19,6 +19,6 @@ export default function removeDeprecatedData(
     union(data: { _type: string }, field: UnionType) {
       if (data && !Object.keys(field.types).includes(data._type)) return null;
     }
-  });
+  },{withI18nFlag:true});
   return obj;
 }

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import styled, { css } from "styled-components/macro";
-import Icon from "../common/icons";
+import { icons } from "@cotype/ui";
 import { testable } from "../utils/helper";
 import { mediaBasePath } from "../basePath";
 
@@ -122,7 +122,7 @@ export default class Image extends Component<Props> {
             <ItemActions {...testable("media-tile-actions")}>
               {onSelect && (
                 <Action onClick={onSelect} {...testable("media-details")}>
-                  <Icon.Details />
+                  <icons.Details />
                 </Action>
               )}
               {onDelete && (
@@ -131,7 +131,7 @@ export default class Image extends Component<Props> {
                   style={{ backgroundColor: "#ff5e49", color: "#fff" }}
                   {...testable("media-delete")}
                 >
-                  <Icon.Trash />
+                  <icons.Trash />
                 </Action>
               )}
             </ItemActions>
@@ -162,7 +162,7 @@ export default class Image extends Component<Props> {
     const ext = originalname && originalname.replace(/.*\./, "");
     return (
       <Doc>
-        <Icon.Document width={48} height={48} {...testable("media-preview")} />
+        <icons.Document width={48} height={48} {...testable("media-preview")} />
         {ext}
       </Doc>
     );

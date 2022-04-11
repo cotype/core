@@ -45,6 +45,8 @@ import ImmutableOutput from "./ImmutableOutput";
 import inputs from "./inputs";
 import outputs from "./outputs";
 import PositionInput from "./PositionInput";
+import I18nInput from "./I18nInput";
+import I18nOutput from "./I18nOutput";
 
 const Empty: React.FC = () => null;
 
@@ -67,7 +69,8 @@ inputs.register({
   textarea: TextAreaInput,
   immutable: ImmutableInput,
   position: PositionInput,
-  virtual: Empty
+  virtual: Empty,
+  i18n: I18nInput
 });
 
 outputs.register({
@@ -87,7 +90,8 @@ outputs.register({
   textarea: TextOutput,
   immutable: ImmutableOutput,
   position: TextOutput,
-  virtual: Empty
+  virtual: Empty,
+  i18n: I18nOutput
 });
 
 export const Input = ObjectInput;

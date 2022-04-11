@@ -3,9 +3,9 @@ import moment from "moment";
 import { FieldProps } from "formik";
 import "moment/locale/de";
 import dateJS from "date.js";
-import DatePicker from "../../common/DatePicker";
 import { required } from "./validation";
 import { DateString } from "../../../../typings";
+import { DatePicker } from "@cotype/ui";
 
 type Props = FieldProps<any> & DateString;
 export default class DateInput extends Component<Props> {

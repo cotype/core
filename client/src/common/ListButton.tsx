@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components/macro";
-import Icon from "./icons";
+import { icons } from "@cotype/ui";
 
 export const StyledButton = styled("button")`
   cursor: ${({ disabled }: P) => !disabled && "pointer"};
@@ -29,7 +29,7 @@ export const StyledButton = styled("button")`
   }
 `;
 
-const PlusIcon = styled(Icon.Plus)`
+const PlusIcon = styled(icons.Plus)`
   color: white;
   width: 100%;
   height: 100%;

@@ -44,7 +44,11 @@ export type RewriteDataIterator = (
   meta: MetaData
 ) => void | Data | Promise<Data>;
 
-function findValueByPath(path: string | undefined, data: Cotype.Data) {
+function findValueByPath(
+  path: string | undefined,
+  data: Cotype.Data,
+  language?: string
+) {
   if (!path) return;
 
   const titlePath = path.split(".");
@@ -54,9 +58,16 @@ function findValueByPath(path: string | undefined, data: Cotype.Data) {
     data
   ) as unknown) as string | undefined;
 
+  if (title && typeof title !== "string") {
+    if (language && title[language]) {
+      return title[language];
+    }
+
+    return Object.values(title).find((s) => !!s) as string || '';
+  }
+
   return title;
 }
-
 export default class ContentPersistence implements Cotype.VersionedDataSource {
   adapter: ContentAdapter;
   models: Cotype.Model[];
@@ -137,17 +148,18 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
 
     const model = this.getModel(type);
     if (!model) return null;
-    const { title: titlePath, image, singular, orderBy } = model;
+    const { title: titlePath, image: imagePath, singular, orderBy } = model;
 
     const title = findValueByPath(titlePath, data);
-    const orderValue = findValueByPath(orderBy || title, data);
+    const orderValue = findValueByPath(orderBy || titlePath, data);
+    const image = findValueByPath(imagePath, data);
 
     return {
       id,
       model: type,
       type: model.type,
       title: title || singular,
-      image: image && ((data || {})[image] || null),
+      image,
       kind: singular,
       orderValue: orderValue || title
     };
@@ -156,15 +168,17 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
   createSearchResultItem = (
     content: Cotype.Content,
     term: string,
-    external: boolean = true
+    external: boolean = true,
+    language?: string
   ): Cotype.SearchResultItem | null => {
     const { id, type, data } = content;
 
     const model = this.getModel(type);
     if (!model) return null;
-    const { title: titlePath, image, singular } = model;
+    const { title: titlePath, image: imagePath, singular } = model;
 
-    const title = findValueByPath(titlePath, data);
+    const title = findValueByPath(titlePath, data, language);
+    const image = findValueByPath(imagePath, data, language);
 
     return {
       id,
@@ -172,9 +186,11 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       kind: external ? undefined : singular,
       title: title || singular,
       description: extractMatch(data, model, term, !external),
-      image: image && ((data || {})[image] || null),
+      image,
       model: model.name,
-      url: external ? (getRefUrl(data, model.urlPath) as string) : undefined
+      url: external
+        ? (getRefUrl(data, model.urlPath, language) as string)
+        : undefined
     };
   };
 
@@ -189,7 +205,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     principal: Cotype.Principal,
     model: Cotype.Model,
     data: Cotype.Data,
-    models: Cotype.Model[]
+    models: Cotype.Model[],
+    activeLanguages: string[]
   ) {
     data = this.setOrderPosition(data, model, models);
     const hookData = await this.applyPreHooks("onCreate", model, data);
@@ -205,12 +222,17 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       searchData,
       model,
       models,
-      principal.id!
+      principal.id!,
+      activeLanguages
     );
 
-    this.applyPostHooks("onCreate", model, { id, data: storeData });
+    this.applyPostHooks("onCreate", model, {
+      id,
+      data: storeData,
+      activeLanguages
+    });
 
-    return { id: String(id), data: storeData };
+    return { id: String(id), data: storeData, activeLanguages };
   }
 
   async createRevision(
@@ -218,7 +240,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     model: Cotype.Model,
     id: string,
     data: object,
-    models: Cotype.Model[]
+    models: Cotype.Model[],
+    activeLanguages: string[]
   ) {
     const { storeData, searchData } = await this.splitStoreAndIndexData(
       data,
@@ -231,7 +254,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       model,
       models,
       id,
-      principal.id!
+      principal.id!,
+      activeLanguages
     );
 
     return { rev, data: storeData };
@@ -242,7 +266,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     contentFormat: ContentFormat,
     previewOpts: Cotype.PreviewOpts = {},
     join: Cotype.Join = {},
-    model: Cotype.Model
+    model: Cotype.Model,
+    language?: string
   ): Promise<Cotype.Refs> {
     // load all content the loaded content is referencing
 
@@ -293,7 +318,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
             contentFormat,
             allModels: this.models,
             mediaUrl: this.config.mediaUrl,
-            previewOpts
+            previewOpts,
+            language,
+            fallBackLanguage: this.config.languages[0]
           })
         };
       });
@@ -314,7 +341,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     id: string,
     join: Cotype.Join = {},
     contentFormat: ContentFormat,
-    previewOpts?: Cotype.PreviewOpts
+    previewOpts?: Cotype.PreviewOpts,
+    language?: string
   ): Promise<Cotype.ContentWithRefs | null> {
     const content = await this.adapter.load(model, id, previewOpts);
     if (!content) return content;
@@ -324,7 +352,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       contentFormat,
       previewOpts,
       join,
-      model
+      model,
+      language
     );
 
     const convertedContentData = convert({
@@ -334,7 +363,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       contentFormat,
       allModels: this.models,
       mediaUrl: this.config.mediaUrl,
-      previewOpts
+      previewOpts,
+      language,
+      fallBackLanguage: this.config.languages[0]
     });
 
     return {
@@ -351,6 +382,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     previewOpts?: Cotype.PreviewOpts
   ): Promise<Cotype.Content | null> {
     const content = await this.adapter.load(model, id, previewOpts);
+
     if (content) {
       removeDeprecatedData(content.data, model, true);
     }
@@ -391,7 +423,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     model: Cotype.Model,
     id: string,
     data: object,
-    models: Cotype.Model[]
+    models: Cotype.Model[],
+    activeLanguages: string[]
   ): Promise<{ id: string; data: object }> {
     const hookData = await this.applyPreHooks("onSave", model, data);
     const rev = await this.createRevision(
@@ -399,12 +432,14 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       model,
       id,
       hookData,
-      models
+      models,
+      activeLanguages
     );
 
     const resp = {
       id: String(id),
-      data: rev.data
+      data: rev.data,
+      activeLanguages
     };
 
     this.applyPostHooks("onSave", model, resp);
@@ -494,14 +529,16 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     contentFormat: Cotype.ContentFormat,
     join: Cotype.Join,
     criteria?: Cotype.Criteria,
-    previewOpts?: Cotype.PreviewOpts
+    previewOpts?: Cotype.PreviewOpts,
+    language?: string
   ): Promise<Cotype.ListChunkWithRefs<Cotype.Content>> {
     const items = await this.adapter.list(
       model,
       this.models,
       opts,
       criteria,
-      previewOpts
+      previewOpts,
+      language
     );
     if (!items.total) return { ...items, _refs: { content: {}, media: {} } };
 
@@ -510,7 +547,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
       contentFormat,
       previewOpts,
       join,
-      model
+      model,
+      language
     );
 
     const convertedItems = {
@@ -524,7 +562,9 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
           contentFormat,
           allModels: this.models,
           mediaUrl: this.config.mediaUrl,
-          previewOpts
+          previewOpts,
+          language,
+          fallBackLanguage: this.config.languages[0]
         })
       }))
     };
@@ -567,7 +607,8 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     principal: Cotype.Principal,
     term: string,
     opts: Cotype.ListOpts,
-    previewOpts?: Cotype.PreviewOpts
+    previewOpts?: Cotype.PreviewOpts,
+    language?: string
   ): Promise<Cotype.ListChunk<Cotype.SearchResultItem>> {
     const clearedTerm = term.replace("*", " ");
     const textSearch = await this.adapter.search(
@@ -578,7 +619,7 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
     );
 
     const items = textSearch.items
-      .map(c => this.createSearchResultItem(c, term))
+      .map(c => this.createSearchResultItem(c, term, true, language))
       .filter(this.canView(principal)) as Cotype.SearchResultItem[];
 
     return {
@@ -590,9 +631,17 @@ export default class ContentPersistence implements Cotype.VersionedDataSource {
   async suggest(
     principal: Cotype.Principal,
     term: string,
-    previewOpts?: Cotype.PreviewOpts
+    previewOpts?: Cotype.PreviewOpts,
+    models?: string[]
   ): Promise<string[]> {
-    const { items } = await this.adapter.search(term, true, {}, previewOpts);
+    const { items } = await this.adapter.search(
+      term,
+      true,
+      {
+        models
+      },
+      previewOpts
+    );
     const pattern = `${_escapeRegExp(
       term
     )}([\\w|ü|ö|ä|ß|Ü|Ö|Ä]*['|\\-|\\/|_|+]*[\\w|ü|ö|ä|ß|Ü|Ö|Ä]+|[\\w|ü|ö|ä|ß|Ü|Ö|Ä]*)`;

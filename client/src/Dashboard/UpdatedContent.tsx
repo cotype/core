@@ -3,7 +3,7 @@ import styled from "styled-components/macro";
 import Header from "./Header";
 import api from "../api";
 import ItemList from "./ItemList";
-import ToggleSwitch from "../common/ToggleSwitch";
+import { ToggleSwitch } from "@cotype/ui";
 
 const Filter = styled("div")`
   display: inline-flex;

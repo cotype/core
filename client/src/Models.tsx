@@ -11,7 +11,7 @@ type Props = {
   match: matchType<any>;
   models: Model[];
   navigation: NavigationItem[];
-  onChange?: (model: Model, id: string, data: Data) => void;
+  onChange?: (model: Model, id: string, data: Data, activeLanguages?:string[]) => void;
 };
 export default function Models({ match, models, navigation, onChange }: Props) {
   return (

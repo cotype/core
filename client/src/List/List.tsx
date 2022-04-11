@@ -8,9 +8,7 @@ import ScrollList from "../common/ScrollList";
 import Item from "./Item";
 import FilterModal, { FilterValue } from "./FilterModal";
 import styled, { css } from "styled-components/macro";
-import { paths } from "../common/icons";
-import Icon from "../common/Icon";
-import Button from "../common/Button";
+import { Button, Icon, paths } from "@cotype/ui";
 import extractFilter from "../utils/extractFilter";
 import { testable } from "../utils/helper";
 

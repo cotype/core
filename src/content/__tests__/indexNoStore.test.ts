@@ -78,15 +78,18 @@ describe("Index fields but don't store them in revisions", () => {
 
   it("should not store flagged fields", async () => {
     const data = await create("noStore", dummyData);
+
     expect(data).toStrictEqual({
       id: data.id,
       data: { title: dummyData.title }
     });
 
     const updatedData = await update("noStore", data.id, dummyData);
+
     expect(updatedData).toStrictEqual({
       id: data.id,
-      data: { title: dummyData.title }
+      data: { title: dummyData.title },
+      activeLanguages: []
     });
 
     const foundData = await find("noStore", data.id, {}, false);

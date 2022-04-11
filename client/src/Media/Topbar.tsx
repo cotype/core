@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components/macro";
-import ButtonImport from "../common/Button";
-import Icon from "../common/icons";
+import { Button as ButtonImport } from "@cotype/ui";
+import { icons } from "@cotype/ui";
 import MoreButton from "../common/MoreButton";
 import UploadField from "./UploadField";
 import { useUpload } from "react-use-upload";
@@ -192,7 +192,7 @@ export default function Topbar(props: Props) {
               onOrderByChange(o.value);
             }
           }))}
-          icon={<Icon.SortAlphabetical />}
+          icon={<icons.SortAlphabetical />}
         />
         <OrderButton
           ascending={!descending}
@@ -201,7 +201,7 @@ export default function Topbar(props: Props) {
             setDescending(!descending);
           }}
         >
-          <Icon.Descending />
+          <icons.Descending />
         </OrderButton>
         <MoreButton
           actions={[
@@ -222,11 +222,11 @@ export default function Topbar(props: Props) {
               active: unUsed
             }
           ]}
-          icon={unUsed ? <Icon.FilterRemove /> : <Icon.Filter />}
+          icon={unUsed ? <icons.FilterRemove /> : <icons.Filter />}
         />
       </IconBox>
       <Search>
-        <Icon.Search />
+        <icons.Search />
         <SearchInput
           onChange={e => {
             onSearch(e.target.value);

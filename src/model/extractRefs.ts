@@ -29,7 +29,7 @@ export default function extractRefs(
   const refs: BuildRef[] = [];
 
   visit(obj, model, {
-    richtext(delta: QuillDelta) {
+    richtext(delta: QuillDelta, _field, _del, fieldPath) {
       if (delta && delta.ops) {
         delta.ops.forEach(el => {
           if (el.attributes && el.attributes.link) {
@@ -42,7 +42,21 @@ export default function extractRefs(
                 m => m.name.toLocaleLowerCase() === match[1].toLocaleLowerCase()
               );
               if (refModel && match[2]) {
-                refs.push({ content: parseInt(match[2], 10), optional: false });
+                const contentID = parseInt(match[2], 10);
+                const oldRef = refs.find(
+                  ref => "content" in ref && ref.content === contentID
+                );
+
+                if (oldRef && oldRef.fieldNames) {
+                  // When Ref to this field already exists, add field~
+                  oldRef.fieldNames.push(fieldPath);
+                } else {
+                  refs.push({
+                    content: contentID,
+                    optional: false,
+                    fieldNames: [fieldPath]
+                  });
+                }
               }
             } else {
               const mediaMatch = /\$media:([\w\/\.]*)\$/gm.exec(
