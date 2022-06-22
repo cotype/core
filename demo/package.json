@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@cotype/local-thumbnail-provider": "0.0.2",
-    "got": "^11.1.1"
+    "got": "^11.8.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.3",
