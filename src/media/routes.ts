@@ -85,7 +85,8 @@ export default function routes(
       order,
       search,
       mimetype,
-      unUsed
+      unUsed,
+      used
     } = query as any;
 
     const list = await media.list(principal, {
@@ -95,7 +96,8 @@ export default function routes(
       order,
       search,
       mimetype,
-      unUsed: !!unUsed
+      unUsed: !!unUsed,
+      used: !!used
     });
     res.json(list);
   });

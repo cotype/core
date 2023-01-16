@@ -35,6 +35,7 @@ function renderTopbar(customProps: Partial<TopbarProps> = {}) {
     onUpload: jest.fn(),
     onUploadProgress: jest.fn(),
     onUnUsedChange: jest.fn(),
+    onUsedChange: jest.fn()
   };
 
   const queries = render(

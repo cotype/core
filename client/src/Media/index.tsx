@@ -67,6 +67,7 @@ type State = {
   filters: ({ label: string; value: string })[];
   topbarProgress: number | undefined;
   unUsed: boolean;
+  used: boolean;
 };
 type Props = {
   model?: object;
@@ -96,7 +97,8 @@ export default class Media extends Component<Props, State> {
     order: "desc",
     filters: FilterTypes,
     topbarProgress: undefined,
-    unUsed: false
+    unUsed: false,
+    used: false
   };
 
   constructor(props: Props) {
@@ -127,7 +129,7 @@ export default class Media extends Component<Props, State> {
   };
 
   fetchData = (offset: number, limit = 100) => {
-    const { fileType, order, orderBy, search, items, unUsed } = this.state;
+    const { fileType, order, orderBy, search, items, unUsed, used } = this.state;
 
     this.setState({ lastRequestedIndex: offset + limit });
 
@@ -138,7 +140,8 @@ export default class Media extends Component<Props, State> {
       search,
       offset,
       limit,
-      unUsed: unUsed ? true : undefined
+      unUsed: unUsed ? true : undefined,
+      used: used ? true : undefined
     };
     api.listMedia(query).then(res =>
       this.setState({
@@ -223,6 +226,9 @@ export default class Media extends Component<Props, State> {
   onUnUsedChange = (unUsed: boolean) => {
     this.setState({ unUsed, lastRequestedIndex: 0 }, this.fetchNextData);
   };
+  onUsedChange = (used: boolean) => {
+    this.setState({ used, lastRequestedIndex: 0 }, this.fetchNextData);
+  };
 
   onSearch = (search: string) => {
     this.setState({ search, lastRequestedIndex: 0 }, this.fetchNextData);
@@ -292,6 +298,7 @@ export default class Media extends Component<Props, State> {
           onFilterChange={this.onFilterChange}
           onOrderByChange={this.onOrderByChange}
           onUnUsedChange={this.onUnUsedChange}
+          onUsedChange={this.onUsedChange}
           onSearch={this.onSearch}
           orderBys={OrderByTypes}
           onOrderChange={this.onOrderChange}
