@@ -26,6 +26,7 @@ export type MediaListOpts = {
   mimetype?: string;
   search?: string;
   unUsed?: boolean;
+  used?: boolean;
 };
 
 export type PreviewOpts = {

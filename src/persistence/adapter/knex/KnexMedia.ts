@@ -25,7 +25,8 @@ export default class KnexMedia implements MediaAdapter {
     orderBy,
     order,
     mimetype,
-    unUsed
+    unUsed,
+    used
   }: Cotype.MediaListOpts): Promise<Cotype.ListChunk<Cotype.Media>> {
     const q = this.knex("media");
 
@@ -49,6 +50,21 @@ export default class KnexMedia implements MediaAdapter {
 
     if (unUsed) {
       q.whereNotIn("media.id", subquery => {
+        subquery.select("media.id").from("media");
+        subquery.join("content_references", join => {
+          join.on("media.id", "content_references.media");
+        });
+        subquery.join("contents", join => {
+          join.on("contents.id", "content_references.id");
+          join.on(j => {
+            j.on("contents.latest_rev", "=", "content_references.rev");
+            j.orOn("contents.published_rev", "=", "content_references.rev");
+          });
+        });
+      });
+    }
+    if (used) {
+      q.whereIn("media.id", subquery => {
         subquery.select("media.id").from("media");
         subquery.join("content_references", join => {
           join.on("media.id", "content_references.media");

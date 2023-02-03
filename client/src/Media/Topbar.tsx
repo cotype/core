@@ -127,6 +127,7 @@ export type Props = {
   onOrderByChange: (orderBy: string) => void;
   onOrderChange: (order: string) => void;
   onUnUsedChange: (unUsed: boolean) => void;
+  onUsedChange: (used: boolean) => void;
   onUpload: any;
   onUploadProgress: (progress: number) => void;
 };
@@ -134,6 +135,7 @@ export type Props = {
 export default function Topbar(props: Props) {
   const [filter, setFilter] = useState(props.filters[0].label);
   const [unUsed, setUnUsed] = useState(false);
+  const [used, setUsed] = useState(false);
   const [orderBy, setOrderBy] = useState("Date");
   const [descending, setDescending] = useState(true);
   const [uploadFieldKey, setUploadFieldKey] = useState(0);
@@ -162,7 +164,8 @@ export default function Topbar(props: Props) {
     orderBys,
     onOrderByChange,
     onOrderChange,
-    onUnUsedChange
+    onUnUsedChange,
+    onUsedChange
   } = props;
 
   return (
@@ -210,19 +213,33 @@ export default function Topbar(props: Props) {
               onClick: () => {
                 onUnUsedChange(false);
                 setUnUsed(false);
+                onUsedChange(false);
+                setUsed(false);
               },
-              active: !unUsed
+              active: !unUsed && !used
             },
             {
               label: "Show unused documents",
               onClick: () => {
                 onUnUsedChange(true);
                 setUnUsed(true);
+                onUsedChange(false);
+                setUsed(false);
               },
               active: unUsed
+            },
+            {
+              label: "Show used documents",
+              onClick: () => {
+                onUsedChange(true);
+                setUsed(true);
+                onUnUsedChange(false);
+                setUnUsed(false);
+              },
+              active: used
             }
           ]}
-          icon={unUsed ? <Icon.FilterRemove /> : <Icon.Filter />}
+          icon={(unUsed || used) ? <Icon.FilterRemove /> : <Icon.Filter />}
         />
       </IconBox>
       <Search>
