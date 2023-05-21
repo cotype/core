@@ -57,7 +57,7 @@
     "hasha": "^5.2.0",
     "http-proxy-middleware": "1.0.3",
     "image-size": "^0.8.3",
-    "knex": "^0.21.1",
+    "knex": "^2.4.0",
     "lodash": "^4.17.15",
     "mdi-json": "^1.0.0",
     "mudder": "^1.0.9",
@@ -127,19 +127,14 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.ts"
-    ],
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"],
     "globals": {
       "ts-jest": {
         "tsConfig": "<rootDir>/tsconfig.test.json"
       }
     },
     "clearMocks": true,
-    "testMatch": [
-      "**/__tests__/**/*.test.ts",
-      "**/__tests__/**/*.test.tsx"
-    ],
+    "testMatch": ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.test.tsx"],
     "collectCoverageFrom": [
       "**/*.{ts,tsx}",
       "!**/.cache/**",
@@ -150,9 +145,7 @@
       "!**/node_modules/**",
       "!**/demo/**"
     ],
-    "watchPathIgnorePatterns": [
-      "node_modules"
-    ],
+    "watchPathIgnorePatterns": ["node_modules"],
     "moduleNameMapper": {
       "\\.(css)$": "<rootDir>/__mocks__/styleMock.js"
     }
