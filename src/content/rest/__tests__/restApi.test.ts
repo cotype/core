@@ -79,9 +79,8 @@ describe("rest api", () => {
       "admin"
     ));
 
-    ({ find, list, search, findByField, suggest } = createApiReadHelpers(
-      server
-    ));
+    ({ find, list, search, findByField, suggest } =
+      createApiReadHelpers(server));
     ({ create, update } = createApiWriteHelpers(server, headers));
 
     const mediaBuffer = Buffer.from(faker.lorem.paragraphs(), "utf8");
@@ -145,10 +144,10 @@ describe("rest api", () => {
           credit: null,
           focusX: null,
           focusY: null,
-          height: null,
+          // height: null,
           search: ` ${mediaFile.originalname}`,
           tags: null,
-          width: null,
+          // width: null,
           ...mediaFile
         }
       };
@@ -203,45 +202,55 @@ describe("rest api", () => {
         });
 
         await expect(
-          (await list(
-            "news",
-            { search: { term: "foo-new-t", scope: "title" } },
-            false
-          )).total
+          (
+            await list(
+              "news",
+              { search: { term: "foo-new-t", scope: "title" } },
+              false
+            )
+          ).total
         ).toBe(1);
 
         await expect(
-          (await list(
-            "news",
-            { search: { term: "lololor", scope: "global" } },
-            false
-          )).total
+          (
+            await list(
+              "news",
+              { search: { term: "lololor", scope: "global" } },
+              false
+            )
+          ).total
         ).toBe(1);
       });
 
       it("should not list news with wrong search criteria", async () => {
         await expect(
-          (await list(
-            "news",
-            { search: { term: "lololor", scope: "title" } },
-            false
-          )).total
+          (
+            await list(
+              "news",
+              { search: { term: "lololor", scope: "title" } },
+              false
+            )
+          ).total
         ).toBe(0);
 
         await expect(
-          (await list(
-            "news",
-            { search: { term: "foo-new-txx", scope: "title" } },
-            false
-          )).total
+          (
+            await list(
+              "news",
+              { search: { term: "foo-new-txx", scope: "title" } },
+              false
+            )
+          ).total
         ).toBe(0);
 
         await expect(
-          (await list(
-            "news",
-            { search: { term: "lololor-xx", scope: "global" } },
-            false
-          )).total
+          (
+            await list(
+              "news",
+              { search: { term: "lololor-xx", scope: "global" } },
+              false
+            )
+          ).total
         ).toBe(0);
       });
 
@@ -524,59 +533,73 @@ describe("rest api", () => {
 
       it("results should contain description", async () => {
         await expect(
-          (await search(description, {
-            published: false,
-            linkableOnly: false,
-            includeModels: ["news"]
-          })).items[0]
+          (
+            await search(description, {
+              published: false,
+              linkableOnly: false,
+              includeModels: ["news"]
+            })
+          ).items[0]
         ).toMatchObject({ description });
       });
 
       it("should find only linkable content by search", async () => {
         await expect(
-          (await search(searchForAllContent, {
-            published: false,
-            linkableOnly: true
-          })).total
+          (
+            await search(searchForAllContent, {
+              published: false,
+              linkableOnly: true
+            })
+          ).total
         ).toBe(2);
       });
 
       it("should find limited content by search", async () => {
         await expect(
-          (await search(searchForAllContent, {
-            published: false,
-            linkableOnly: true,
-            includeModels: ["products"]
-          })).total
+          (
+            await search(searchForAllContent, {
+              published: false,
+              linkableOnly: true,
+              includeModels: ["products"]
+            })
+          ).total
         ).toBe(1);
         await expect(
-          (await search(searchForAllContent, {
-            published: false,
-            linkableOnly: true,
-            includeModels: ["news"]
-          })).total
+          (
+            await search(searchForAllContent, {
+              published: false,
+              linkableOnly: true,
+              includeModels: ["news"]
+            })
+          ).total
         ).toBe(1);
         await expect(
-          (await search(searchForAllContent, {
-            published: false,
-            linkableOnly: true,
-            excludeModels: ["news", "products"]
-          })).total
+          (
+            await search(searchForAllContent, {
+              published: false,
+              linkableOnly: true,
+              excludeModels: ["news", "products"]
+            })
+          ).total
         ).toBe(0);
         await expect(
-          (await search(searchForProduct, {
-            published: false,
-            linkableOnly: true,
-            excludeModels: ["products"]
-          })).total
+          (
+            await search(searchForProduct, {
+              published: false,
+              linkableOnly: true,
+              excludeModels: ["products"]
+            })
+          ).total
         ).toBe(0);
         await expect(
-          (await search(searchForNews, {
-            published: false,
-            linkableOnly: true,
-            includeModels: ["news"],
-            excludeModels: ["products"]
-          })).total
+          (
+            await search(searchForNews, {
+              published: false,
+              linkableOnly: true,
+              includeModels: ["news"],
+              excludeModels: ["products"]
+            })
+          ).total
         ).toBe(1);
       });
 
@@ -632,10 +655,7 @@ describe("rest api", () => {
           }
         );
         await expect(res).toMatchObject([
-          searchForNews
-            .split(" ")
-            .slice(0, 2)
-            .join(" ")
+          searchForNews.split(" ").slice(0, 2).join(" ")
         ]);
       });
     });

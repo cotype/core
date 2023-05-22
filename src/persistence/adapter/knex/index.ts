@@ -1,6 +1,6 @@
 import path from "path";
 import { promisify } from "util";
-import knex, { Config, SeedsConfig } from "knex";
+import {knex, Knex} from "knex";
 import glob from "glob-promise";
 import { mkdirp, copyFile, mkdir } from "fs-extra";
 import { PersistenceAdapter } from "..";
@@ -22,12 +22,12 @@ const log = {
   error: logger.error
 };
 
-type KnexSeedsConfig = SeedsConfig & {
+type KnexSeedsConfig = Knex.SeederConfig & {
   directory: string;
   uploads?: string;
 };
 
-export type KnexConfig = Config & {
+export type KnexConfig = Knex.Config & {
   migrate?: boolean;
   seeds?: KnexSeedsConfig;
 };

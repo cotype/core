@@ -1,5 +1,5 @@
 import { Models, ThumbnailProvider } from "../../typings";
-import express, { Router } from "express";
+import express, { Router, Request } from "express";
 import { OpenApiBuilder } from "openapi3-ts";
 import { Persistence } from "../persistence";
 import routes from "./routes";
@@ -25,7 +25,7 @@ export default function media(
       if (storage instanceof FsStorage) {
         router.use("/media", express.static(storage.uploadDir));
       }
-      router.get("/thumbs/:format/*", async (req, res) => {
+      router.get("/thumbs/:format/*", async (req: Request, res) => {
         const { format } = req.params;
         const id = req.params["0"];
         try {
