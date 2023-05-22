@@ -9,7 +9,7 @@
     "dev": "NODE_ENV=development DEVCLIENT=true nodemon --watch ../typings --watch ./ --watch ../src --ext ts,json --exec npx ts-node --files server/server.ts"
   },
   "dependencies": {
-    "@cotype/local-thumbnail-provider": "0.0.2",
+    "@cotype/local-thumbnail-provider": "git+https://github.com/saifookhan/local-thumbnail-provider.git",
     "got": "^11.1.1"
   },
   "devDependencies": {
