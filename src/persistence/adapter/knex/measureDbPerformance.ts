@@ -1,4 +1,4 @@
-import Knex from "knex";
+import {Knex} from "knex";
 import logger from "../../../log";
 
 const speedLog = logger.color("#35feff");

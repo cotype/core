@@ -4,7 +4,7 @@ import { log } from "../../src";
 import { Opts, knexAdapter } from "../../src";
 import { KnexConfig } from "../../src/persistence/adapter/knex";
 import { unlinkSync } from "fs";
-import { Sqlite3ConnectionConfig } from "knex";
+import { Knex } from "knex";
 
 export type ReinitOpts = {
   config?: Partial<Opts>;
@@ -31,7 +31,7 @@ function getJsonBody(req: IncomingMessage) {
 function isSqlite3ConnectionConfig(
   connection: KnexConfig["connection"],
   client: KnexConfig["client"]
-): connection is Sqlite3ConnectionConfig {
+): connection is Knex.Sqlite3ConnectionConfig {
   return client === "sqlite3";
 }
 
