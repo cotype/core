@@ -2,9 +2,7 @@
 *.schema.json
 coverage/
 cypress/screenshots/
-dist/
 etc/
-lib/
 node_modules/
 uploads/
 .idea/
