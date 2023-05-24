@@ -74,7 +74,7 @@
     "tempy": "^0.5.0",
     "title-case": "^3.0.2",
     "url-join": "^4.0.1",
-    "webpack": "^4.43.0"
+    "webpack": "^5.83.1"
   },
   "devDependencies": {
     "@cotype/local-thumbnail-provider": "git+https://github.com/saifookhan/local-thumbnail-provider.git",
@@ -127,14 +127,19 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.ts"
+    ],
     "globals": {
       "ts-jest": {
         "tsConfig": "<rootDir>/tsconfig.test.json"
       }
     },
     "clearMocks": true,
-    "testMatch": ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.test.tsx"],
+    "testMatch": [
+      "**/__tests__/**/*.test.ts",
+      "**/__tests__/**/*.test.tsx"
+    ],
     "collectCoverageFrom": [
       "**/*.{ts,tsx}",
       "!**/.cache/**",
@@ -145,7 +150,9 @@
       "!**/node_modules/**",
       "!**/demo/**"
     ],
-    "watchPathIgnorePatterns": ["node_modules"],
+    "watchPathIgnorePatterns": [
+      "node_modules"
+    ],
     "moduleNameMapper": {
       "\\.(css)$": "<rootDir>/__mocks__/styleMock.js"
     }
