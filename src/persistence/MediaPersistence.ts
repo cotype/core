@@ -49,7 +49,7 @@ export default class MediaPersistence {
   async delete(principal: Cotype.Principal, id: string) {
     try {
       await this.adapter.delete(id, this.content.models);
-    } catch (err) {
+    } catch (err: any) {
       if (err.type === "content") {
         err.refs = await this.content.findByMedia(id);
       }

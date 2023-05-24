@@ -1,12 +1,12 @@
 import { Model, ListOpts } from "../../../../typings";
 
-import knex from "knex";
+import {Knex} from "knex";
 import { SettingsAdapter } from "..";
 
 export default class KnexSettings implements SettingsAdapter {
-  knex: knex;
+  knex: Knex;
 
-  constructor(inputKnex: knex) {
+  constructor(inputKnex: Knex) {
     this.knex = inputKnex;
   }
 
