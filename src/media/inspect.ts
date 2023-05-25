@@ -1,5 +1,5 @@
 import probe from "probe-image-size";
-import { fileTypeFromStream } from "file-type";
+import fileType from "file-type";
 import { Readable } from "stream";
 import hasha from "hasha";
 
@@ -19,7 +19,7 @@ const inspect = async (
   readableStream.wrap(fileStream);
 
   const [pipedFileStream, hash] = await Promise.all([
-    fileTypeFromStream(readableStream),
+    fileType.stream(readableStream),
     hasha.fromFile(filePath, {
       algorithm: "md5"
     })
@@ -32,7 +32,7 @@ const inspect = async (
     ext: null,
     mime: null
   };
-  if (!pipedFileStream || !pipedFileStream.mime) {
+  if (!pipedFileStream || !pipedFileStream.fileType) {
     return fileImageInfo;
   }
 

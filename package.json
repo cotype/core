@@ -6,6 +6,7 @@
   "bin": {
     "cotype_create_seeds": "./scripts/createSeeds.js"
   },
+  "type": "module",
   "scripts": {
     "clean": "rm -rf ./dist && rm -rf ./lib",
     "reinit": "rm -rf node_modules; rm -rf demo/node_modules; rm demo/dev_db; rm -rf client/node-modules; npm i",
@@ -51,7 +52,7 @@
     "crypto-random-string": "^3.2.0",
     "express": "^4.17.1",
     "express-promise-router": "^3.0.3",
-    "file-type": "^18.4.0",
+    "file-type": "^16.5.4",
     "fs-extra": "^9.0.0",
     "glob-promise": "^3.4.0",
     "got": "^11.1.1",
