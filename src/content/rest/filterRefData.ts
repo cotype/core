@@ -1,5 +1,5 @@
 import * as Cotype from "../../../typings";
-import pick = require("lodash/pick");
+import pick from "lodash/pick";
 import visit from "../../model/visit";
 import visitConvertedRestContent from "./visit";
 import { Field } from "../../../typings";
@@ -135,7 +135,7 @@ export const getContainingMedia = (
   return containingMedia;
 };
 
-export default function(
+export default function (
   contents: Cotype.Content[],
   refs: Cotype.Refs,
   join: Cotype.Join,

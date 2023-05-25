@@ -4,7 +4,7 @@ import { FsStorage, init, knexAdapter } from "../..";
 import LocalThumbnailProvider from "@cotype/local-thumbnail-provider";
 
 import request from "supertest";
-import tempy = require("tempy");
+import tempy from "tempy";
 import { Persistence } from "../../persistence";
 import fs from "fs-extra";
 

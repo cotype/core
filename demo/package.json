@@ -1,6 +1,7 @@
 {
   "name": "demo",
   "version": "0.0.1",
+  "type": "module",
   "scripts": {
     "clean": "rm -f dev_db",
     "start": "ts-node --files server/server.ts",

@@ -5,13 +5,7 @@
 import { Router } from "express";
 
 // TODO Just read in meta data and fetch paths from the filesystem if needed
-/* tslint:disable-next-line */
-const icons: Icon[] = require("mdi-json");
-
-type Icon = {
-  name: string;
-  path: string;
-};
+import { icons, Icon } from "mdi-json";
 
 const svg = (
   icon: Icon

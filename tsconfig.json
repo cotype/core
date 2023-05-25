@@ -3,10 +3,11 @@
   "compilerOptions": {
     "strict": true,
     "outDir": "lib",
-    "target": "ES6",
+    "target": "es2017",
     "sourceMap": true,
     "declaration": true,
-    "module": "commonjs",
+    "module": "esnext",
+    "moduleResolution": "node",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
