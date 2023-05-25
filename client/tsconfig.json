@@ -13,11 +13,10 @@
     "outDir": "lib",
     "rootDir": "src",
     "jsx": "preserve",
-    "target": "es5",
+    "target": "ES6",
     "sourceMap": true,
     "module": "esnext",
     "skipLibCheck": true,
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -30,6 +29,7 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    "moduleResolution": "node"
   }
 }

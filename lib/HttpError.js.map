@@ -1,1 +1,1 @@
-{"version":3,"file":"HttpError.js","sourceRoot":"","sources":["../src/HttpError.ts"],"names":[],"mappings":";;AAAA,MAAqB,SAAU,SAAQ,KAAK;IAC1C,MAAM,CAAS;IAEf,YAAY,MAAc,EAAE,OAAe;QACzC,KAAK,CAAC,OAAO,CAAC,CAAC;QACf,IAAI,CAAC,MAAM,GAAG,MAAM,CAAC;IACvB,CAAC;CACF;AAPD,4BAOC"}
+{"version":3,"file":"HttpError.js","sourceRoot":"","sources":["../src/HttpError.ts"],"names":[],"mappings":";;AAAA,MAAqB,SAAU,SAAQ,KAAK;IAG1C,YAAY,MAAc,EAAE,OAAe;QACzC,KAAK,CAAC,OAAO,CAAC,CAAC;QACf,IAAI,CAAC,MAAM,GAAG,MAAM,CAAC;IACvB,CAAC;CACF;AAPD,4BAOC"}
