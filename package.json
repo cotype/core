@@ -3,10 +3,10 @@
   "version": "0.0.0-development",
   "main": "lib/",
   "typings": "lib/index.d.ts",
+  "type": "commonjs",
   "bin": {
     "cotype_create_seeds": "./scripts/createSeeds.js"
   },
-  "type": "module",
   "scripts": {
     "clean": "rm -rf ./dist && rm -rf ./lib",
     "reinit": "rm -rf node_modules; rm -rf demo/node_modules; rm demo/dev_db; rm -rf client/node-modules; npm i",
