@@ -3,7 +3,6 @@
   "version": "0.0.0-development",
   "main": "lib/",
   "typings": "lib/index.d.ts",
-  "type": "module",
   "bin": {
     "cotype_create_seeds": "./scripts/createSeeds.js"
   },
