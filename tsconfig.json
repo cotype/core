@@ -1,5 +1,5 @@
 {
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "./typings/**.*"],
   "compilerOptions": {
     "strict": true,
     "outDir": "lib",
@@ -12,6 +12,10 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "baseUrl": "./",
+    "paths": {
+        "*": [ "typings/*"]
+    }
   }
 }
