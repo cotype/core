@@ -55,7 +55,7 @@ type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
 
 export { Persistence } from "./persistence";
 export { default as knexAdapter } from "./persistence/adapter/knex";
-// export * as Cotype from "../typings";
+export type { default as Cotype } from "../typings";
 export { default as FsStorage } from "./media/storage/FsStorage";
 
 export * from "./utils";
