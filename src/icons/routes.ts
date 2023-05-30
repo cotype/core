@@ -1,3 +1,4 @@
+//@ts-nocheck
 // TODO Factor out as stand-alone npm module
 /**
  * Routes to search & serve material design icons.

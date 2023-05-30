@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "homepage": "/admin",
-  "type": "module",
   "scripts": {
     "bundle": "react-scripts build",
     "postbundle": "rm -rf ../dist/client && mkdir -p ../dist && mv ./build ../dist/client",

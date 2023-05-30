@@ -1,7 +1,7 @@
 /// <reference path="../typings/untyped-modules.d.ts"/>
 /// <reference path="../typings/request.d.ts"/>
 
-import {
+import type {
   ModelOpts,
   NavigationOpts,
   ThumbnailProvider,
@@ -9,7 +9,7 @@ import {
   ResponseHeaders,
   ExternalDataSource,
   BaseUrls
-} from "../typings";
+} from "../typings/index";
 import express, {
   Request,
   Response,
@@ -55,7 +55,7 @@ type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
 
 export { Persistence } from "./persistence";
 export { default as knexAdapter } from "./persistence/adapter/knex";
-export * from "../typings";
+// export * as Cotype from "../typings";
 export { default as FsStorage } from "./media/storage/FsStorage";
 
 export * from "./utils";
