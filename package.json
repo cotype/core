@@ -1,6 +1,6 @@
 {
   "name": "@cotype/core",
-  "version": "0.0.0-development",
+  "version": "0.0.1-development",
   "main": "lib/",
   "typings": "lib/index.d.ts",
   "bin": {
