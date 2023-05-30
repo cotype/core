@@ -13,7 +13,6 @@ import SettingsPersistence from "./persistence/SettingsPersistence";
 type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
 export { Persistence } from "./persistence";
 export { default as knexAdapter } from "./persistence/adapter/knex";
-export * from "../typings";
 export { default as FsStorage } from "./media/storage/FsStorage";
 export * from "./utils";
 export { PersistenceAdapter, Storage, SessionOpts, RequestHandler, AnonymousPermissions, ContentPersistence, MigrationContext, log };

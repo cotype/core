@@ -32,7 +32,7 @@ const inspect = async (
     ext: null,
     mime: null
   };
-  if (!pipedFileStream || !pipedFileStream.fileType) {
+  if (!pipedFileStream || !pipedFileStream.fileType?.mime) {
     return fileImageInfo;
   }
 
