@@ -1,4 +1,4 @@
-/// <reference path="../../../typings/request.d.ts" />
+/// <reference types="request" />
 import { Model, ExternalDataSource, ResponseHeaders } from "../../../typings";
 import { Router } from "express";
 import { Persistence } from "../../persistence";

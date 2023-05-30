@@ -1,7 +1,7 @@
-/// <reference path="../typings/untyped-modules.d.ts" />
-/// <reference path="../typings/request.d.ts" />
 /// <reference types="cookie-session" />
-import { ModelOpts, NavigationOpts, ThumbnailProvider, ContentHooks, ResponseHeaders, ExternalDataSource, BaseUrls } from "../typings";
+/// <reference types="untyped-modules" />
+/// <reference types="request" />
+import type { ModelOpts, NavigationOpts, ThumbnailProvider, ContentHooks, ResponseHeaders, ExternalDataSource, BaseUrls } from "../typings/index";
 import express, { RequestHandler, Express } from "express";
 import log from "./log";
 import { AnonymousPermissions } from "./auth";
@@ -13,7 +13,6 @@ import SettingsPersistence from "./persistence/SettingsPersistence";
 type SessionOpts = CookieSessionInterfaces.CookieSessionOptions;
 export { Persistence } from "./persistence";
 export { default as knexAdapter } from "./persistence/adapter/knex";
-export * from "../typings";
 export { default as FsStorage } from "./media/storage/FsStorage";
 export * from "./utils";
 export { PersistenceAdapter, Storage, SessionOpts, RequestHandler, AnonymousPermissions, ContentPersistence, MigrationContext, log };
