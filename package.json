@@ -36,7 +36,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cotype/core.git"
+    "url": "https://github.com/cotype/core.git",
+    "branch": "master"
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "dependencies": {
