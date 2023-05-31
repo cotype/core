@@ -40,7 +40,15 @@ const inspect = async (
     ...fileImageInfo,
     ...pipedFileStream
   };
-  if (fileImageInfo.mime!.startsWith("image")) {
+
+  if (pipedFileStream.fileType?.mime) {
+    fileImageInfo.mime = pipedFileStream.fileType.mime;
+  }
+  if (pipedFileStream.fileType?.ext) {
+    fileImageInfo.ext = pipedFileStream.fileType.ext;
+  }
+
+  if (fileImageInfo.mime?.startsWith("image")) {
     const imageInfo = await probe(pipedFileStream);
     if (imageInfo.width && imageInfo.height) {
       fileImageInfo.width = imageInfo.width;
