@@ -1,16 +1,21 @@
 {
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "./typings/**.*"],
   "compilerOptions": {
     "strict": true,
     "outDir": "lib",
-    "target": "esnext",
+    "target": "ES2017",
     "sourceMap": true,
     "declaration": true,
-    "module": "commonjs",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "baseUrl": "./",
+    "paths": {
+        "*": [ "typings/*"]
+    }
   }
 }

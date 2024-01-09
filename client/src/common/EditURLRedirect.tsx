@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Model, NavigationItem } from "../../../typings";
-import { Redirect, RouteComponentProps } from "react-router";
+import { Redirect, RouteComponentProps } from "react-router-dom";
 import { parse } from "qs";
 import pathMatch from "path-match";
 import basePath from "../basePath";
@@ -17,21 +17,20 @@ export type Props = RouteComponentProps & {
   navigation?: NavigationItem[];
 };
 
-const findPathInNavigation = (model: Model) => (
-  found: string,
-  navigationItem: NavigationItem
-): string => {
-  if (found) {
-    return found;
-  }
-  if ("items" in navigationItem) {
-    return navigationItem.items.reduce(findPathInNavigation(model), "");
-  }
-  if (navigationItem.model === model.name) {
-    return navigationItem.path;
-  }
-  return "";
-};
+const findPathInNavigation =
+  (model: Model) =>
+  (found: string, navigationItem: NavigationItem): string => {
+    if (found) {
+      return found;
+    }
+    if ("items" in navigationItem) {
+      return navigationItem.items.reduce(findPathInNavigation(model), "");
+    }
+    if (navigationItem.model === model.name) {
+      return navigationItem.path;
+    }
+    return "";
+  };
 
 const EditURLRedirect: React.FC<Props> = ({
   contentModels,

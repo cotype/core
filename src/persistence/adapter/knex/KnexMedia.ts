@@ -1,15 +1,15 @@
 import * as Cotype from "../../../../typings";
 
-import knex from "knex";
+import {Knex} from "knex";
 import { MediaAdapter } from "..";
 import ReferenceConflictError from "../../errors/ReferenceConflictError";
 import pick from "lodash/pick";
 import cleanSearchTerm from "./cleanSearchTerm";
 
 export default class KnexMedia implements MediaAdapter {
-  knex: knex;
+  knex: Knex;
 
-  constructor(inputKnex: knex) {
+  constructor(inputKnex: Knex) {
     this.knex = inputKnex;
   }
 

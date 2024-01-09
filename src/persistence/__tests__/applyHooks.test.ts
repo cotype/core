@@ -19,7 +19,8 @@ describe("applyHooks", () => {
         new Promise(resolve => {
           setTimeout(() => {
             order += "1";
-            resolve();
+            // Note: resolve() -> resolve(true)
+            resolve(true);
           }, 1);
         })
     );
@@ -79,7 +80,8 @@ describe("applyHooks", () => {
         return new Promise(resolve => {
           setTimeout(() => {
             s.order += "2";
-            resolve();
+            // Note: resolve() -> resolve(true)
+            resolve(true);
           }, 1);
         });
       }

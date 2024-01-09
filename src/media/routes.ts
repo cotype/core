@@ -1,7 +1,7 @@
 /**
  * Media routes (/api/media/*)
  */
-import { Router } from "express";
+import { Router, Request } from "express";
 import log from "../log";
 import { Persistence } from "../persistence";
 import ReferenceConflictError from "../persistence/errors/ReferenceConflictError";
@@ -102,7 +102,7 @@ export default function routes(
     res.json(list);
   });
 
-  router.get("/admin/rest/media/*", async (req, res) => {
+  router.get("/admin/rest/media/*", async (req: Request, res) => {
     const { principal, params } = req;
     const id = prepareMediaId(params[0]);
 
@@ -112,7 +112,7 @@ export default function routes(
     res.json(data);
   });
 
-  router.post("/admin/rest/media/*", async (req, res) => {
+  router.post("/admin/rest/media/*", async (req: Request, res) => {
     const { principal, params, body } = req;
     const id = prepareMediaId(params[0]);
 
@@ -125,7 +125,7 @@ export default function routes(
     }
   });
 
-  router.delete("/admin/rest/media/*", async (req, res) => {
+  router.delete("/admin/rest/media/*", async (req: Request, res) => {
     const { principal, params } = req;
     const id = prepareMediaId(params[0]);
     try {
